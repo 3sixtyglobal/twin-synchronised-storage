@@ -28,13 +28,6 @@
 			"extra-files": [
 				"src/index.ts"
 			]
-		},
-		"apps/synchronised-storage-node": {
-			"package-name": "synchronised-storage-node",
-			"changelog-path": "docs/changelog.md",
-			"extra-files": [
-				"src/index.ts"
-			]
 		}
 	},
 	"plugins": [
@@ -45,8 +38,7 @@
 			"components": [
 				"synchronised-storage-models",
 				"synchronised-storage-service",
-				"synchronised-storage-rest-client",
-				"synchronised-storage-node"
+				"synchronised-storage-rest-client"
 			]
 		}
 	]
