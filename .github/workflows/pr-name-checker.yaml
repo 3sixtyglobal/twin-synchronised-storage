@@ -13,10 +13,13 @@ jobs:
         uses: actions/checkout@v4
 
       # Cache npm modules
-      - name: Cache npm downloads
+      - name: Cache npm downloads and node_modules
+        id: cache
         uses: actions/cache@v4
         with:
-          path: ~/.npm
+          path: |
+            ~/.npm
+            node_modules
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
 
       # Setup Node
@@ -27,6 +30,7 @@ jobs:
 
       # Install commitlint globally
       - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           npm install @commitlint/config-conventional @commitlint/cli -g
 
