@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.1-next.2](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-models-v0.0.1-next.1...synchronised-storage-models-v0.0.1-next.2) (2025-07-22)
+
+
+### Features
+
+* add async item requests to reduce storage overhead ([#3](https://github.com/twinfoundation/synchronised-storage/issues/3)) ([af4e17d](https://github.com/twinfoundation/synchronised-storage/commit/af4e17d826f0a8278fd60dc69aaa21fe6895425f))
+
 ## [0.0.1-next.1](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-models-v0.0.1-next.0...synchronised-storage-models-v0.0.1-next.1) (2025-07-18)
 
 
