@@ -1,6 +1,6 @@
-# Interface: ISyncConsolidationBatchResponse\<T\>
+# Interface: ISyncBatchResponse\<T\>
 
-Response for a local consolidation batch.
+Response for a local batch.
 
 ## Type Parameters
 
@@ -18,19 +18,19 @@ The type of the schema for the entities in the batch.
 
 ***
 
+### primaryKey
+
+> **primaryKey**: keyof `T`
+
+The primary key of the entity in the sync item response.
+
+***
+
 ### entities
 
-> **entities**: `object`[]
+> **entities**: `T`[]
 
-The entities in the consolidation batch.
-
-#### id
-
-> **id**: `string`
-
-#### entity
-
-> **entity**: `T`
+The entities in the batch.
 
 ***
 

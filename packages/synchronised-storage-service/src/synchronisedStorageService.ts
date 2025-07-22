@@ -11,7 +11,7 @@ import { IdentityConnectorFactory, type IIdentityConnector } from "@twin.org/ide
 import { type ILoggingConnector, LoggingConnectorFactory } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
 import {
-	type ISyncItemSet,
+	type ISyncItemChange,
 	type ISyncRegisterSchemaType,
 	SynchronisedStorageTopics,
 	type ISynchronisedEntity,
@@ -239,14 +239,13 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 			async event => this.registerType(event.data)
 		);
 
-		this._eventBusComponent.subscribe<ISyncItemSet<T>>(
-			SynchronisedStorageTopics.LocalItemSet,
+		this._eventBusComponent.subscribe<ISyncItemChange>(
+			SynchronisedStorageTopics.LocalItemChange,
 			async event =>
 				this._localSyncStateHelper.addLocalChange(
 					event.data.schemaType,
-					"set",
-					event.data.id,
-					event.data.entity
+					event.data.operation,
+					event.data.id
 				)
 		);
 	}
@@ -383,22 +382,23 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 				await this._localSyncStateHelper.getLocalChangeSnapshot(schemaType);
 
 			if (!Is.empty(localChangeSnapshot)) {
-				const changeSetStorageId = await this._remoteSyncStateHelper.createAndStoreChangeSet(
+				await this._remoteSyncStateHelper.createAndStoreChangeSet(
 					schemaType,
-					localChangeSnapshot.localChanges
-				);
+					localChangeSnapshot.localChanges,
+					async changeSetStorageId => {
+						if (Is.stringValue(changeSetStorageId)) {
+							// Send the local changes to the remote storage if we are a trusted node
+							if (this._config.isTrustedNode) {
+								await this._remoteSyncStateHelper.addChangeSetToSyncState(changeSetStorageId);
+							} else if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
+								// If we are not a trusted node, we need to send the changes to the trusted node
+								await this._trustedSynchronisedStorageComponent.syncChangeSet(changeSetStorageId);
+							}
 
-				if (Is.stringValue(changeSetStorageId)) {
-					// Send the local changes to the remote storage if we are a trusted node
-					if (this._config.isTrustedNode) {
-						await this._remoteSyncStateHelper.addChangeSetToSyncState(changeSetStorageId);
-					} else if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
-						// If we are not a trusted node, we need to send the changes to the trusted node
-						await this._trustedSynchronisedStorageComponent.syncChangeSet(changeSetStorageId);
+							await this._localSyncStateHelper.removeLocalChangeSnapshot(localChangeSnapshot);
+						}
 					}
-
-					await this._localSyncStateHelper.removeLocalChangeSnapshot(localChangeSnapshot);
-				}
+				);
 			}
 		}
 	}
@@ -454,6 +454,15 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	 * @internal
 	 */
 	private async registerType(syncRegisterType: ISyncRegisterSchemaType): Promise<void> {
+		await this._logging?.log({
+			level: "info",
+			source: this.CLASS_NAME,
+			message: "registerType",
+			data: {
+				schemaType: syncRegisterType.schemaType
+			}
+		});
+
 		if (this._config.entityUpdateIntervalMs > 0) {
 			await this.startEntitySync(syncRegisterType.schemaType);
 		}

@@ -16,10 +16,12 @@ import type { IEventBusComponent } from "@twin.org/event-bus-models";
 import type { ILoggingConnector } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
 import {
-	type ISyncConsolidationBatchRequest,
+	type ISyncBatchRequest,
 	SynchronisedStorageTopics,
-	type ISyncConsolidationBatchResponse,
-	type ISynchronisedEntity
+	type ISyncBatchResponse,
+	type ISynchronisedEntity,
+	type ISyncItemResponse,
+	SyncChangeOperation
 } from "@twin.org/synchronised-storage-models";
 import type { IVerifiableStorageConnector } from "@twin.org/verifiable-storage-models";
 import type { ChangeSetHelper } from "./changeSetHelper";
@@ -75,6 +77,19 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	private readonly _batchResponseStorageIds: { [schemaType: string]: string[] };
 
 	/**
+	 * The full changes for each schema type.
+	 * @internal
+	 */
+	private readonly _populateFullChanges: {
+		[schemaType: string]: {
+			changes: ISyncChange<T>[];
+			entities: { [id: string]: T | undefined };
+			requestIds: string[];
+			completeCallback: (id?: string) => Promise<void>;
+		};
+	};
+
+	/**
 	 * The synchronised storage key to use for verified storage operations.
 	 * @internal
 	 */
@@ -111,11 +126,19 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 		this._synchronisedStorageKey = synchronisedStorageKey;
 
 		this._batchResponseStorageIds = {};
+		this._populateFullChanges = {};
 
-		this._eventBusComponent.subscribe<ISyncConsolidationBatchResponse<T>>(
-			SynchronisedStorageTopics.ConsolidationBatchResponse,
+		this._eventBusComponent.subscribe<ISyncBatchResponse<T>>(
+			SynchronisedStorageTopics.BatchResponse,
 			async response => {
-				await this.handleConsolidationBatchResponse(response.data);
+				await this.handleBatchResponse(response.data);
+			}
+		);
+
+		this._eventBusComponent.subscribe<ISyncItemResponse<T>>(
+			SynchronisedStorageTopics.LocalItemResponse,
+			async response => {
+				await this.handleLocalItemResponse(response.data);
 			}
 		);
 	}
@@ -132,18 +155,65 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 * Create and store a change set.
 	 * @param schemaType The schema type of the change set.
 	 * @param changes The changes to apply.
+	 * @param completeCallback The callback to call when the changeset is created and stored.
 	 * @returns The storage id of the change set if created.
 	 */
 	public async createAndStoreChangeSet(
 		schemaType: string,
-		changes: ISyncChange<T>[] | undefined
-	): Promise<string | undefined> {
-		if (Is.arrayValue(changes) && Is.stringValue(this._nodeIdentity)) {
-			// Populate the full details for the sync change set
+		changes: ISyncChange<T>[] | undefined,
+		completeCallback: (id?: string) => Promise<void>
+	): Promise<void> {
+		if (Is.arrayValue(changes)) {
+			this._populateFullChanges[schemaType] = {
+				changes,
+				entities: {},
+				requestIds: [],
+				completeCallback: async () => this.finaliseFullChanges(schemaType, completeCallback)
+			};
+
+			const setChanges = changes.filter(c => c.operation === SyncChangeOperation.Set);
+			if (setChanges.length === 0) {
+				// If we don't need to request any full details, we can just call the complete callback
+				await this.finaliseFullChanges(schemaType, completeCallback);
+			} else {
+				// Otherwise we need to request the full details for each change
+				this._populateFullChanges[schemaType].requestIds = setChanges.map(change => change.id);
+
+				// Once all the requests are handled the callback will be called
+				for (const change of setChanges) {
+					// Create a request for each change to populate the full details
+					this._eventBusComponent.publish<ISyncItemResponse<T>>(
+						SynchronisedStorageTopics.LocalItemRequest,
+						{
+							schemaType,
+							id: change.id
+						}
+					);
+				}
+			}
+		} else {
+			await completeCallback();
+		}
+	}
+
+	/**
+	 * Finalise the full details for the sync change set.
+	 * @param schemaType The schema type of the change set.
+	 * @param completeCallback The callback to call when the changeset is populated.
+	 * @returns Nothing.
+	 */
+	public async finaliseFullChanges(
+		schemaType: string,
+		completeCallback: (id?: string) => Promise<void>
+	): Promise<void> {
+		if (Is.stringValue(this._nodeIdentity)) {
+			const changes = this._populateFullChanges[schemaType].changes;
 			for (const change of changes) {
-				if (change.operation === "set" && Is.objectValue(change.entity)) {
+				change.entity = this._populateFullChanges[schemaType].entities[change.id] ?? change.entity;
+
+				if (change.operation === SyncChangeOperation.Set && Is.objectValue(change.entity)) {
 					// Remove the node identity as the changeset has this stored at the top level
-					// and we do not want to store it in the change itself
+					// and we do not want to store it in the change itself to reduce redundancy
 					ObjectHelper.propertyDelete(change.entity, "nodeIdentity");
 				}
 			}
@@ -161,7 +231,10 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 			syncChangeSet.proof = await this._changeSetHelper.createChangeSetProof(syncChangeSet);
 
 			// Store the changeset in the blob storage
-			return this._changeSetHelper.storeChangeSet(syncChangeSet);
+			const changeSetStorageId = await this._changeSetHelper.storeChangeSet(syncChangeSet);
+			await completeCallback(changeSetStorageId);
+		} else {
+			await completeCallback();
 		}
 	}
 
@@ -214,22 +287,19 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	/**
 	 * Create a consolidated snapshot for the entire storage.
 	 * @param schemaType The schema type of the snapshot to create.
-	 * @param consolidationBatchSize The batch size to use for consolidation.
+	 * @param batchSize The batch size to use for consolidation.
 	 * @returns Nothing.
 	 */
-	public async consolidateFromLocal(
-		schemaType: string,
-		consolidationBatchSize: number
-	): Promise<void> {
+	public async consolidateFromLocal(schemaType: string, batchSize: number): Promise<void> {
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "consolidationStarting"
 		});
 
-		await this._eventBusComponent.publish<ISyncConsolidationBatchRequest>(
-			SynchronisedStorageTopics.ConsolidationBatchRequest,
-			{ schemaType, consolidationBatchSize }
+		await this._eventBusComponent.publish<ISyncBatchRequest>(
+			SynchronisedStorageTopics.BatchRequest,
+			{ schemaType, batchSize }
 		);
 	}
 
@@ -387,21 +457,18 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	}
 
 	/**
-	 * Handle the consolidation batch response.
-	 * @param response The consolidation batch response to handle.
+	 * Handle the batch response.
+	 * @param response The batch response to handle.
 	 */
-	private async handleConsolidationBatchResponse(
-		response: ISyncConsolidationBatchResponse<T>
-	): Promise<void> {
+	private async handleBatchResponse(response: ISyncBatchResponse<T>): Promise<void> {
 		if (Is.stringValue(this._nodeIdentity)) {
 			// Create a new snapshot entry for the current batch
 			const syncChangeSet: ISyncChangeSet<T> = {
 				id: Converter.bytesToHex(RandomHelper.generate(32)),
 				dateCreated: new Date(Date.now()).toISOString(),
 				changes: response.entities.map(change => ({
-					operation: "set",
-					id: change.id,
-					entity: change.entity
+					operation: SyncChangeOperation.Set,
+					id: change[response.primaryKey] as string
 				})),
 				schemaType: response.schemaType,
 				nodeIdentity: this._nodeIdentity
@@ -438,6 +505,25 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 					source: this.CLASS_NAME,
 					message: "consolidationCompleted"
 				});
+			}
+		}
+	}
+
+	/**
+	 * Handle the item response.
+	 * @param response The item response to handle.
+	 */
+	private async handleLocalItemResponse(response: ISyncItemResponse<T>): Promise<void> {
+		if (!Is.empty(this._populateFullChanges[response.schemaType])) {
+			const idx = this._populateFullChanges[response.schemaType].requestIds.indexOf(response.id);
+
+			if (idx !== -1) {
+				this._populateFullChanges[response.schemaType].requestIds.splice(idx, 1);
+				this._populateFullChanges[response.schemaType].entities[response.id] = response.entity;
+
+				if (this._populateFullChanges[response.schemaType].requestIds.length === 0) {
+					await this._populateFullChanges[response.schemaType].completeCallback();
+				}
 			}
 		}
 	}

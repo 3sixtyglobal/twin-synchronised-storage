@@ -5,7 +5,10 @@ import { ComparisonOperator } from "@twin.org/entity";
 import type { IEntityStorageConnector } from "@twin.org/entity-storage-models";
 import type { ILoggingConnector } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
-import type { ISynchronisedEntity } from "@twin.org/synchronised-storage-models";
+import type {
+	ISynchronisedEntity,
+	SyncChangeOperation
+} from "@twin.org/synchronised-storage-models";
 import type { ChangeSetHelper } from "./changeSetHelper";
 import type { SyncSnapshotEntry } from "../entities/syncSnapshotEntry";
 import type { ISyncState } from "../models/ISyncState";
@@ -58,16 +61,14 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	/**
 	 * Add a new change to the local snapshot.
 	 * @param schemaType The schema type of the snapshot to add the change for.
-	 * @param operation The operation to perform, either "set" or "delete".
+	 * @param operation The operation to perform.
 	 * @param id The id of the entity to add the change for.
-	 * @param entity The entity to add the change for, if applicable.
 	 * @returns Nothing.
 	 */
 	public async addLocalChange(
 		schemaType: string,
-		operation: "set" | "delete",
-		id: string,
-		entity?: T
+		operation: SyncChangeOperation,
+		id: string
 	): Promise<void> {
 		const localChangeSnapshot = await this.getLocalChangeSnapshot(schemaType);
 
@@ -87,7 +88,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 			localChangeSnapshot.dateModified = new Date(Date.now()).toISOString();
 		}
 
-		localChangeSnapshot.localChanges.push({ operation, id, entity });
+		localChangeSnapshot.localChanges.push({ operation, id });
 
 		await this.setLocalChangeSnapshot(localChangeSnapshot);
 	}

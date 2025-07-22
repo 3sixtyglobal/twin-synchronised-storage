@@ -18,14 +18,6 @@ The type of the schema being set.
 
 ***
 
-### id
-
-> **id**: `string`
-
-The id of the item being set.
-
-***
-
 ### entity
 
 > **entity**: `T`

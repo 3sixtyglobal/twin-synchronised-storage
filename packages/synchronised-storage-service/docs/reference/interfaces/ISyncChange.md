@@ -12,7 +12,7 @@ The object definition for a sync change.
 
 ### operation
 
-> **operation**: `"set"` \| `"delete"`
+> **operation**: `SyncChangeOperation`
 
 Operation.
 

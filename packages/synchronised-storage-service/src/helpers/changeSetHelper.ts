@@ -15,7 +15,8 @@ import {
 	type ISyncItemSet,
 	SynchronisedStorageTopics,
 	type ISynchronisedEntity,
-	type ISyncItemRemove
+	type ISyncItemRemove,
+	SyncChangeOperation
 } from "@twin.org/synchronised-storage-models";
 import type { ISyncChangeSet } from "../models/ISyncChangeSet";
 
@@ -138,7 +139,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 				});
 
 				switch (change.operation) {
-					case "set":
+					case SyncChangeOperation.Set:
 						if (!Is.empty(change.entity)) {
 							// The node identity was stripped when stored in the changeset
 							// as the changeset is signed with the node identity.
@@ -148,13 +149,12 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 								SynchronisedStorageTopics.RemoteItemSet,
 								{
 									schemaType: syncChangeset.schemaType,
-									id: change.id,
 									entity: change.entity
 								}
 							);
 						}
 						break;
-					case "delete":
+					case SyncChangeOperation.Delete:
 						if (!Is.empty(change.id)) {
 							await this._eventBusComponent.publish<ISyncItemRemove>(
 								SynchronisedStorageTopics.RemoteItemRemove,

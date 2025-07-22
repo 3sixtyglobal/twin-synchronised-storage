@@ -3,21 +3,23 @@
 import type { ISynchronisedEntity } from "../ISynchronisedEntity";
 
 /**
- * Response for a local consolidation batch.
+ * Response for a local batch.
  */
-export interface ISyncConsolidationBatchResponse<T extends ISynchronisedEntity> {
+export interface ISyncBatchResponse<T extends ISynchronisedEntity> {
 	/**
 	 * The type of the schema for the entities in the batch.
 	 */
 	schemaType: string;
 
 	/**
-	 * The entities in the consolidation batch.
+	 * The primary key of the entity in the sync item response.
 	 */
-	entities: {
-		id: string;
-		entity: T;
-	}[];
+	primaryKey: keyof T;
+
+	/**
+	 * The entities in the batch.
+	 */
+	entities: T[];
 
 	/**
 	 * Is this the last entry in the batch?

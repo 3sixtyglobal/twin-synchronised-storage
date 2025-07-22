@@ -12,24 +12,29 @@ export const SynchronisedStorageTopics = {
 	RegisterSchemaType: "synchronised-storage:register-schema-type",
 
 	/**
-	 * An item was set in the storage by the local node.
+	 * An item was changed in the storage by the local node.
 	 */
-	LocalItemSet: "synchronised-storage:local-item-set",
+	LocalItemChange: "synchronised-storage:local-item-change",
 
 	/**
-	 * An item was removed from the storage by the local node.
+	 * A request has been made for a local item.
 	 */
-	LocalItemRemove: "synchronised-storage:local-item-remove",
+	LocalItemRequest: "synchronised-storage:local-item-request",
 
 	/**
-	 * A request has been made for a consolidation batch.
+	 * A response to a local item request.
 	 */
-	ConsolidationBatchRequest: "synchronised-storage:consolidation-batch-request",
+	LocalItemResponse: "synchronised-storage:local-item-response",
 
 	/**
-	 * A response to a consolidation batch.
+	 * A request has been made for a batch.
 	 */
-	ConsolidationBatchResponse: "synchronised-storage:consolidation-batch-response",
+	BatchRequest: "synchronised-storage:batch-request",
+
+	/**
+	 * A response to a batch.
+	 */
+	BatchResponse: "synchronised-storage:batch-response",
 
 	/**
 	 * An item was set in the storage by the remote node.

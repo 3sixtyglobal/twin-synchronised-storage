@@ -26,6 +26,9 @@
 			"remoteSyncStateNotFound": "No remote sync state entry found for syncPointerId \"{syncPointerId}\"",
 			"consolidationStarting": "Starting consolidation of remote sync state",
 			"consolidationCompleted": "Consolidation of remote sync state completed"
+		},
+		"synchronisedStorageService": {
+			"registerType": "Registering synchronised storage type \"{schemaType}\""
 		}
 	},
 	"error": {

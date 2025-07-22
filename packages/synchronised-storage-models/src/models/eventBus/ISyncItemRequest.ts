@@ -2,16 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0.
 
 /**
- * Request for a local consolidation batch.
+ * Request for a local item.
  */
-export interface ISyncConsolidationBatchRequest {
+export interface ISyncItemRequest {
 	/**
 	 * The type of the schema for the entities in the batch.
 	 */
 	schemaType: string;
 
 	/**
-	 * The size of the consolidation batch.
+	 * The item id being requested.
 	 */
-	consolidationBatchSize: number;
+	id: string;
 }

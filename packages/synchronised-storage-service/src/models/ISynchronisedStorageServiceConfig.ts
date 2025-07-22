@@ -16,6 +16,7 @@ export interface ISynchronisedStorageServiceConfig {
 	 * @default synchronised-storage-assertion
 	 */
 	synchronisedStorageMethodId?: string;
+
 	/**
 	 * How often to check for entity updates in milliseconds.
 	 * @default 300000 (5 minutes)

@@ -12,11 +12,6 @@ export interface ISyncItemSet<T extends ISynchronisedEntity = ISynchronisedEntit
 	schemaType: string;
 
 	/**
-	 * The id of the item being set.
-	 */
-	id: string;
-
-	/**
 	 * The entity being set in the item set.
 	 */
 	entity: T;
