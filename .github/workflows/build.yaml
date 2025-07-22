@@ -24,7 +24,7 @@ jobs:
       TEST_NODE_MNEMONIC: ${{ secrets.TEST_NODE_MNEMONIC }}
 
     steps:
-      # Get the code
+      # Clone the repository to the runner
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -32,7 +32,14 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
+
+      # Cache npm modules
+      - name: Cache npm downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
 
       # Install dependencies with retry
       - name: Install dependencies
