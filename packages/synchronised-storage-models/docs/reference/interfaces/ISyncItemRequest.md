@@ -4,11 +4,11 @@ Request for a local item.
 
 ## Properties
 
-### schemaType
+### storageKey
 
-> **schemaType**: `string`
+> **storageKey**: `string`
 
-The type of the schema for the entities in the batch.
+The key of the storage for the entities in the batch.
 
 ***
 

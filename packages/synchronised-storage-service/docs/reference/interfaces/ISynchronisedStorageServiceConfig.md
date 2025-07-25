@@ -27,16 +27,16 @@ synchronised-storage-assertion
 
 ***
 
-### entityUpdateIntervalMs?
+### entityUpdateIntervalMinutes?
 
-> `optional` **entityUpdateIntervalMs**: `number`
+> `optional` **entityUpdateIntervalMinutes**: `number`
 
-How often to check for entity updates in milliseconds.
+How often to check for entity updates in minutes.
 
 #### Default
 
 ```ts
-300000 (5 minutes)
+5
 ```
 
 ***
@@ -55,16 +55,16 @@ false
 
 ***
 
-### consolidationIntervalMs?
+### consolidationIntervalMinutes?
 
-> `optional` **consolidationIntervalMs**: `number`
+> `optional` **consolidationIntervalMinutes**: `number`
 
 Interval to perform consolidation of changesets, only used if isTrustedNode is set.
 
 #### Default
 
 ```ts
-300000 (5 minutes)
+60
 ```
 
 ***

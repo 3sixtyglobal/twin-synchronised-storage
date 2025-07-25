@@ -28,11 +28,11 @@ The id for the snapshot.
 
 ***
 
-### schemaType
+### storageKey
 
-> **schemaType**: `string`
+> **storageKey**: `string`
 
-The schema type for the snapshot i.e. which entity is being synchronized.
+The storage key for the snapshot i.e. which entity is being synchronized.
 
 ***
 
@@ -68,8 +68,8 @@ The ids of the storage for the change sets in the snapshot, if this is not a loc
 
 ***
 
-### localChanges?
+### changes?
 
-> `optional` **localChanges**: [`ISyncChange`](../interfaces/ISyncChange.md)\<`T`\>[]
+> `optional` **changes**: [`ISyncChange`](../interfaces/ISyncChange.md)\<`T`\>[]
 
 The changes that were made in this snapshot, if this is a local snapshot.

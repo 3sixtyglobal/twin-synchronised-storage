@@ -7,9 +7,9 @@ import type { ISynchronisedEntity } from "../ISynchronisedEntity";
  */
 export interface ISyncItemSet<T extends ISynchronisedEntity = ISynchronisedEntity> {
 	/**
-	 * The type of the schema being set.
+	 * The key of the storage being set.
 	 */
-	schemaType: string;
+	storageKey: string;
 
 	/**
 	 * The entity being set in the item set.

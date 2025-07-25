@@ -60,45 +60,63 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 
 	/**
 	 * Add a new change to the local snapshot.
-	 * @param schemaType The schema type of the snapshot to add the change for.
+	 * @param storageKey The storage key of the snapshot to add the change for.
 	 * @param operation The operation to perform.
 	 * @param id The id of the entity to add the change for.
 	 * @returns Nothing.
 	 */
 	public async addLocalChange(
-		schemaType: string,
+		storageKey: string,
 		operation: SyncChangeOperation,
 		id: string
 	): Promise<void> {
-		const localChangeSnapshot = await this.getLocalChangeSnapshot(schemaType);
+		await this._logging?.log({
+			level: "info",
+			source: this.CLASS_NAME,
+			message: "addLocalChange",
+			data: {
+				storageKey,
+				operation,
+				id
+			}
+		});
 
-		localChangeSnapshot.localChanges ??= [];
+		const localChangeSnapshot = await this.getLocalChangeSnapshot(storageKey);
+
+		localChangeSnapshot.changes ??= [];
 
 		// If we already have a change for this id we are
 		// about to supersede it, we remove the previous change
 		// to avoid having multiple changes for the same id
-		const previousChangeIndex = localChangeSnapshot.localChanges.findIndex(
-			change => change.id === id
-		);
+		const previousChangeIndex = localChangeSnapshot.changes.findIndex(change => change.id === id);
 		if (previousChangeIndex !== -1) {
-			localChangeSnapshot.localChanges.splice(previousChangeIndex, 1);
+			localChangeSnapshot.changes.splice(previousChangeIndex, 1);
 		}
 
-		if (localChangeSnapshot.localChanges.length > 0) {
+		if (localChangeSnapshot.changes.length > 0) {
 			localChangeSnapshot.dateModified = new Date(Date.now()).toISOString();
 		}
 
-		localChangeSnapshot.localChanges.push({ operation, id });
+		localChangeSnapshot.changes.push({ operation, id });
 
 		await this.setLocalChangeSnapshot(localChangeSnapshot);
 	}
 
 	/**
 	 * Get the current local snapshot.
-	 * @param schemaType The schema type of the snapshot to get.
+	 * @param storageKey The storage key of the snapshot to get.
 	 * @returns The local snapshot entry.
 	 */
-	public async getLocalChangeSnapshot(schemaType: string): Promise<SyncSnapshotEntry<T>> {
+	public async getLocalChangeSnapshot(storageKey: string): Promise<SyncSnapshotEntry<T>> {
+		await this._logging?.log({
+			level: "info",
+			source: this.CLASS_NAME,
+			message: "getLocalChangeSnapshot",
+			data: {
+				storageKey
+			}
+		});
+
 		const queryResult = await this._localSyncSnapshotEntryEntityStorage.query({
 			conditions: [
 				{
@@ -107,20 +125,36 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 					comparison: ComparisonOperator.Equals
 				},
 				{
-					property: "schemaType",
-					value: schemaType,
+					property: "storageKey",
+					value: storageKey,
 					comparison: ComparisonOperator.Equals
 				}
 			]
 		});
 
 		if (queryResult.entities.length > 0) {
+			await this._logging?.log({
+				level: "info",
+				source: this.CLASS_NAME,
+				message: "localChangeSnapshotExists",
+				data: {
+					storageKey
+				}
+			});
 			return queryResult.entities[0] as SyncSnapshotEntry<T>;
 		}
 
+		await this._logging?.log({
+			level: "info",
+			source: this.CLASS_NAME,
+			message: "localChangeSnapshotDoesNotExist",
+			data: {
+				storageKey
+			}
+		});
 		return {
 			id: Converter.bytesToHex(RandomHelper.generate(32)),
-			schemaType,
+			storageKey,
 			dateCreated: new Date(Date.now()).toISOString(),
 			changeSetStorageIds: [],
 			isLocalSnapshot: true
@@ -133,6 +167,14 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	 * @returns Nothing.
 	 */
 	public async setLocalChangeSnapshot(localChangeSnapshot: SyncSnapshotEntry<T>): Promise<void> {
+		await this._logging?.log({
+			level: "info",
+			source: this.CLASS_NAME,
+			message: "setLocalChangeSnapshot",
+			data: {
+				storageKey: localChangeSnapshot.storageKey
+			}
+		});
 		await this._localSyncSnapshotEntryEntityStorage.set(localChangeSnapshot);
 	}
 
@@ -155,11 +197,11 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 
 	/**
 	 * Sync local data using a remote sync state.
-	 * @param schemaType The schema type of the snapshot to sync with.
+	 * @param storageKey The storage key of the snapshot to sync with.
 	 * @param remoteSyncState The sync state to sync with.
 	 * @returns Nothing.
 	 */
-	public async syncFromRemote(schemaType: string, remoteSyncState: ISyncState): Promise<void> {
+	public async syncFromRemote(storageKey: string, remoteSyncState: ISyncState): Promise<void> {
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
@@ -194,7 +236,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 			const localSnapshot = await this._localSyncSnapshotEntryEntityStorage.get(remoteSnapshot.id);
 			const remoteSnapshotWithContext: SyncSnapshotEntry<T> = {
 				...remoteSnapshot,
-				schemaType
+				storageKey
 			};
 
 			if (Is.empty(localSnapshot)) {

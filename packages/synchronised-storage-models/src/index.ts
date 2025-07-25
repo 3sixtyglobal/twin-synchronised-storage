@@ -8,7 +8,7 @@ export * from "./models/eventBus/ISyncItemRemove";
 export * from "./models/eventBus/ISyncItemRequest";
 export * from "./models/eventBus/ISyncItemResponse";
 export * from "./models/eventBus/ISyncItemSet";
-export * from "./models/eventBus/ISyncRegisterSchemaType";
+export * from "./models/eventBus/ISyncRegisterStorageKey";
 export * from "./models/eventBus/syncChangeOperation";
 export * from "./models/ISynchronisedEntity";
 export * from "./models/ISynchronisedStorageComponent";

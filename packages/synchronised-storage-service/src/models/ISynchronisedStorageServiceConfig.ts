@@ -18,10 +18,10 @@ export interface ISynchronisedStorageServiceConfig {
 	synchronisedStorageMethodId?: string;
 
 	/**
-	 * How often to check for entity updates in milliseconds.
-	 * @default 300000 (5 minutes)
+	 * How often to check for entity updates in minutes.
+	 * @default 5
 	 */
-	entityUpdateIntervalMs?: number;
+	entityUpdateIntervalMinutes?: number;
 
 	/**
 	 * Is this a node that has permission to write to the verifiable storage?
@@ -31,9 +31,9 @@ export interface ISynchronisedStorageServiceConfig {
 
 	/**
 	 * Interval to perform consolidation of changesets, only used if isTrustedNode is set.
-	 * @default 300000 (5 minutes)
+	 * @default 60
 	 */
-	consolidationIntervalMs?: number;
+	consolidationIntervalMinutes?: number;
 
 	/**
 	 * The number of entities to process in a single consolidation batch.

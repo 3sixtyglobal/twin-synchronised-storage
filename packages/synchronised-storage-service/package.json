@@ -32,6 +32,7 @@
 	},
 	"dependencies": {
 		"@twin.org/api-models": "next",
+		"@twin.org/background-task-models": "next",
 		"@twin.org/blob-storage-models": "next",
 		"@twin.org/core": "next",
 		"@twin.org/entity": "next",
@@ -46,8 +47,10 @@
 		"@twin.org/web": "next"
 	},
 	"devDependencies": {
+		"@twin.org/background-task-scheduler": "next",
 		"@twin.org/blob-storage-connector-memory": "next",
 		"@twin.org/blob-storage-service": "next",
+		"@twin.org/crypto": "next",
 		"@twin.org/entity-storage-connector-memory": "next",
 		"@twin.org/event-bus-connector-local": "next",
 		"@twin.org/event-bus-service": "next",

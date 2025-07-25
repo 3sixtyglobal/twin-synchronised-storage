@@ -10,11 +10,11 @@ The payload for an item set.
 
 ## Properties
 
-### schemaType
+### storageKey
 
-> **schemaType**: `string`
+> **storageKey**: `string`
 
-The type of the schema being set.
+The key of the storage being set.
 
 ***
 

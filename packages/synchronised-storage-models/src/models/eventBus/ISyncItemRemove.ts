@@ -6,9 +6,9 @@
  */
 export interface ISyncItemRemove {
 	/**
-	 * The type of the schema being removed.
+	 * The key of the storage being removed.
 	 */
-	schemaType: string;
+	storageKey: string;
 
 	/**
 	 * The entity being removed from the item set.

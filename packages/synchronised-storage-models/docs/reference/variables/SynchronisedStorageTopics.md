@@ -6,11 +6,11 @@ The topics for synchronised storage event bus notifications.
 
 ## Type declaration
 
-### RegisterSchemaType
+### RegisterStorageKey
 
-> `readonly` **RegisterSchemaType**: `"synchronised-storage:register-schema-type"` = `"synchronised-storage:register-schema-type"`
+> `readonly` **RegisterStorageKey**: `"synchronised-storage:register-storage-key"` = `"synchronised-storage:register-storage-key"`
 
-Register a schema type for the synchronised storage.
+Register a storage key for the synchronised storage.
 
 ### LocalItemChange
 

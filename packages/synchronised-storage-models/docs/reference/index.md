@@ -12,7 +12,7 @@
 - [ISyncItemRequest](interfaces/ISyncItemRequest.md)
 - [ISyncItemResponse](interfaces/ISyncItemResponse.md)
 - [ISyncItemSet](interfaces/ISyncItemSet.md)
-- [ISyncRegisterSchemaType](interfaces/ISyncRegisterSchemaType.md)
+- [ISyncRegisterStorageKey](interfaces/ISyncRegisterStorageKey.md)
 
 ## Type Aliases
 

@@ -7,9 +7,9 @@ import type { ISynchronisedEntity } from "../ISynchronisedEntity";
  */
 export interface ISyncBatchResponse<T extends ISynchronisedEntity> {
 	/**
-	 * The type of the schema for the entities in the batch.
+	 * The key of the storage for the entities in the batch.
 	 */
-	schemaType: string;
+	storageKey: string;
 
 	/**
 	 * The primary key of the entity in the sync item response.

@@ -8,6 +8,10 @@
 ## Interfaces
 
 - [ISyncChange](interfaces/ISyncChange.md)
+- [ISyncChangeSet](interfaces/ISyncChangeSet.md)
+- [ISyncPointerStore](interfaces/ISyncPointerStore.md)
+- [ISyncSnapshot](interfaces/ISyncSnapshot.md)
+- [ISyncState](interfaces/ISyncState.md)
 - [ISynchronisedStorageServiceConfig](interfaces/ISynchronisedStorageServiceConfig.md)
 - [ISynchronisedStorageServiceConstructorOptions](interfaces/ISynchronisedStorageServiceConstructorOptions.md)
 

@@ -7,9 +7,9 @@ import type { SyncChangeOperation } from "./syncChangeOperation";
  */
 export interface ISyncItemChange {
 	/**
-	 * The type of the schema being changed.
+	 * The key of the storage being changed.
 	 */
-	schemaType: string;
+	storageKey: string;
 
 	/**
 	 * The operation being performed on the item.

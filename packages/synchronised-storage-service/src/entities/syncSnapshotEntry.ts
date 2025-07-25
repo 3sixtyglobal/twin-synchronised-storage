@@ -16,10 +16,10 @@ export class SyncSnapshotEntry<T extends ISynchronisedEntity = ISynchronisedEnti
 	public id!: string;
 
 	/**
-	 * The schema type for the snapshot i.e. which entity is being synchronized.
+	 * The storage key for the snapshot i.e. which entity is being synchronized.
 	 */
 	@property({ type: "string", isSecondary: true })
-	public schemaType!: string;
+	public storageKey!: string;
 
 	/**
 	 * The date the snapshot was created.
@@ -49,5 +49,5 @@ export class SyncSnapshotEntry<T extends ISynchronisedEntity = ISynchronisedEnti
 	 * The changes that were made in this snapshot, if this is a local snapshot.
 	 */
 	@property({ type: "array", itemType: "object", optional: true })
-	public localChanges?: ISyncChange<T>[];
+	public changes?: ISyncChange<T>[];
 }

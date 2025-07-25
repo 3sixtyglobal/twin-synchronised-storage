@@ -4,11 +4,11 @@ The payload for an item remove.
 
 ## Properties
 
-### schemaType
+### storageKey
 
-> **schemaType**: `string`
+> **storageKey**: `string`
 
-The type of the schema being removed.
+The key of the storage being removed.
 
 ***
 

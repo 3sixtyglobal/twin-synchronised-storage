@@ -76,6 +76,20 @@ identity
 
 ***
 
+### taskSchedulerComponentType?
+
+> `optional` **taskSchedulerComponentType**: `string`
+
+The task scheduler component.
+
+#### Default
+
+```ts
+task-scheduler
+```
+
+***
+
 ### trustedSynchronisedStorageComponentType?
 
 > `optional` **trustedSynchronisedStorageComponentType**: `string`

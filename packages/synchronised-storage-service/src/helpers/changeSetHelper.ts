@@ -107,17 +107,18 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 	/**
 	 * Apply a sync changeset.
 	 * @param changeSetStorageId The id of the sync changeset to apply.
-	 * @returns True if the change was applied.
+	 * @returns The changeset if it existed.
 	 */
-	public async getAndApplyChangeset(changeSetStorageId: string): Promise<boolean> {
+	public async getAndApplyChangeset(
+		changeSetStorageId: string
+	): Promise<ISyncChangeSet<T> | undefined> {
 		const syncChangeset = await this.getAndVerifyChangeset(changeSetStorageId);
 
 		if (!Is.empty(syncChangeset)) {
 			await this.applyChangeset(syncChangeset);
-			return true;
 		}
 
-		return false;
+		return syncChangeset;
 	}
 
 	/**
@@ -148,7 +149,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 							await this._eventBusComponent.publish<ISyncItemSet>(
 								SynchronisedStorageTopics.RemoteItemSet,
 								{
-									schemaType: syncChangeset.schemaType,
+									storageKey: syncChangeset.storageKey,
 									entity: change.entity
 								}
 							);
@@ -159,7 +160,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 							await this._eventBusComponent.publish<ISyncItemRemove>(
 								SynchronisedStorageTopics.RemoteItemRemove,
 								{
-									schemaType: syncChangeset.schemaType,
+									storageKey: syncChangeset.storageKey,
 									id: change.id
 								}
 							);
@@ -173,9 +174,13 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 	/**
 	 * Store the changeset.
 	 * @param syncChangeSet The sync change set to store.
+	 * @param nodeIdentity The node identity to use for the changeset.
 	 * @returns The id of the change set.
 	 */
-	public async storeChangeSet(syncChangeSet: ISyncChangeSet): Promise<string> {
+	public async storeChangeSet(
+		syncChangeSet: ISyncChangeSet,
+		nodeIdentity: string
+	): Promise<string> {
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
@@ -195,7 +200,9 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 			{
 				disableEncryption: true,
 				compress: BlobStorageCompressionType.Gzip
-			}
+			},
+			undefined,
+			nodeIdentity
 		);
 	}
 
@@ -264,7 +271,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 		);
 
 		await this._logging?.log({
-			level: "error",
+			level: "info",
 			source: this.CLASS_NAME,
 			message: "createdChangeSetProof",
 			data: {

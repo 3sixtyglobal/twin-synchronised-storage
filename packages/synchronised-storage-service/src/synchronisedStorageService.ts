@@ -1,5 +1,6 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
+import type { ITaskSchedulerComponent } from "@twin.org/background-task-models";
 import type { IBlobStorageComponent } from "@twin.org/blob-storage-models";
 import { BaseError, ComponentFactory, GeneralError, Guards, Is } from "@twin.org/core";
 import {
@@ -12,7 +13,7 @@ import { type ILoggingConnector, LoggingConnectorFactory } from "@twin.org/loggi
 import { nameof } from "@twin.org/nameof";
 import {
 	type ISyncItemChange,
-	type ISyncRegisterSchemaType,
+	type ISyncRegisterStorageKey,
 	SynchronisedStorageTopics,
 	type ISynchronisedEntity,
 	type ISynchronisedStorageComponent
@@ -35,22 +36,22 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	implements ISynchronisedStorageComponent
 {
 	/**
-	 * The default interval to check for entity updates, defaults to 5 mins.
+	 * The default interval to check for entity updates.
 	 * @internal
 	 */
-	private static readonly _DEFAULT_ENTITY_UPDATE_INTERVAL_MS: number = 300000;
+	private static readonly _DEFAULT_ENTITY_UPDATE_INTERVAL_MINUTES: number = 5;
 
 	/**
-	 * The default interval to perform consolidation, defaults to 60 mins.
+	 * The default interval to perform consolidation.
 	 * @internal
 	 */
-	private static readonly _DEFAULT_CONSOLIDATION_INTERVAL_MS: number = 3600000;
+	private static readonly _DEFAULT_CONSOLIDATION_INTERVAL_MINUTES: number = 60;
 
 	/**
 	 * The default size of a consolidation batch.
 	 * @internal
 	 */
-	private static readonly _DEFAULT_CONSOLIDATION_BATCH_SIZE: number = 1000;
+	private static readonly _DEFAULT_CONSOLIDATION_BATCH_SIZE: number = 100;
 
 	/**
 	 * Runtime name for the class.
@@ -96,6 +97,12 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	private readonly _identityConnector: IIdentityConnector;
 
 	/**
+	 * The task scheduler component.
+	 * @internal
+	 */
+	private readonly _taskSchedulerComponent: ITaskSchedulerComponent;
+
+	/**
 	 * The synchronised storage service to use when this is not a trusted node.
 	 * @internal
 	 */
@@ -126,16 +133,16 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	private readonly _config: Required<ISynchronisedStorageServiceConfig>;
 
 	/**
-	 * The timer ids for checking for entity updates.
+	 * The flag to determine if the service has been started.
 	 * @internal
 	 */
-	private readonly _entityUpdateTimers: { [schemaType: string]: NodeJS.Timeout };
+	private _serviceStarted: boolean;
 
 	/**
-	 * The timer ids for consolidation.
+	 * The active storage keys for the synchronised storage service.
 	 * @internal
 	 */
-	private readonly _consolidationTimers: { [schemaType: string]: NodeJS.Timeout };
+	private readonly _activeStorageKeys: { [storageKey: string]: boolean };
 
 	/**
 	 * The identity of the node this connector is running on.
@@ -178,17 +185,21 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 			options.identityConnectorType ?? "identity"
 		);
 
+		this._taskSchedulerComponent = ComponentFactory.get(
+			options.taskSchedulerComponentType ?? "task-scheduler"
+		);
+
 		this._config = {
 			synchronisedStorageKey: options.config.synchronisedStorageKey,
 			synchronisedStorageMethodId:
 				options.config.synchronisedStorageMethodId ?? "synchronised-storage-assertion",
-			entityUpdateIntervalMs:
-				options.config.entityUpdateIntervalMs ??
-				SynchronisedStorageService._DEFAULT_ENTITY_UPDATE_INTERVAL_MS,
+			entityUpdateIntervalMinutes:
+				options.config.entityUpdateIntervalMinutes ??
+				SynchronisedStorageService._DEFAULT_ENTITY_UPDATE_INTERVAL_MINUTES,
 			isTrustedNode: options.config.isTrustedNode ?? false,
-			consolidationIntervalMs:
-				options.config.consolidationIntervalMs ??
-				SynchronisedStorageService._DEFAULT_CONSOLIDATION_INTERVAL_MS,
+			consolidationIntervalMinutes:
+				options.config.consolidationIntervalMinutes ??
+				SynchronisedStorageService._DEFAULT_CONSOLIDATION_INTERVAL_MINUTES,
 			consolidationBatchSize:
 				options.config.consolidationBatchSize ??
 				SynchronisedStorageService._DEFAULT_CONSOLIDATION_BATCH_SIZE
@@ -231,11 +242,11 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 			this._config.synchronisedStorageKey
 		);
 
-		this._consolidationTimers = {};
-		this._entityUpdateTimers = {};
+		this._serviceStarted = false;
+		this._activeStorageKeys = {};
 
-		this._eventBusComponent.subscribe<ISyncRegisterSchemaType>(
-			SynchronisedStorageTopics.RegisterSchemaType,
+		this._eventBusComponent.subscribe<ISyncRegisterStorageKey>(
+			SynchronisedStorageTopics.RegisterStorageKey,
 			async event => this.registerType(event.data)
 		);
 
@@ -243,7 +254,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 			SynchronisedStorageTopics.LocalItemChange,
 			async event =>
 				this._localSyncStateHelper.addLocalChange(
-					event.data.schemaType,
+					event.data.storageKey,
 					event.data.operation,
 					event.data.id
 				)
@@ -266,6 +277,12 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	): Promise<void> {
 		this._nodeIdentity = nodeIdentity;
 		this._remoteSyncStateHelper.setNodeIdentity(nodeIdentity);
+		this._serviceStarted = true;
+
+		// If there are already storage keys registered, we need to activate them
+		for (const storageKey in this._activeStorageKeys) {
+			await this.activateStorageKey(storageKey);
+		}
 	}
 
 	/**
@@ -280,14 +297,10 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 		nodeLoggingConnectorType: string | undefined,
 		componentState?: { [id: string]: unknown }
 	): Promise<void> {
-		for (const schemaType in this._entityUpdateTimers) {
-			clearTimeout(this._entityUpdateTimers[schemaType]);
-			delete this._entityUpdateTimers[schemaType];
-		}
-
-		for (const schemaType in this._consolidationTimers) {
-			clearTimeout(this._consolidationTimers[schemaType]);
-			delete this._consolidationTimers[schemaType];
+		for (const storageKey in this._activeStorageKeys) {
+			this._activeStorageKeys[storageKey] = false;
+			this._taskSchedulerComponent.removeTask(`synchronised-storage-update-${storageKey}`);
+			this._taskSchedulerComponent.removeTask(`synchronised-storage-consolidation-${storageKey}`);
 		}
 	}
 
@@ -313,23 +326,35 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 		const changeSet = await this._changeSetHelper.getAndApplyChangeset(changeSetStorageId);
 
 		if (!Is.empty(changeSet)) {
-			await this._remoteSyncStateHelper.addChangeSetToSyncState(changeSetStorageId);
+			await this._remoteSyncStateHelper.addChangeSetToSyncState(
+				changeSet.storageKey,
+				changeSetStorageId
+			);
 		}
 	}
 
 	/**
 	 * Start the sync with further updates after an interval.
-	 * @param schemaType The schema type to sync.
+	 * @param storageKey The storage key to sync.
 	 * @returns Nothing.
 	 * @internal
 	 */
-	private async startEntitySync(schemaType: string): Promise<void> {
+	private async startEntitySync(storageKey: string): Promise<void> {
 		try {
+			await this._logging?.log({
+				level: "info",
+				source: this.CLASS_NAME,
+				message: "startEntitySync",
+				data: {
+					storageKey
+				}
+			});
+
 			// First we check for remote changes
-			await this.updateFromRemoteSyncState(schemaType);
+			await this.updateFromRemoteSyncState(storageKey);
 
 			// Now send any updates we have to the remote storage
-			await this.updateFromLocalSyncState(schemaType);
+			await this.updateFromLocalSyncState(storageKey);
 		} catch (error) {
 			await this._logging?.log({
 				level: "error",
@@ -337,35 +362,39 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 				message: "entitySyncFailed",
 				error: BaseError.fromError(error)
 			});
-		} finally {
-			// Set a timer to check for updates again
-			this._entityUpdateTimers[schemaType] = setTimeout(
-				async () => this.startEntitySync(schemaType),
-				this._config.entityUpdateIntervalMs
-			);
 		}
 	}
 
 	/**
 	 * Check for updates in the remote storage.
-	 * @param schemaType The schema type to check for updates.
+	 * @param storageKey The storage key to check for updates.
 	 * @returns Nothing.
 	 * @internal
 	 */
-	private async updateFromRemoteSyncState(schemaType: string): Promise<void> {
-		// Get the verifiable sync pointer from the verifiable storage
-		const verifiableSyncPointer = await this._remoteSyncStateHelper.getVerifiableSyncPointer();
+	private async updateFromRemoteSyncState(storageKey: string): Promise<void> {
+		await this._logging?.log({
+			level: "info",
+			source: this.CLASS_NAME,
+			message: "updateFromRemoteSyncState",
+			data: {
+				storageKey
+			}
+		});
 
-		if (!Is.empty(verifiableSyncPointer)) {
+		// Get the verifiable sync pointer store from the verifiable storage
+		const verifiableSyncPointerStore =
+			await this._remoteSyncStateHelper.getVerifiableSyncPointerStore();
+
+		if (!Is.empty(verifiableSyncPointerStore.syncPointers[storageKey])) {
 			// Load the sync state from the remote blob storage using the sync pointer
 			// to load the sync state
 			const remoteSyncState = await this._remoteSyncStateHelper.getRemoteSyncState(
-				verifiableSyncPointer.syncPointerId
+				verifiableSyncPointerStore.syncPointers[storageKey]
 			);
 
 			// If we got the sync state we can try and sync from it
 			if (!Is.undefined(remoteSyncState)) {
-				await this._localSyncStateHelper.syncFromRemote(schemaType, remoteSyncState);
+				await this._localSyncStateHelper.syncFromRemote(storageKey, remoteSyncState);
 			}
 		}
 	}
@@ -375,52 +404,87 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	 * @returns Nothing.
 	 * @internal
 	 */
-	private async updateFromLocalSyncState(schemaType: string): Promise<void> {
-		if (Is.stringValue(this._nodeIdentity)) {
-			// Ge the current local change snapshot
-			const localChangeSnapshot =
-				await this._localSyncStateHelper.getLocalChangeSnapshot(schemaType);
+	private async updateFromLocalSyncState(storageKey: string): Promise<void> {
+		await this._logging?.log({
+			level: "info",
+			source: this.CLASS_NAME,
+			message: "updateFromLocalSyncState",
+			data: {
+				storageKey
+			}
+		});
 
-			if (!Is.empty(localChangeSnapshot)) {
-				await this._remoteSyncStateHelper.createAndStoreChangeSet(
-					schemaType,
-					localChangeSnapshot.localChanges,
-					async changeSetStorageId => {
-						if (Is.stringValue(changeSetStorageId)) {
-							// Send the local changes to the remote storage if we are a trusted node
-							if (this._config.isTrustedNode) {
-								await this._remoteSyncStateHelper.addChangeSetToSyncState(changeSetStorageId);
-							} else if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
-								// If we are not a trusted node, we need to send the changes to the trusted node
-								await this._trustedSynchronisedStorageComponent.syncChangeSet(changeSetStorageId);
+		const localChangeSnapshot = await this._localSyncStateHelper.getLocalChangeSnapshot(storageKey);
+
+		if (Is.arrayValue(localChangeSnapshot.changes)) {
+			await this._remoteSyncStateHelper.createAndStoreChangeSet(
+				storageKey,
+				localChangeSnapshot.changes,
+				async changeSetStorageId => {
+					if (Is.stringValue(changeSetStorageId)) {
+						await this._logging?.log({
+							level: "info",
+							source: this.CLASS_NAME,
+							message: "createdStorageChangeSet",
+							data: {
+								storageKey,
+								changeSetStorageId
 							}
-
+						});
+						// Send the local changes to the remote storage if we are a trusted node
+						if (this._config.isTrustedNode) {
+							await this._remoteSyncStateHelper.addChangeSetToSyncState(
+								storageKey,
+								changeSetStorageId
+							);
+							await this._localSyncStateHelper.removeLocalChangeSnapshot(localChangeSnapshot);
+						} else if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
+							// If we are not a trusted node, we need to send the changes to the trusted node
+							await this._trustedSynchronisedStorageComponent.syncChangeSet(changeSetStorageId);
 							await this._localSyncStateHelper.removeLocalChangeSnapshot(localChangeSnapshot);
 						}
+					} else {
+						await this._logging?.log({
+							level: "info",
+							source: this.CLASS_NAME,
+							message: "createdStorageChangeSetNone",
+							data: {
+								storageKey
+							}
+						});
 					}
-				);
-			}
+				}
+			);
+		} else {
+			await this._logging?.log({
+				level: "info",
+				source: this.CLASS_NAME,
+				message: "updateFromLocalSyncStateNoChanges",
+				data: {
+					storageKey
+				}
+			});
 		}
 	}
 
 	/**
 	 * Start the consolidation sync.
-	 * @param schemaType The schema type to consolidate.
+	 * @param storageKey The storage key to consolidate.
 	 * @returns Nothing.
 	 * @internal
 	 */
-	private async startConsolidationSync(schemaType: string): Promise<void> {
+	private async startConsolidationSync(storageKey: string): Promise<void> {
 		let localChangeSnapshot: SyncSnapshotEntry<T> | undefined;
 		try {
 			// If we are performing a consolidation, we can remove the local changes
-			await this._localSyncStateHelper.getLocalChangeSnapshot(schemaType);
+			await this._localSyncStateHelper.getLocalChangeSnapshot(storageKey);
 			if (!Is.empty(localChangeSnapshot)) {
 				await this._localSyncStateHelper.removeLocalChangeSnapshot(localChangeSnapshot);
 			}
 
 			if (Is.stringValue(this._nodeIdentity)) {
 				await this._remoteSyncStateHelper.consolidateFromLocal(
-					schemaType,
+					storageKey,
 					this._config.consolidationBatchSize ??
 						SynchronisedStorageService._DEFAULT_CONSOLIDATION_BATCH_SIZE
 				);
@@ -439,12 +503,6 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 				message: "consolidationSyncFailed",
 				error: BaseError.fromError(error)
 			});
-		} finally {
-			// Set a timer to perform the consolidation again
-			this._consolidationTimers[schemaType] = setTimeout(
-				async () => this.startConsolidationSync(schemaType),
-				this._config.consolidationIntervalMs
-			);
 		}
 	}
 
@@ -453,22 +511,68 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	 * @param syncRegisterType The sync register type to register.
 	 * @internal
 	 */
-	private async registerType(syncRegisterType: ISyncRegisterSchemaType): Promise<void> {
+	private async registerType(syncRegisterType: ISyncRegisterStorageKey): Promise<void> {
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "registerType",
 			data: {
-				schemaType: syncRegisterType.schemaType
+				storageKey: syncRegisterType.storageKey
 			}
 		});
 
-		if (this._config.entityUpdateIntervalMs > 0) {
-			await this.startEntitySync(syncRegisterType.schemaType);
-		}
+		if (Is.empty(this._activeStorageKeys[syncRegisterType.storageKey])) {
+			this._activeStorageKeys[syncRegisterType.storageKey] = false;
 
-		if (this._config.isTrustedNode && this._config.consolidationIntervalMs > 0) {
-			await this.startConsolidationSync(syncRegisterType.schemaType);
+			if (this._serviceStarted) {
+				await this.activateStorageKey(syncRegisterType.storageKey);
+			}
+		}
+	}
+
+	/**
+	 * Activate a storage key.
+	 * @param storageKey The storage key to activate.
+	 * @internal
+	 */
+	private async activateStorageKey(storageKey: string): Promise<void> {
+		if (!Is.empty(this._activeStorageKeys[storageKey]) && !this._activeStorageKeys[storageKey]) {
+			await this._logging?.log({
+				level: "info",
+				source: this.CLASS_NAME,
+				message: "activateType",
+				data: {
+					storageKey
+				}
+			});
+
+			this._activeStorageKeys[storageKey] = true;
+
+			if (this._config.entityUpdateIntervalMinutes > 0) {
+				await this._taskSchedulerComponent.addTask(
+					`synchronised-storage-update-${storageKey}`,
+					[
+						{
+							nextTriggerTime: Date.now(),
+							intervalMinutes: this._config.entityUpdateIntervalMinutes
+						}
+					],
+					async () => this.startEntitySync(storageKey)
+				);
+			}
+
+			if (this._config.isTrustedNode && this._config.consolidationIntervalMinutes > 0) {
+				await this._taskSchedulerComponent.addTask(
+					`synchronised-storage-consolidation-${storageKey}`,
+					[
+						{
+							nextTriggerTime: Date.now(),
+							intervalMinutes: this._config.consolidationIntervalMinutes
+						}
+					],
+					async () => this.startConsolidationSync(storageKey)
+				);
+			}
 		}
 	}
 }

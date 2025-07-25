@@ -27,7 +27,7 @@ import type { IVerifiableStorageConnector } from "@twin.org/verifiable-storage-m
 import type { ChangeSetHelper } from "./changeSetHelper";
 import type { ISyncChange } from "../models/ISyncChange";
 import type { ISyncChangeSet } from "../models/ISyncChangeSet";
-import type { ISyncPointer } from "../models/ISyncPointer";
+import type { ISyncPointerStore } from "../models/ISyncPointerStore";
 import type { ISyncSnapshot } from "../models/ISyncSnapshot";
 import type { ISyncState } from "../models/ISyncState";
 
@@ -71,17 +71,17 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	private readonly _changeSetHelper: ChangeSetHelper<T>;
 
 	/**
-	 * The storage ids of the batch responses for each schema type.
+	 * The storage ids of the batch responses for each storage key.
 	 * @internal
 	 */
-	private readonly _batchResponseStorageIds: { [schemaType: string]: string[] };
+	private readonly _batchResponseStorageIds: { [storageKey: string]: string[] };
 
 	/**
-	 * The full changes for each schema type.
+	 * The full changes for each storage key.
 	 * @internal
 	 */
 	private readonly _populateFullChanges: {
-		[schemaType: string]: {
+		[storageKey: string]: {
 			changes: ISyncChange<T>[];
 			entities: { [id: string]: T | undefined };
 			requestIds: string[];
@@ -153,63 +153,86 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 
 	/**
 	 * Create and store a change set.
-	 * @param schemaType The schema type of the change set.
+	 * @param storageKey The storage key of the change set.
 	 * @param changes The changes to apply.
 	 * @param completeCallback The callback to call when the changeset is created and stored.
 	 * @returns The storage id of the change set if created.
 	 */
 	public async createAndStoreChangeSet(
-		schemaType: string,
-		changes: ISyncChange<T>[] | undefined,
+		storageKey: string,
+		changes: ISyncChange<T>[],
 		completeCallback: (id?: string) => Promise<void>
 	): Promise<void> {
-		if (Is.arrayValue(changes)) {
-			this._populateFullChanges[schemaType] = {
-				changes,
-				entities: {},
-				requestIds: [],
-				completeCallback: async () => this.finaliseFullChanges(schemaType, completeCallback)
-			};
-
-			const setChanges = changes.filter(c => c.operation === SyncChangeOperation.Set);
-			if (setChanges.length === 0) {
-				// If we don't need to request any full details, we can just call the complete callback
-				await this.finaliseFullChanges(schemaType, completeCallback);
-			} else {
-				// Otherwise we need to request the full details for each change
-				this._populateFullChanges[schemaType].requestIds = setChanges.map(change => change.id);
-
-				// Once all the requests are handled the callback will be called
-				for (const change of setChanges) {
-					// Create a request for each change to populate the full details
-					this._eventBusComponent.publish<ISyncItemResponse<T>>(
-						SynchronisedStorageTopics.LocalItemRequest,
-						{
-							schemaType,
-							id: change.id
-						}
-					);
-				}
+		await this._logging?.log({
+			level: "info",
+			source: this.CLASS_NAME,
+			message: "createAndStoreChangeSet",
+			data: {
+				storageKey,
+				changeCount: changes.length
 			}
+		});
+
+		this._populateFullChanges[storageKey] = {
+			changes,
+			entities: {},
+			requestIds: [],
+			completeCallback: async () => this.finaliseFullChanges(storageKey, completeCallback)
+		};
+
+		const setChanges = changes.filter(c => c.operation === SyncChangeOperation.Set);
+		if (setChanges.length === 0) {
+			// If we don't need to request any full details, we can just call the complete callback
+			await this.finaliseFullChanges(storageKey, completeCallback);
 		} else {
-			await completeCallback();
+			// Otherwise we need to request the full details for each change
+			this._populateFullChanges[storageKey].requestIds = setChanges.map(change => change.id);
+
+			// Once all the requests are handled the callback will be called
+			for (const change of setChanges) {
+				// Create a request for each change to populate the full details
+				await this._logging?.log({
+					level: "info",
+					source: this.CLASS_NAME,
+					message: "createChangeSetRequestingItem",
+					data: {
+						storageKey,
+						id: change.id
+					}
+				});
+				this._eventBusComponent.publish<ISyncItemResponse<T>>(
+					SynchronisedStorageTopics.LocalItemRequest,
+					{
+						storageKey,
+						id: change.id
+					}
+				);
+			}
 		}
 	}
 
 	/**
 	 * Finalise the full details for the sync change set.
-	 * @param schemaType The schema type of the change set.
+	 * @param storageKey The storage key of the change set.
 	 * @param completeCallback The callback to call when the changeset is populated.
 	 * @returns Nothing.
 	 */
 	public async finaliseFullChanges(
-		schemaType: string,
+		storageKey: string,
 		completeCallback: (id?: string) => Promise<void>
 	): Promise<void> {
+		await this._logging?.log({
+			level: "info",
+			source: this.CLASS_NAME,
+			message: "finalisingSyncChanges",
+			data: {
+				storageKey
+			}
+		});
 		if (Is.stringValue(this._nodeIdentity)) {
-			const changes = this._populateFullChanges[schemaType].changes;
+			const changes = this._populateFullChanges[storageKey].changes;
 			for (const change of changes) {
-				change.entity = this._populateFullChanges[schemaType].entities[change.id] ?? change.entity;
+				change.entity = this._populateFullChanges[storageKey].entities[change.id] ?? change.entity;
 
 				if (change.operation === SyncChangeOperation.Set && Is.objectValue(change.entity)) {
 					// Remove the node identity as the changeset has this stored at the top level
@@ -222,17 +245,33 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 			const syncChangeSet: ISyncChangeSet<T> = {
 				id: Converter.bytesToHex(RandomHelper.generate(32)),
 				dateCreated: new Date(Date.now()).toISOString(),
-				schemaType,
+				storageKey,
 				changes,
 				nodeIdentity: this._nodeIdentity
 			};
 
-			// And sign it with the node identity
-			syncChangeSet.proof = await this._changeSetHelper.createChangeSetProof(syncChangeSet);
+			try {
+				// And sign it with the node identity
+				syncChangeSet.proof = await this._changeSetHelper.createChangeSetProof(syncChangeSet);
 
-			// Store the changeset in the blob storage
-			const changeSetStorageId = await this._changeSetHelper.storeChangeSet(syncChangeSet);
-			await completeCallback(changeSetStorageId);
+				// Store the changeset in the blob storage
+				const changeSetStorageId = await this._changeSetHelper.storeChangeSet(
+					syncChangeSet,
+					this._nodeIdentity
+				);
+				await completeCallback(changeSetStorageId);
+			} catch (err) {
+				await this._logging?.log({
+					level: "error",
+					source: this.CLASS_NAME,
+					message: "finalisingSyncChangesFailed",
+					data: {
+						storageKey
+					},
+					error: BaseError.fromError(err)
+				});
+				await completeCallback();
+			}
 		} else {
 			await completeCallback();
 		}
@@ -240,16 +279,32 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 
 	/**
 	 * Add a new changeset into the sync state.
+	 * @param storageKey The storage key of the change set to add.
 	 * @param changeSetStorageId The id of the change set to add the the current state
 	 * @returns Nothing.
 	 */
-	public async addChangeSetToSyncState(changeSetStorageId: string): Promise<void> {
-		// First load the current sync state if there is one
-		const syncStatePointer = await this.getVerifiableSyncPointer();
+	public async addChangeSetToSyncState(
+		storageKey: string,
+		changeSetStorageId: string
+	): Promise<void> {
+		await this._logging?.log({
+			level: "info",
+			source: this.CLASS_NAME,
+			message: "addChangeSetToSyncState",
+			data: {
+				storageKey,
+				changeSetStorageId
+			}
+		});
+
+		// First load the sync pointer store to get the current sync pointer for the storage key
+		const syncPointerStore = await this.getVerifiableSyncPointerStore();
+
 		let syncState: ISyncState | undefined;
-		if (!Is.empty(syncStatePointer?.syncPointerId)) {
-			syncState = await this.getRemoteSyncState(syncStatePointer.syncPointerId);
+		if (!Is.empty(syncPointerStore.syncPointers[storageKey])) {
+			syncState = await this.getRemoteSyncState(syncPointerStore.syncPointers[storageKey]);
 		}
+
 		// No current sync state, so we create a new one
 		if (Is.empty(syncState)) {
 			syncState = { snapshots: [] };
@@ -278,19 +333,19 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 		currentSnapshot.changeSetStorageIds.push(changeSetStorageId);
 
 		// Store the sync state in the blob storage
-		const syncStateId = await this.storeRemoteSyncState(syncState);
+		syncPointerStore.syncPointers[storageKey] = await this.storeRemoteSyncState(syncState);
 
-		// Store the verifiable sync pointer in the verifiable storage
-		await this.storeVerifiableSyncPointer(syncStateId);
+		// Store the verifiable sync pointer store in the verifiable storage
+		await this.storeVerifiableSyncPointerStore(syncPointerStore);
 	}
 
 	/**
 	 * Create a consolidated snapshot for the entire storage.
-	 * @param schemaType The schema type of the snapshot to create.
+	 * @param storageKey The storage key of the snapshot to create.
 	 * @param batchSize The batch size to use for consolidation.
 	 * @returns Nothing.
 	 */
-	public async consolidateFromLocal(schemaType: string, batchSize: number): Promise<void> {
+	public async consolidateFromLocal(storageKey: string, batchSize: number): Promise<void> {
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
@@ -299,20 +354,20 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 
 		await this._eventBusComponent.publish<ISyncBatchRequest>(
 			SynchronisedStorageTopics.BatchRequest,
-			{ schemaType, batchSize }
+			{ storageKey, batchSize }
 		);
 	}
 
 	/**
-	 * Get the sync pointer.
-	 * @returns The sync pointer.
+	 * Get the sync pointer store.
+	 * @returns The sync pointer store.
 	 */
-	public async getVerifiableSyncPointer(): Promise<ISyncPointer | undefined> {
+	public async getVerifiableSyncPointerStore(): Promise<ISyncPointerStore> {
 		try {
 			await this._logging?.log({
 				level: "info",
 				source: this.CLASS_NAME,
-				message: "verifiableSyncPointerRetrieving",
+				message: "verifiableSyncPointerStoreRetrieving",
 				data: {
 					key: this._synchronisedStorageKey
 				}
@@ -322,14 +377,13 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 				{ includeData: true }
 			);
 			if (Is.uint8Array(syncPointerStore.data)) {
-				const syncPointer = ObjectHelper.fromBytes<ISyncPointer>(syncPointerStore.data);
+				const syncPointer = ObjectHelper.fromBytes<ISyncPointerStore>(syncPointerStore.data);
 				await this._logging?.log({
 					level: "info",
 					source: this.CLASS_NAME,
-					message: "verifiableSyncPointerRetrieved",
+					message: "verifiableSyncPointerStoreRetrieved",
 					data: {
-						key: this._synchronisedStorageKey,
-						syncPointerId: syncPointer.syncPointerId
+						key: this._synchronisedStorageKey
 					}
 				});
 				return syncPointer;
@@ -343,41 +397,41 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
-			message: "verifiableSyncPointerNotFound",
+			message: "verifiableSyncPointerStoreNotFound",
 			data: {
 				key: this._synchronisedStorageKey
 			}
 		});
+
+		// If no sync pointer store exists, we return an empty one
+		return {
+			syncPointers: {}
+		};
 	}
 
 	/**
 	 * Store the verifiable sync pointer in the verifiable storage.
-	 * @param syncStateId The id of the sync state to store.
+	 * @param syncPointerStore The sync pointer store to store.
 	 * @returns Nothing.
 	 */
-	public async storeVerifiableSyncPointer(syncStateId: string): Promise<ISyncPointer> {
-		// Create a new verifiable sync pointer object pointing to the sync state
-		const verifiableSyncPointer: ISyncPointer = {
-			syncPointerId: syncStateId
-		};
+	public async storeVerifiableSyncPointerStore(syncPointerStore: ISyncPointerStore): Promise<void> {
+		if (this._nodeIdentity) {
+			await this._logging?.log({
+				level: "info",
+				source: this.CLASS_NAME,
+				message: "verifiableSyncPointerStoreStoring",
+				data: {
+					key: this._synchronisedStorageKey
+				}
+			});
 
-		await this._logging?.log({
-			level: "info",
-			source: this.CLASS_NAME,
-			message: "verifiableSyncPointerStoring",
-			data: {
-				key: this._synchronisedStorageKey,
-				syncPointerId: verifiableSyncPointer.syncPointerId
-			}
-		});
-
-		// Store the verifiable sync pointer in the verifiable storage
-		await this._verifiableSyncPointerStorageConnector.create(
-			this._synchronisedStorageKey,
-			ObjectHelper.toBytes<ISyncPointer>(verifiableSyncPointer)
-		);
-
-		return verifiableSyncPointer;
+			// Store the verifiable sync pointer in the verifiable storage
+			await this._verifiableSyncPointerStorageConnector.update(
+				this._nodeIdentity,
+				this._synchronisedStorageKey,
+				ObjectHelper.toBytes<ISyncPointerStore>(syncPointerStore)
+			);
+		}
 	}
 
 	/**
@@ -402,7 +456,9 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 			undefined,
 			undefined,
 			undefined,
-			{ disableEncryption: true, compress: BlobStorageCompressionType.Gzip }
+			{ disableEncryption: true, compress: BlobStorageCompressionType.Gzip },
+			undefined,
+			this._nodeIdentity
 		);
 	}
 
@@ -421,9 +477,14 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 					syncPointerId
 				}
 			});
-			const blobEntry = await this._blobStorageComponent.get(syncPointerId, {
-				includeContent: true
-			});
+			const blobEntry = await this._blobStorageComponent.get(
+				syncPointerId,
+				{
+					includeContent: true
+				},
+				undefined,
+				this._nodeIdentity
+			);
 
 			if (Is.stringBase64(blobEntry.blob)) {
 				const syncState = ObjectHelper.fromBytes<ISyncState>(
@@ -470,7 +531,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 					operation: SyncChangeOperation.Set,
 					id: change[response.primaryKey] as string
 				})),
-				schemaType: response.schemaType,
+				storageKey: response.storageKey,
 				nodeIdentity: this._nodeIdentity
 			};
 
@@ -478,11 +539,14 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 			syncChangeSet.proof = await this._changeSetHelper.createChangeSetProof(syncChangeSet);
 
 			// Store the changeset in the blob storage
-			const changeSetStorageId = await this._changeSetHelper.storeChangeSet(syncChangeSet);
+			const changeSetStorageId = await this._changeSetHelper.storeChangeSet(
+				syncChangeSet,
+				this._nodeIdentity
+			);
 
 			// Add the changeset storage id to the snapshot ids
-			this._batchResponseStorageIds[response.schemaType] ??= [];
-			this._batchResponseStorageIds[response.schemaType].push(changeSetStorageId);
+			this._batchResponseStorageIds[response.storageKey] ??= [];
+			this._batchResponseStorageIds[response.storageKey].push(changeSetStorageId);
 
 			if (response.lastEntry) {
 				const syncState: ISyncState = { snapshots: [] };
@@ -490,15 +554,20 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 				const batchSnapshot: ISyncSnapshot = {
 					id: Converter.bytesToHex(RandomHelper.generate(32)),
 					dateCreated: new Date(Date.now()).toISOString(),
-					changeSetStorageIds: this._batchResponseStorageIds[response.schemaType]
+					changeSetStorageIds: this._batchResponseStorageIds[response.storageKey]
 				};
 				syncState.snapshots.push(batchSnapshot);
 
 				// Store the sync state in the blob storage
 				const syncStateId = await this.storeRemoteSyncState(syncState);
 
+				// Get the current sync pointer store
+				const syncPointerStore = await this.getVerifiableSyncPointerStore();
+
+				syncPointerStore.syncPointers[response.storageKey] = syncStateId;
+
 				// Store the verifiable sync pointer in the verifiable storage
-				await this.storeVerifiableSyncPointer(syncStateId);
+				await this.storeVerifiableSyncPointerStore(syncPointerStore);
 
 				await this._logging?.log({
 					level: "info",
@@ -514,15 +583,24 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 * @param response The item response to handle.
 	 */
 	private async handleLocalItemResponse(response: ISyncItemResponse<T>): Promise<void> {
-		if (!Is.empty(this._populateFullChanges[response.schemaType])) {
-			const idx = this._populateFullChanges[response.schemaType].requestIds.indexOf(response.id);
+		await this._logging?.log({
+			level: "info",
+			source: this.CLASS_NAME,
+			message: "createChangeSetRespondingItem",
+			data: {
+				storageKey: response.storageKey,
+				id: response.id
+			}
+		});
+		if (!Is.empty(this._populateFullChanges[response.storageKey])) {
+			const idx = this._populateFullChanges[response.storageKey].requestIds.indexOf(response.id);
 
 			if (idx !== -1) {
-				this._populateFullChanges[response.schemaType].requestIds.splice(idx, 1);
-				this._populateFullChanges[response.schemaType].entities[response.id] = response.entity;
+				this._populateFullChanges[response.storageKey].requestIds.splice(idx, 1);
+				this._populateFullChanges[response.storageKey].entities[response.id] = response.entity;
 
-				if (this._populateFullChanges[response.schemaType].requestIds.length === 0) {
-					await this._populateFullChanges[response.schemaType].completeCallback();
+				if (this._populateFullChanges[response.storageKey].requestIds.length === 0) {
+					await this._populateFullChanges[response.storageKey].completeCallback();
 				}
 			}
 		}

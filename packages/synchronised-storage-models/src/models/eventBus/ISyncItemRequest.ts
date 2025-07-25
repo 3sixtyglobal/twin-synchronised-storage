@@ -6,9 +6,9 @@
  */
 export interface ISyncItemRequest {
 	/**
-	 * The type of the schema for the entities in the batch.
+	 * The key of the storage for the entities in the batch.
 	 */
-	schemaType: string;
+	storageKey: string;
 
 	/**
 	 * The item id being requested.

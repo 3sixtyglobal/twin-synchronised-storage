@@ -41,6 +41,12 @@ export interface ISynchronisedStorageServiceConstructorOptions {
 	identityConnectorType?: string;
 
 	/**
+	 * The task scheduler component.
+	 * @default task-scheduler
+	 */
+	taskSchedulerComponentType?: string;
+
+	/**
 	 * The synchronised entity storage component type to use if this node is not trusted.
 	 */
 	trustedSynchronisedStorageComponentType?: string;

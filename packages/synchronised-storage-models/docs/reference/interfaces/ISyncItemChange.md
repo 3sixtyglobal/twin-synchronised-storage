@@ -4,11 +4,11 @@ The payload for an item change.
 
 ## Properties
 
-### schemaType
+### storageKey
 
-> **schemaType**: `string`
+> **storageKey**: `string`
 
-The type of the schema being changed.
+The key of the storage being changed.
 
 ***
 

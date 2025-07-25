@@ -19,9 +19,9 @@ export interface ISyncChangeSet<T extends ISynchronisedEntity = ISynchronisedEnt
 	dateCreated: string;
 
 	/**
-	 * The schema type of the change set. This is used to identify the type of entity being synchronised.
+	 * The storage key of the change set. This is used to identify the entities being synchronised.
 	 */
-	schemaType: string;
+	storageKey: string;
 
 	/**
 	 * The date the change set was last modified.

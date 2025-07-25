@@ -9,26 +9,43 @@
 			"createdChangeSetProof": "Created change proof for change set with id \"{id}\", proof value is \"{proofValue}\""
 		},
 		"localSyncStateHelper": {
+			"getLocalChangeSnapshot": "Retrieving local change snapshot for storage key \"{storageKey}\"",
+			"localChangeSnapshotExists": "Found existing local change snapshot for storage key \"{storageKey}\"",
+			"localChangeSnapshotDoesNotExist": "No local change snapshot found for storage key \"{storageKey}\", creating new one",
 			"remoteSyncSynchronisation": "Syncing from remote state with \"{snapshotCount}\" snapshots",
 			"remoteSyncSnapshotProcessing": "Processing remote sync snapshot with id \"{snapshotId}\" created on \"{dateCreated}\"",
 			"remoteSyncSnapshotModified": "Processing modified sync snapshot with id \"{snapshotId}\", remote modified on \"{remoteModified}\", local modified on \"{localModified}\"",
 			"remoteSyncSnapshotNew": "Processing new sync snapshot with id \"{snapshotId}\", created on \"{dateCreated}\"",
-			"removeLocalChangeSnapshot": "Removing local change snapshot with id \"{snapshotId}\""
+			"removeLocalChangeSnapshot": "Removing local change snapshot with id \"{snapshotId}\"",
+			"addLocalChange": "Adding local change with id \"{id}\" to local change snapshot for storage key \"{storageKey}\", operation \"{operation}\"",
+			"setLocalChangeSnapshot": "Storing local change snapshot for storage key \"{storageKey}\""
 		},
 		"remoteSyncStateHelper": {
-			"verifiableSyncPointerRetrieving": "Retrieving verifiable sync pointer for key \"{key}\"",
-			"verifiableSyncPointerNotFound": "No verifiable sync pointer found for key \"{key}\"",
-			"verifiableSyncPointerRetrieved": "Retrieved verifiable sync pointer for key \"{key}\" with value \"{syncPointerId}\"",
-			"verifiableSyncPointerStoring": "Storing verifiable sync pointer for key \"{key}\" with value \"{syncPointerId}\"",
+			"verifiableSyncPointerStoreRetrieving": "Retrieving verifiable sync pointer for key \"{key}\"",
+			"verifiableSyncPointerStoreNotFound": "No verifiable sync pointer store found for key \"{key}\"",
+			"verifiableSyncPointerStoreRetrieved": "Retrieved verifiable sync pointer for key \"{key}\"",
+			"verifiableSyncPointerStoreStoring": "Storing verifiable sync pointer store for key \"{key}\"",
 			"remoteSyncStateStoring": "Storing remote sync state entry with \"{snapshotCount}\" snapshots",
 			"remoteSyncStateRetrieving": "Retrieving remote sync state entry for syncPointerId \"{syncPointerId}\"",
 			"remoteSyncStateRetrieved": "Retrieving remote sync state entry for syncPointerId \"{syncPointerId}\" with \"{snapshotCount}\" snapshots",
 			"remoteSyncStateNotFound": "No remote sync state entry found for syncPointerId \"{syncPointerId}\"",
 			"consolidationStarting": "Starting consolidation of remote sync state",
-			"consolidationCompleted": "Consolidation of remote sync state completed"
+			"consolidationCompleted": "Consolidation of remote sync state completed",
+			"addChangeSetToSyncState": "Adding change set with id \"{changeSetStorageId}\" to remote sync state for storage key \"{storageKey}\"",
+			"createAndStoreChangeSet": "Creating and storing change set for storage key \"{storageKey}\" with \"{changeCount}\" changes",
+			"finalisingSyncChanges": "Finalising sync changes for storage key \"{storageKey}\""
 		},
 		"synchronisedStorageService": {
-			"registerType": "Registering synchronised storage type \"{schemaType}\""
+			"registerType": "Registering synchronised storage type \"{storageKey}\"",
+			"activateType": "Activating synchronised storage type \"{storageKey}\"",
+			"startEntitySync": "Starting synchronised entity storage for type \"{storageKey}\"",
+			"updateFromRemoteSyncState": "Updating synchronised entity storage from remote sync state for type \"{storageKey}\"",
+			"updateFromLocalSyncState": "Updating synchronised entity storage from local sync state for type \"{storageKey}\"",
+			"updateFromLocalSyncStateNoChanges": "No changes found in local sync state for type \"{storageKey}\", skipping update",
+			"createdStorageChangeSet": "Created storage change set for type \"{storageKey}\" with id \"{changeSetStorageId}\"",
+			"createdStorageChangeSetNone": "No changes found for type \"{storageKey}\", no storage change set created",
+			"createChangeSetRequestingItem": "Creating change set for type \"{storageKey}\", requesting item with id \"{id}\"",
+			"createChangeSetRespondingItem": "Responding to change set request for type \"{storageKey}\", item with id \"{id}\""
 		}
 	},
 	"error": {
@@ -40,6 +57,9 @@
 			"notTrustedNode": "This method can only be called on a trusted node",
 			"entitySyncFailed": "Failed to sync synchronised entity storage connector",
 			"consolidationSyncFailed": "Failed to consolidate synchronised entity storage connector"
+		},
+		"remoteSyncStateHelper": {
+			"finalisingSyncChangesFailed": "Failed to finalise sync changes for storage key \"{storageKey}\""
 		}
 	}
 }

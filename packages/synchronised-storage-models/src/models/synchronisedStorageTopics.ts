@@ -7,9 +7,9 @@
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const SynchronisedStorageTopics = {
 	/**
-	 * Register a schema type for the synchronised storage.
+	 * Register a storage key for the synchronised storage.
 	 */
-	RegisterSchemaType: "synchronised-storage:register-schema-type",
+	RegisterStorageKey: "synchronised-storage:register-storage-key",
 
 	/**
 	 * An item was changed in the storage by the local node.
