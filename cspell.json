@@ -17,7 +17,16 @@
 		".eslintrc.cjs",
 		"**/wordlists/**"
 	],
-	"words": ["abbrev", "autorelease", "nameof", "openapi", "Odrl", "Stiftung"],
+	"words": [
+		"abbrev",
+		"autorelease",
+		"cryptosuite",
+		"eddsa",
+		"nameof",
+		"openapi",
+		"Odrl",
+		"Stiftung"
+	],
 	"ignoreRegExpList": [
 		"/from\\s+(['\"]).*\\1/",
 		"/eslint-disable.*/",

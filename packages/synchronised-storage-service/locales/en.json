@@ -6,7 +6,10 @@
 			"verifyChangeSetProofMissing": "Verifying change set with id \"{id}\" failed, missing proof",
 			"verifyChangeSetProofInvalid": "Verifying change set with id \"{id}\" failed, invalid proof",
 			"verifyChangeSetProofValid": "Verifying change set with id \"{id}\" succeeded",
-			"createdChangeSetProof": "Created change proof for change set with id \"{id}\", proof value is \"{proofValue}\""
+			"createdChangeSetProof": "Created change proof for change set with id \"{id}\", proof value is \"{proofValue}\"",
+			"getChangeSet": "Retrieving change set with id \"{changeSetStorageId}\"",
+			"getChangeSetEmpty": "No change set found with id \"{changeSetStorageId}\"",
+			"copyChangeSet": "Copying change set with id \"{changeSetStorageId}\""
 		},
 		"localSyncStateHelper": {
 			"getLocalChangeSnapshot": "Retrieving local change snapshot for storage key \"{storageKey}\"",
@@ -32,20 +35,29 @@
 			"consolidationStarting": "Starting consolidation of remote sync state",
 			"consolidationCompleted": "Consolidation of remote sync state completed",
 			"addChangeSetToSyncState": "Adding change set with id \"{changeSetStorageId}\" to remote sync state for storage key \"{storageKey}\"",
-			"createAndStoreChangeSet": "Creating and storing change set for storage key \"{storageKey}\" with \"{changeCount}\" changes",
+			"buildingChangeSet": "Building change set for storage key \"{storageKey}\" with \"{changeCount}\" changes",
 			"finalisingSyncChanges": "Finalising sync changes for storage key \"{storageKey}\""
 		},
 		"synchronisedStorageService": {
-			"registerType": "Registering synchronised storage type \"{storageKey}\"",
-			"activateType": "Activating synchronised storage type \"{storageKey}\"",
-			"startEntitySync": "Starting synchronised entity storage for type \"{storageKey}\"",
-			"updateFromRemoteSyncState": "Updating synchronised entity storage from remote sync state for type \"{storageKey}\"",
-			"updateFromLocalSyncState": "Updating synchronised entity storage from local sync state for type \"{storageKey}\"",
-			"updateFromLocalSyncStateNoChanges": "No changes found in local sync state for type \"{storageKey}\", skipping update",
-			"createdStorageChangeSet": "Created storage change set for type \"{storageKey}\" with id \"{changeSetStorageId}\"",
-			"createdStorageChangeSetNone": "No changes found for type \"{storageKey}\", no storage change set created",
-			"createChangeSetRequestingItem": "Creating change set for type \"{storageKey}\", requesting item with id \"{id}\"",
-			"createChangeSetRespondingItem": "Responding to change set request for type \"{storageKey}\", item with id \"{id}\""
+			"registerStorageKey": "Registering synchronised storage key \"{storageKey}\"",
+			"activateStorageKey": "Activating synchronised storage key \"{storageKey}\"",
+			"startEntitySync": "Starting synchronised entity storage for key \"{storageKey}\"",
+			"updateFromRemoteSyncState": "Updating synchronised entity storage from remote sync state for key \"{storageKey}\"",
+			"updateFromLocalSyncState": "Updating synchronised entity storage from local sync state for key \"{storageKey}\"",
+			"updateFromLocalSyncStateNoChanges": "No changes found in local sync state for key \"{storageKey}\", skipping update",
+			"builtStorageChangeSet": "Built storage change set for key \"{storageKey}\" with id \"{changeSetStorageId}\"",
+			"builtStorageChangeSetNone": "No changes found for key \"{storageKey}\", no storage change set created",
+			"createChangeSetRequestingItem": "Creating change set for key \"{storageKey}\", requesting item with id \"{id}\"",
+			"createChangeSetRespondingItem": "Responding to change set request for key \"{storageKey}\", item with id \"{id}\"",
+			"sendingChangeSetToTrustedNode": "Sending change set with id \"{changeSetStorageId}\" to trusted node for key \"{storageKey}\"",
+			"syncChangeSetForRemoteNode": "Synchronising change set with id \"{changeSetStorageId}\" for remote node for type \"{storageKey}\""
+		},
+		"blobStorageHelper": {
+			"loadBlob": "Loading blob with id \"{blobId}\"",
+			"loadedBlob": "Loaded blob with id \"{blobId}\"",
+			"loadBlobEmpty": "No blob found with id \"{blobId}\"",
+			"saveBlob": "Saving blob",
+			"savedBlob": "Saved blob with id \"{blobId}\""
 		}
 	},
 	"error": {
@@ -56,10 +68,25 @@
 		"synchronisedStorageService": {
 			"notTrustedNode": "This method can only be called on a trusted node",
 			"entitySyncFailed": "Failed to sync synchronised entity storage connector",
-			"consolidationSyncFailed": "Failed to consolidate synchronised entity storage connector"
+			"consolidationSyncFailed": "Failed to consolidate synchronised entity storage connector",
+			"invalidProof": "Invalid proof provided for synchronised entity storage connector",
+			"decryptionKeyNotFound": "Decryption key not found, ensure the synchronised storage component is initialised and the decryption key is set"
 		},
 		"remoteSyncStateHelper": {
 			"finalisingSyncChangesFailed": "Failed to finalise sync changes for storage key \"{storageKey}\""
+		},
+		"blobStorageHelper": {
+			"loadBlobFailed": "Failed to load blob with id \"{blobId}\"",
+			"saveBlobFailed": "Failed to save blob",
+			"notTrustedNode": "Cannot save blob, this is not a trusted node"
+		}
+	},
+	"warn": {
+		"changeSetHelper": {
+			"getChangeSetError": "Failed to retrieve change set with id \"{changeSetStorageId}\""
+		},
+		"remoteSyncStateHelper": {
+			"getSyncStateError": "Failed to retrieve sync state for syncPointerId \"{syncPointerId}\""
 		}
 	}
 }

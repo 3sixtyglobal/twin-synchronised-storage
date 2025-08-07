@@ -4,14 +4,8 @@ Request a trusted node to perform a sync request for a changeset.
 
 ## Properties
 
-### query
+### body
 
-> **query**: `object`
+> **body**: [`ISyncChangeSet`](ISyncChangeSet.md)
 
-The query parameters.
-
-#### changeSetStorageId
-
-> **changeSetStorageId**: `string`
-
-The storage id of the changeset.
+The body of the request.

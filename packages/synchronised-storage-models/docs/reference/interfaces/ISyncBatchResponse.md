@@ -18,14 +18,6 @@ The key of the storage for the entities in the batch.
 
 ***
 
-### primaryKey
-
-> **primaryKey**: keyof `T`
-
-The primary key of the entity in the sync item response.
-
-***
-
 ### entities
 
 > **entities**: `T`[]

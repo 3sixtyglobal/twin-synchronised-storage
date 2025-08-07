@@ -20,6 +20,14 @@ The event bus component type.
 
 ***
 
+### vaultConnectorType?
+
+> `optional` **vaultConnectorType**: `string`
+
+The vault connector type.
+
+***
+
 ### syncSnapshotStorageConnectorType?
 
 > `optional` **syncSnapshotStorageConnectorType**: `string`
@@ -34,11 +42,11 @@ sync-snapshot-entry
 
 ***
 
-### blobStorageComponentType?
+### blobStorageConnectorType?
 
-> `optional` **blobStorageComponentType**: `string`
+> `optional` **blobStorageConnectorType**: `string`
 
-The blob storage component used for remote sync state.
+The blob storage connector used for remote sync state.
 
 #### Default
 

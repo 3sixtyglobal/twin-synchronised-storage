@@ -12,7 +12,7 @@ export interface ISynchronisedStorageServiceConfig {
 	synchronisedStorageKey: string;
 
 	/**
-	 * The id of the identity method to use when signing/verifying changesets.
+	 * The id of the identity method to use when signing/verifying requests and changesets.
 	 * @default synchronised-storage-assertion
 	 */
 	synchronisedStorageMethodId?: string;
@@ -40,4 +40,10 @@ export interface ISynchronisedStorageServiceConfig {
 	 * @default 1000
 	 */
 	consolidationBatchSize?: number;
+
+	/**
+	 * The encryption key id from the vault to use for blob storage, only required for trusted nodes, untrusted nodes will request the key.
+	 * @default synchronised-storage-blob-encryption-key
+	 */
+	blobStorageEncryptionKeyId?: string;
 }

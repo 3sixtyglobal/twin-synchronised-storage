@@ -2,9 +2,13 @@
 
 ## Interfaces
 
+- [ISyncChange](interfaces/ISyncChange.md)
+- [ISyncChangeSet](interfaces/ISyncChangeSet.md)
 - [ISynchronisedEntity](interfaces/ISynchronisedEntity.md)
 - [ISynchronisedStorageComponent](interfaces/ISynchronisedStorageComponent.md)
 - [ISyncChangeSetRequest](interfaces/ISyncChangeSetRequest.md)
+- [ISyncDecryptionKeyRequest](interfaces/ISyncDecryptionKeyRequest.md)
+- [ISyncDecryptionKeyResponse](interfaces/ISyncDecryptionKeyResponse.md)
 - [ISyncBatchRequest](interfaces/ISyncBatchRequest.md)
 - [ISyncBatchResponse](interfaces/ISyncBatchResponse.md)
 - [ISyncItemChange](interfaces/ISyncItemChange.md)

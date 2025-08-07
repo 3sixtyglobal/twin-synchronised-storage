@@ -1,10 +1,6 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import {
-	BlobStorageCompressionType,
-	type IBlobStorageComponent
-} from "@twin.org/blob-storage-models";
-import {
 	BaseError,
 	Converter,
 	Is,
@@ -17,16 +13,17 @@ import type { ILoggingConnector } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
 import {
 	type ISyncBatchRequest,
-	SynchronisedStorageTopics,
 	type ISyncBatchResponse,
+	type ISyncChange,
+	type ISyncChangeSet,
 	type ISynchronisedEntity,
 	type ISyncItemResponse,
-	SyncChangeOperation
+	SyncChangeOperation,
+	SynchronisedStorageTopics
 } from "@twin.org/synchronised-storage-models";
 import type { IVerifiableStorageConnector } from "@twin.org/verifiable-storage-models";
+import type { BlobStorageHelper } from "./blobStorageHelper";
 import type { ChangeSetHelper } from "./changeSetHelper";
-import type { ISyncChange } from "../models/ISyncChange";
-import type { ISyncChangeSet } from "../models/ISyncChangeSet";
 import type { ISyncPointerStore } from "../models/ISyncPointerStore";
 import type { ISyncSnapshot } from "../models/ISyncSnapshot";
 import type { ISyncState } from "../models/ISyncState";
@@ -53,10 +50,10 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	private readonly _eventBusComponent: IEventBusComponent;
 
 	/**
-	 * The blob storage component to use for remote sync states.
+	 * The blob storage helper.
 	 * @internal
 	 */
-	private readonly _blobStorageComponent: IBlobStorageComponent;
+	private readonly _blobStorageHelper: BlobStorageHelper;
 
 	/**
 	 * The verifiable storage connector to use for storing sync pointers.
@@ -102,28 +99,37 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	private _nodeIdentity?: string;
 
 	/**
+	 * Whether the node is trusted or not.
+	 * @internal
+	 */
+	private readonly _isTrustedNode: boolean;
+
+	/**
 	 * Create a new instance of DecentralisedEntityStorageConnector.
 	 * @param logging The logging connector to use for logging.
 	 * @param eventBusComponent The event bus component to use for events.
-	 * @param blobStorageComponent The blob storage component to use for remote sync states.
 	 * @param verifiableSyncPointerStorageConnector The verifiable storage connector to use for storing sync pointers.
+	 * @param blobStorageHelper The blob storage helper to use for remote sync states.
 	 * @param changeSetHelper The change set helper to use for managing changesets.
 	 * @param synchronisedStorageKey The synchronised storage key to use for verified storage operations.
+	 * @param isTrustedNode Whether the node is trusted or not.
 	 */
 	constructor(
 		logging: ILoggingConnector | undefined,
 		eventBusComponent: IEventBusComponent,
-		blobStorageComponent: IBlobStorageComponent,
 		verifiableSyncPointerStorageConnector: IVerifiableStorageConnector,
+		blobStorageHelper: BlobStorageHelper,
 		changeSetHelper: ChangeSetHelper<T>,
-		synchronisedStorageKey: string
+		synchronisedStorageKey: string,
+		isTrustedNode: boolean
 	) {
 		this._logging = logging;
 		this._eventBusComponent = eventBusComponent;
-		this._blobStorageComponent = blobStorageComponent;
 		this._verifiableSyncPointerStorageConnector = verifiableSyncPointerStorageConnector;
 		this._changeSetHelper = changeSetHelper;
+		this._blobStorageHelper = blobStorageHelper;
 		this._synchronisedStorageKey = synchronisedStorageKey;
+		this._isTrustedNode = isTrustedNode;
 
 		this._batchResponseStorageIds = {};
 		this._populateFullChanges = {};
@@ -152,21 +158,21 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	}
 
 	/**
-	 * Create and store a change set.
+	 * Build a changeset.
 	 * @param storageKey The storage key of the change set.
 	 * @param changes The changes to apply.
 	 * @param completeCallback The callback to call when the changeset is created and stored.
 	 * @returns The storage id of the change set if created.
 	 */
-	public async createAndStoreChangeSet(
+	public async buildChangeSet(
 		storageKey: string,
 		changes: ISyncChange<T>[],
-		completeCallback: (id?: string) => Promise<void>
+		completeCallback: (syncChangeSet?: ISyncChangeSet<T>, id?: string) => Promise<void>
 	): Promise<void> {
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
-			message: "createAndStoreChangeSet",
+			message: "buildingChangeSet",
 			data: {
 				storageKey,
 				changeCount: changes.length
@@ -219,7 +225,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 */
 	public async finaliseFullChanges(
 		storageKey: string,
-		completeCallback: (id?: string) => Promise<void>
+		completeCallback: (syncChangeSet?: ISyncChangeSet<T>, id?: string) => Promise<void>
 	): Promise<void> {
 		await this._logging?.log({
 			level: "info",
@@ -235,13 +241,15 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 				change.entity = this._populateFullChanges[storageKey].entities[change.id] ?? change.entity;
 
 				if (change.operation === SyncChangeOperation.Set && Is.objectValue(change.entity)) {
+					// Remove the id from the entity as this is stored in the operation
+					// and will be reinstated when the changeset is reconstituted
+					ObjectHelper.propertyDelete(change.entity, "id");
 					// Remove the node identity as the changeset has this stored at the top level
 					// and we do not want to store it in the change itself to reduce redundancy
 					ObjectHelper.propertyDelete(change.entity, "nodeIdentity");
 				}
 			}
 
-			// Add the changeset to the current snapshot
 			const syncChangeSet: ISyncChangeSet<T> = {
 				id: Converter.bytesToHex(RandomHelper.generate(32)),
 				dateCreated: new Date(Date.now()).toISOString(),
@@ -254,12 +262,13 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 				// And sign it with the node identity
 				syncChangeSet.proof = await this._changeSetHelper.createChangeSetProof(syncChangeSet);
 
-				// Store the changeset in the blob storage
-				const changeSetStorageId = await this._changeSetHelper.storeChangeSet(
-					syncChangeSet,
-					this._nodeIdentity
-				);
-				await completeCallback(changeSetStorageId);
+				// If this is a trusted node, we also store the changeset
+				let changeSetStorageId;
+				if (this._isTrustedNode) {
+					changeSetStorageId = await this._changeSetHelper.storeChangeSet(syncChangeSet);
+				}
+
+				await completeCallback(syncChangeSet, changeSetStorageId);
 			} catch (err) {
 				await this._logging?.log({
 					level: "error",
@@ -449,17 +458,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 			}
 		});
 
-		// We don't want to encrypt the sync state as no other nodes would be able to read it
-		// the blob storage also needs to be publicly accessible so that other nodes can retrieve it
-		return this._blobStorageComponent.create(
-			Converter.bytesToBase64(ObjectHelper.toBytes<ISyncState>(syncState)),
-			undefined,
-			undefined,
-			undefined,
-			{ disableEncryption: true, compress: BlobStorageCompressionType.Gzip },
-			undefined,
-			this._nodeIdentity
-		);
+		return this._blobStorageHelper.saveBlob(syncState);
 	}
 
 	/**
@@ -477,19 +476,9 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 					syncPointerId
 				}
 			});
-			const blobEntry = await this._blobStorageComponent.get(
-				syncPointerId,
-				{
-					includeContent: true
-				},
-				undefined,
-				this._nodeIdentity
-			);
+			const syncState = await this._blobStorageHelper.load<ISyncState>(syncPointerId);
 
-			if (Is.stringBase64(blobEntry.blob)) {
-				const syncState = ObjectHelper.fromBytes<ISyncState>(
-					Converter.base64ToBytes(blobEntry.blob)
-				);
+			if (Is.object(syncState)) {
 				await this._logging?.log({
 					level: "info",
 					source: this.CLASS_NAME,
@@ -501,10 +490,16 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 				});
 				return syncState;
 			}
-		} catch (err) {
-			if (!BaseError.someErrorName(err, NotFoundError.CLASS_NAME)) {
-				throw err;
-			}
+		} catch (error) {
+			await this._logging?.log({
+				level: "warn",
+				source: this.CLASS_NAME,
+				message: "getSyncStateError",
+				data: {
+					syncPointerId
+				},
+				error: BaseError.fromError(error)
+			});
 		}
 
 		await this._logging?.log({
@@ -529,7 +524,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 				dateCreated: new Date(Date.now()).toISOString(),
 				changes: response.entities.map(change => ({
 					operation: SyncChangeOperation.Set,
-					id: change[response.primaryKey] as string
+					id: change.id
 				})),
 				storageKey: response.storageKey,
 				nodeIdentity: this._nodeIdentity
@@ -539,10 +534,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 			syncChangeSet.proof = await this._changeSetHelper.createChangeSetProof(syncChangeSet);
 
 			// Store the changeset in the blob storage
-			const changeSetStorageId = await this._changeSetHelper.storeChangeSet(
-				syncChangeSet,
-				this._nodeIdentity
-			);
+			const changeSetStorageId = await this._changeSetHelper.storeChangeSet(syncChangeSet);
 
 			// Add the changeset storage id to the snapshot ids
 			this._batchResponseStorageIds[response.storageKey] ??= [];

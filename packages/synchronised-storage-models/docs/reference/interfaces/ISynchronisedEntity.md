@@ -4,6 +4,14 @@ The base definition for synchronised entries.
 
 ## Properties
 
+### id
+
+> **id**: `string`
+
+The id of the entry.
+
+***
+
 ### dateModified
 
 > **dateModified**: `string`

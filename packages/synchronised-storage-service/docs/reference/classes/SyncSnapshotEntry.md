@@ -70,6 +70,6 @@ The ids of the storage for the change sets in the snapshot, if this is not a loc
 
 ### changes?
 
-> `optional` **changes**: [`ISyncChange`](../interfaces/ISyncChange.md)\<`T`\>[]
+> `optional` **changes**: `ISyncChange`\<`T`\>[]
 
 The changes that were made in this snapshot, if this is a local snapshot.

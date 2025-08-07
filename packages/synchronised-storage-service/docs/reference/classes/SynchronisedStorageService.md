@@ -118,19 +118,52 @@ Nothing.
 
 ***
 
-### syncChangeSet()
+### getDecryptionKey()
 
-> **syncChangeSet**(`changeSetStorageId`): `Promise`\<`void`\>
+> **getDecryptionKey**(`nodeIdentity`, `proof`): `Promise`\<`string`\>
 
-Synchronise a complete set of changes, assumes this is a trusted node.
+Get the decryption key for the synchronised storage.
+This is used to decrypt the data stored in the synchronised storage.
 
 #### Parameters
 
-##### changeSetStorageId
+##### nodeIdentity
 
 `string`
 
-The id of the change set to synchronise in blob storage.
+The identity of the node requesting the decryption key.
+
+##### proof
+
+`IProof`
+
+The proof of the request so we know the request is from the specified node.
+
+#### Returns
+
+`Promise`\<`string`\>
+
+The decryption key.
+
+#### Implementation of
+
+`ISynchronisedStorageComponent.getDecryptionKey`
+
+***
+
+### syncChangeSet()
+
+> **syncChangeSet**(`syncChangeSet`): `Promise`\<`void`\>
+
+Synchronise a set of changes from an untrusted node, assumes this is a trusted node.
+
+#### Parameters
+
+##### syncChangeSet
+
+`ISyncChangeSet`\<`T`\>
+
+The change set to synchronise.
 
 #### Returns
 

@@ -1,8 +1,7 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import { entity, property } from "@twin.org/entity";
-import type { ISynchronisedEntity } from "@twin.org/synchronised-storage-models";
-import type { ISyncChange } from "../models/ISyncChange";
+import type { ISyncChange, ISynchronisedEntity } from "@twin.org/synchronised-storage-models";
 
 /**
  * Class representing an entry for the sync snapshot.

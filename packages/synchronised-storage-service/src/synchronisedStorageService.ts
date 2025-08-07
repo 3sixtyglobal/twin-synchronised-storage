@@ -1,28 +1,48 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import type { ITaskSchedulerComponent } from "@twin.org/background-task-models";
-import type { IBlobStorageComponent } from "@twin.org/blob-storage-models";
-import { BaseError, ComponentFactory, GeneralError, Guards, Is } from "@twin.org/core";
+import {
+	BlobStorageConnectorFactory,
+	type IBlobStorageConnector
+} from "@twin.org/blob-storage-models";
+import {
+	BaseError,
+	ComponentFactory,
+	Converter,
+	GeneralError,
+	Guards,
+	Is,
+	UnauthorizedError
+} from "@twin.org/core";
+import type { IJsonLdNodeObject } from "@twin.org/data-json-ld";
 import {
 	EntityStorageConnectorFactory,
 	type IEntityStorageConnector
 } from "@twin.org/entity-storage-models";
 import type { IEventBusComponent } from "@twin.org/event-bus-models";
-import { IdentityConnectorFactory, type IIdentityConnector } from "@twin.org/identity-models";
+import {
+	DocumentHelper,
+	IdentityConnectorFactory,
+	type IIdentityConnector
+} from "@twin.org/identity-models";
 import { type ILoggingConnector, LoggingConnectorFactory } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
+import { type IProof, ProofTypes } from "@twin.org/standards-w3c-did";
 import {
+	type ISyncChangeSet,
+	type ISynchronisedEntity,
+	type ISynchronisedStorageComponent,
 	type ISyncItemChange,
 	type ISyncRegisterStorageKey,
-	SynchronisedStorageTopics,
-	type ISynchronisedEntity,
-	type ISynchronisedStorageComponent
+	SynchronisedStorageTopics
 } from "@twin.org/synchronised-storage-models";
+import { type IVaultConnector, VaultConnectorFactory } from "@twin.org/vault-models";
 import {
 	type IVerifiableStorageConnector,
 	VerifiableStorageConnectorFactory
 } from "@twin.org/verifiable-storage-models";
 import type { SyncSnapshotEntry } from "./entities/syncSnapshotEntry";
+import { BlobStorageHelper } from "./helpers/blobStorageHelper";
 import { ChangeSetHelper } from "./helpers/changeSetHelper";
 import { LocalSyncStateHelper } from "./helpers/localSyncStateHelper";
 import { RemoteSyncStateHelper } from "./helpers/remoteSyncStateHelper";
@@ -71,6 +91,12 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	private readonly _eventBusComponent: IEventBusComponent;
 
 	/**
+	 * The vault connector.
+	 * @internal
+	 */
+	private readonly _vaultConnector: IVaultConnector;
+
+	/**
 	 * The storage connector for the sync snapshot entries.
 	 * @internal
 	 */
@@ -79,10 +105,10 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	>;
 
 	/**
-	 * The blob storage component to use for remote sync states.
+	 * The blob storage connector to use for remote sync states.
 	 * @internal
 	 */
-	private readonly _blobStorageComponent: IBlobStorageComponent;
+	private readonly _blobStorageConnector: IBlobStorageConnector;
 
 	/**
 	 * The verifiable storage connector to use for storing sync pointers.
@@ -107,6 +133,12 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	 * @internal
 	 */
 	private readonly _trustedSynchronisedStorageComponent?: ISynchronisedStorageComponent;
+
+	/**
+	 * The blob storage helper.
+	 * @internal
+	 */
+	private readonly _blobStorageHelper: BlobStorageHelper;
 
 	/**
 	 * The change set helper.
@@ -168,6 +200,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 
 		this._eventBusComponent = ComponentFactory.get(options.eventBusComponentType ?? "event-bus");
 		this._logging = LoggingConnectorFactory.getIfExists(options.loggingConnectorType ?? "logging");
+		this._vaultConnector = VaultConnectorFactory.get(options.vaultConnectorType ?? "vault");
 
 		this._localSyncSnapshotEntryEntityStorage = EntityStorageConnectorFactory.get<
 			IEntityStorageConnector<SyncSnapshotEntry<T>>
@@ -177,8 +210,8 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 			options.verifiableStorageConnectorType ?? "verifiable-storage"
 		);
 
-		this._blobStorageComponent = ComponentFactory.get(
-			options.blobStorageComponentType ?? "blob-storage"
+		this._blobStorageConnector = BlobStorageConnectorFactory.get(
+			options.blobStorageConnectorType ?? "blob-storage"
 		);
 
 		this._identityConnector = IdentityConnectorFactory.get(
@@ -202,7 +235,9 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 				SynchronisedStorageService._DEFAULT_CONSOLIDATION_INTERVAL_MINUTES,
 			consolidationBatchSize:
 				options.config.consolidationBatchSize ??
-				SynchronisedStorageService._DEFAULT_CONSOLIDATION_BATCH_SIZE
+				SynchronisedStorageService._DEFAULT_CONSOLIDATION_BATCH_SIZE,
+			blobStorageEncryptionKeyId:
+				options.config.blobStorageEncryptionKeyId ?? "synchronised-storage-blob-encryption-key"
 		};
 
 		// If this is not a trusted node, we need to use a synchronised storage service
@@ -219,11 +254,19 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 				);
 		}
 
+		this._blobStorageHelper = new BlobStorageHelper(
+			this._logging,
+			this._vaultConnector,
+			this._blobStorageConnector,
+			this._config.blobStorageEncryptionKeyId,
+			this._config.isTrustedNode
+		);
+
 		this._changeSetHelper = new ChangeSetHelper<T>(
 			this._logging,
 			this._eventBusComponent,
-			this._blobStorageComponent,
 			this._identityConnector,
+			this._blobStorageHelper,
 			this._config.synchronisedStorageMethodId
 		);
 
@@ -236,10 +279,11 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 		this._remoteSyncStateHelper = new RemoteSyncStateHelper<T>(
 			this._logging,
 			this._eventBusComponent,
-			this._blobStorageComponent,
 			this._verifiableSyncPointerStorageConnector,
+			this._blobStorageHelper,
 			this._changeSetHelper,
-			this._config.synchronisedStorageKey
+			this._config.synchronisedStorageKey,
+			this._config.isTrustedNode
 		);
 
 		this._serviceStarted = false;
@@ -247,7 +291,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 
 		this._eventBusComponent.subscribe<ISyncRegisterStorageKey>(
 			SynchronisedStorageTopics.RegisterStorageKey,
-			async event => this.registerType(event.data)
+			async event => this.registerStorageKey(event.data)
 		);
 
 		this._eventBusComponent.subscribe<ISyncItemChange>(
@@ -277,7 +321,29 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	): Promise<void> {
 		this._nodeIdentity = nodeIdentity;
 		this._remoteSyncStateHelper.setNodeIdentity(nodeIdentity);
+		this._changeSetHelper.setNodeIdentity(nodeIdentity);
 		this._serviceStarted = true;
+
+		// If this is not a trusted node we need to request the decryption key from a trusted node
+		if (!this._config.isTrustedNode && !Is.empty(this._trustedSynchronisedStorageComponent)) {
+			const proof = await this._identityConnector.createProof(
+				this._nodeIdentity,
+				DocumentHelper.joinId(this._nodeIdentity, this._config.synchronisedStorageMethodId),
+				ProofTypes.DataIntegrityProof,
+				{ nodeIdentity }
+			);
+
+			const decryptionKey = await this._trustedSynchronisedStorageComponent.getDecryptionKey(
+				this._nodeIdentity,
+				proof
+			);
+
+			// We don't have the private key so instead we store the key as a secret in the vault
+			await this._vaultConnector.setSecret<string>(
+				this._config.blobStorageEncryptionKeyId,
+				decryptionKey
+			);
+		}
 
 		// If there are already storage keys registered, we need to activate them
 		for (const storageKey in this._activeStorageKeys) {
@@ -305,17 +371,60 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	}
 
 	/**
-	 * Synchronise a complete set of changes, assumes this is a trusted node.
-	 * @param changeSetStorageId The id of the change set to synchronise in blob storage.
-	 * @returns Nothing.
+	 * Get the decryption key for the synchronised storage.
+	 * This is used to decrypt the data stored in the synchronised storage.
+	 * @param nodeIdentity The identity of the node requesting the decryption key.
+	 * @param proof The proof of the request so we know the request is from the specified node.
+	 * @returns The decryption key.
 	 */
-	public async syncChangeSet(changeSetStorageId: string): Promise<void> {
+	public async getDecryptionKey(nodeIdentity: string, proof: IProof): Promise<string> {
 		if (!this._config.isTrustedNode) {
 			throw new GeneralError(this.CLASS_NAME, "notTrustedNode");
 		}
 
-		// This method is called by non trusted nodes to synchronise changes
-		Guards.stringValue(this.CLASS_NAME, nameof(changeSetStorageId), changeSetStorageId);
+		Guards.stringValue(this.CLASS_NAME, nameof(nodeIdentity), nodeIdentity);
+		Guards.object<IProof>(this.CLASS_NAME, nameof(proof), proof);
+
+		const isValid = await this._identityConnector.verifyProof(
+			{ nodeIdentity } as unknown as IJsonLdNodeObject,
+			proof
+		);
+
+		if (!isValid) {
+			throw new UnauthorizedError(this.CLASS_NAME, "invalidProof");
+		}
+
+		// TODO: We need to check if the node has permissions to access the decryption key
+		// using rights-management
+		const key = await this._vaultConnector.getKey(this._config.blobStorageEncryptionKeyId);
+
+		if (Is.undefined(key.publicKey)) {
+			throw new UnauthorizedError(this.CLASS_NAME, "decryptionKeyNotFound");
+		}
+
+		return Converter.bytesToBase64(key.publicKey);
+	}
+
+	/**
+	 * Synchronise a set of changes from an untrusted node, assumes this is a trusted node.
+	 * @param syncChangeSet The change set to synchronise.
+	 * @returns Nothing.
+	 */
+	public async syncChangeSet(syncChangeSet: ISyncChangeSet<T>): Promise<void> {
+		if (!this._config.isTrustedNode) {
+			throw new GeneralError(this.CLASS_NAME, "notTrustedNode");
+		}
+
+		Guards.object<ISyncChangeSet>(this.CLASS_NAME, nameof(syncChangeSet), syncChangeSet);
+
+		await this._logging?.log({
+			level: "info",
+			source: this.CLASS_NAME,
+			message: "syncChangeSetForRemoteNode",
+			data: {
+				changeSetStorageId: syncChangeSet.id
+			}
+		});
 
 		// TODO: The change set has a proof signed by the originating node identity
 		// The proof is verified that the change set is valid and has not been tampered with.
@@ -323,12 +432,16 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 		// to store the change set in the synchronised storage.
 		// This will be performed using rights-management
 
-		const changeSet = await this._changeSetHelper.getAndApplyChangeset(changeSetStorageId);
+		const copy = await this._changeSetHelper.copyChangeset(syncChangeSet);
 
-		if (!Is.empty(changeSet)) {
+		if (!Is.empty(copy) && Is.stringValue(this._nodeIdentity)) {
+			// Apply the changes to this node
+			await this._changeSetHelper.applyChangeset(copy.syncChangeSet);
+
+			// And update the sync state with the latest changes
 			await this._remoteSyncStateHelper.addChangeSetToSyncState(
-				changeSet.storageKey,
-				changeSetStorageId
+				copy.syncChangeSet.storageKey,
+				copy.changeSetStorageId
 			);
 		}
 	}
@@ -417,41 +530,56 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 		const localChangeSnapshot = await this._localSyncStateHelper.getLocalChangeSnapshot(storageKey);
 
 		if (Is.arrayValue(localChangeSnapshot.changes)) {
-			await this._remoteSyncStateHelper.createAndStoreChangeSet(
+			await this._remoteSyncStateHelper.buildChangeSet(
 				storageKey,
 				localChangeSnapshot.changes,
-				async changeSetStorageId => {
-					if (Is.stringValue(changeSetStorageId)) {
+				async (syncChangeSet, changeSetStorageId) => {
+					if (Is.empty(syncChangeSet) && Is.empty(changeSetStorageId)) {
 						await this._logging?.log({
 							level: "info",
 							source: this.CLASS_NAME,
-							message: "createdStorageChangeSet",
+							message: "builtStorageChangeSetNone",
+							data: {
+								storageKey
+							}
+						});
+					} else {
+						await this._logging?.log({
+							level: "info",
+							source: this.CLASS_NAME,
+							message: "builtStorageChangeSet",
 							data: {
 								storageKey,
 								changeSetStorageId
 							}
 						});
 						// Send the local changes to the remote storage if we are a trusted node
-						if (this._config.isTrustedNode) {
+						if (this._config.isTrustedNode && Is.stringValue(changeSetStorageId)) {
+							// If we are a trusted node, we can add the change set to the sync state
+							// and remove the local change snapshot
 							await this._remoteSyncStateHelper.addChangeSetToSyncState(
 								storageKey,
 								changeSetStorageId
 							);
 							await this._localSyncStateHelper.removeLocalChangeSnapshot(localChangeSnapshot);
-						} else if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
+						} else if (
+							!Is.empty(this._trustedSynchronisedStorageComponent) &&
+							Is.object(syncChangeSet)
+						) {
 							// If we are not a trusted node, we need to send the changes to the trusted node
-							await this._trustedSynchronisedStorageComponent.syncChangeSet(changeSetStorageId);
+							// and then remove the local change snapshot
+							await this._logging?.log({
+								level: "info",
+								source: this.CLASS_NAME,
+								message: "sendingChangeSetToTrustedNode",
+								data: {
+									storageKey,
+									changeSetStorageId
+								}
+							});
+							await this._trustedSynchronisedStorageComponent.syncChangeSet(syncChangeSet);
 							await this._localSyncStateHelper.removeLocalChangeSnapshot(localChangeSnapshot);
 						}
-					} else {
-						await this._logging?.log({
-							level: "info",
-							source: this.CLASS_NAME,
-							message: "createdStorageChangeSetNone",
-							data: {
-								storageKey
-							}
-						});
 					}
 				}
 			);
@@ -508,24 +636,24 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 
 	/**
 	 * Register a new sync type.
-	 * @param syncRegisterType The sync register type to register.
+	 * @param syncRegisterStorageKey The sync register type to register.
 	 * @internal
 	 */
-	private async registerType(syncRegisterType: ISyncRegisterStorageKey): Promise<void> {
+	private async registerStorageKey(syncRegisterStorageKey: ISyncRegisterStorageKey): Promise<void> {
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
-			message: "registerType",
+			message: "registerStorageKey",
 			data: {
-				storageKey: syncRegisterType.storageKey
+				storageKey: syncRegisterStorageKey.storageKey
 			}
 		});
 
-		if (Is.empty(this._activeStorageKeys[syncRegisterType.storageKey])) {
-			this._activeStorageKeys[syncRegisterType.storageKey] = false;
+		if (Is.empty(this._activeStorageKeys[syncRegisterStorageKey.storageKey])) {
+			this._activeStorageKeys[syncRegisterStorageKey.storageKey] = false;
 
 			if (this._serviceStarted) {
-				await this.activateStorageKey(syncRegisterType.storageKey);
+				await this.activateStorageKey(syncRegisterStorageKey.storageKey);
 			}
 		}
 	}
@@ -540,7 +668,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 			await this._logging?.log({
 				level: "info",
 				source: this.CLASS_NAME,
-				message: "activateType",
+				message: "activateStorageKey",
 				data: {
 					storageKey
 				}

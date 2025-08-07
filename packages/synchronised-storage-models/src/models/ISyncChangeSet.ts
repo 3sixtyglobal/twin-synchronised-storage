@@ -1,15 +1,15 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import type { IProof } from "@twin.org/standards-w3c-did";
-import type { ISynchronisedEntity } from "@twin.org/synchronised-storage-models";
 import type { ISyncChange } from "./ISyncChange";
+import type { ISynchronisedEntity } from "./ISynchronisedEntity";
 
 /**
  * The object definition for a sync change set.
  */
 export interface ISyncChangeSet<T extends ISynchronisedEntity = ISynchronisedEntity> {
 	/**
-	 * The id of the snapshot.
+	 * The id of the change set.
 	 */
 	id: string;
 

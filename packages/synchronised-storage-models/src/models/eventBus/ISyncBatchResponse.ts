@@ -12,11 +12,6 @@ export interface ISyncBatchResponse<T extends ISynchronisedEntity> {
 	storageKey: string;
 
 	/**
-	 * The primary key of the entity in the sync item response.
-	 */
-	primaryKey: keyof T;
-
-	/**
 	 * The entities in the batch.
 	 */
 	entities: T[];

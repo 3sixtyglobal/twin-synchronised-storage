@@ -6,6 +6,11 @@
  */
 export interface ISynchronisedEntity {
 	/**
+	 * The id of the entry.
+	 */
+	id: string;
+
+	/**
 	 * The date the entry was modified
 	 */
 	dateModified: string;

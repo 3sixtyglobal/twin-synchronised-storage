@@ -10,5 +10,12 @@
 		{
 			"packageRoot": "./"
 		}
-	]
+	],
+	"externalReferences": {
+		"Did(.*?)": "https://schema.twindev.org/w3c-did/Did$1",
+		"ProofTypes": "https://schema.twindev.org/w3c-did/ProofTypes",
+		"Proof": "https://schema.twindev.org/w3c-did/Proof",
+		"DataIntegrityProof": "https://schema.twindev.org/w3c-did/DataIntegrityProof",
+		"JsonWebSignature2020Proof": "https://schema.twindev.org/w3c-did/JsonWebSignature2020Proof"
+	}
 }

@@ -6,7 +6,7 @@ The object definition for a sync change set.
 
 ### T
 
-`T` *extends* `ISynchronisedEntity` = `ISynchronisedEntity`
+`T` *extends* [`ISynchronisedEntity`](ISynchronisedEntity.md) = [`ISynchronisedEntity`](ISynchronisedEntity.md)
 
 ## Properties
 
@@ -14,7 +14,7 @@ The object definition for a sync change set.
 
 > **id**: `string`
 
-The id of the snapshot.
+The id of the change set.
 
 ***
 

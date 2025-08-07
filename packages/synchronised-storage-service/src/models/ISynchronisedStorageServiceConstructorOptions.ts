@@ -17,16 +17,21 @@ export interface ISynchronisedStorageServiceConstructorOptions {
 	eventBusComponentType?: string;
 
 	/**
+	 * The vault connector type.
+	 */
+	vaultConnectorType?: string;
+
+	/**
 	 * The entity storage connector type to use for sync snapshots.
 	 * @default sync-snapshot-entry
 	 */
 	syncSnapshotStorageConnectorType?: string;
 
 	/**
-	 * The blob storage component used for remote sync state.
+	 * The blob storage connector used for remote sync state.
 	 * @default blob-storage
 	 */
-	blobStorageComponentType?: string;
+	blobStorageConnectorType?: string;
 
 	/**
 	 * The verifiable storage connector type to use for decentralised state.
