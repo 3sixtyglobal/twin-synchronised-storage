@@ -48,6 +48,7 @@
 		"@twin.org/web": "next"
 	},
 	"devDependencies": {
+		"@rollup/plugin-json": "6.1.0",
 		"@twin.org/background-task-scheduler": "next",
 		"@twin.org/blob-storage-connector-memory": "next",
 		"@twin.org/blob-storage-service": "next",

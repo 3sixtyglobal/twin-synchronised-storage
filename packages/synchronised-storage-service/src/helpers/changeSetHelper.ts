@@ -245,6 +245,35 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 			});
 			return false;
 		}
+
+		// If the proof or verification method is missing, the proof is invalid
+		const verificationMethod = syncChangeset.proof?.verificationMethod;
+		if (!Is.stringValue(verificationMethod)) {
+			await this._logging?.log({
+				level: "error",
+				source: this.CLASS_NAME,
+				message: "verifyChangeSetProofMissing",
+				data: {
+					id: syncChangeset.id
+				}
+			});
+		}
+
+		// Parse the verification method and extract the node identity
+		// this should match the node identity of the changeset
+		// otherwise you could sign a changeset for another node
+		const changeSetNodeIdentity = DocumentHelper.parseId(verificationMethod ?? "");
+		if (changeSetNodeIdentity.id !== syncChangeset.nodeIdentity) {
+			await this._logging?.log({
+				level: "error",
+				source: this.CLASS_NAME,
+				message: "verifyChangeSetProofNodeIdentityMismatch",
+				data: {
+					id: syncChangeset.id
+				}
+			});
+		}
+
 		const changeSetWithoutProof = ObjectHelper.clone(syncChangeset);
 		delete changeSetWithoutProof.proof;
 

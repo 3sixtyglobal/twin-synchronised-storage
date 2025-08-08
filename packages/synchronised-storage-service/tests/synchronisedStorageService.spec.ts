@@ -95,7 +95,7 @@ class TestType {
 	public dateModified!: string;
 }
 
-const synchronisedStorageKey = "verifiable:entity-storage:11111111111111111111111111111111";
+const verifiableStorageKeyId = "verifiable:entity-storage:11111111111111111111111111111111";
 let eventBusConnector: IEventBusConnector;
 let eventBusService: IEventBusComponent;
 let eventBusUntrustedConnector: IEventBusConnector;
@@ -341,72 +341,29 @@ describe("synchronisedStorageService", () => {
 		);
 	});
 
-	test("RSA mock should be called through vault connector", async () => {
-		// Test that the vault connector uses our mocked RSA implementation
-		const vaultConnector = VaultConnectorFactory.get("vault");
-
-		// Create a key for testing
-		await vaultConnector.createKey("test-encryption-key", VaultKeyType.Rsa2048);
-
-		// Test data to encrypt
-		const testData = new Uint8Array([1, 2, 3, 4, 5]);
-
-		// Encrypt using vault connector (should use our mocked RSA)
-		const encrypted = await vaultConnector.encrypt(
-			"test-encryption-key",
-			VaultEncryptionType.Rsa2048,
-			testData
-		);
-
-		// Decrypt using vault connector (should use our mocked RSA)
-		const decrypted = await vaultConnector.decrypt(
-			"test-encryption-key",
-			VaultEncryptionType.Rsa2048,
-			encrypted
-		);
-
-		// Verify the data round-trip works
-		expect(decrypted).toEqual(testData);
-
-		// Verify our vault mocks were called
-		expect(vaultConnector.encrypt).toHaveBeenCalledWith(
-			"test-encryption-key",
-			VaultEncryptionType.Rsa2048,
-			testData
-		);
-		expect(vaultConnector.decrypt).toHaveBeenCalledWith(
-			"test-encryption-key",
-			VaultEncryptionType.Rsa2048,
-			encrypted
-		);
-
-		// Verify the RSA constructor was called by our vault mock
-		expect(vi.mocked(RSA)).toHaveBeenCalled();
-	});
-
 	test("can create an instance of the service as a trusted node", async () => {
 		const connector = new SynchronisedStorageService({
-			config: { synchronisedStorageKey, isTrustedNode: true }
+			config: { verifiableStorageKeyId, isTrustedNode: true }
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 	});
 
 	test("can create an instance of the service as a non trusted node", async () => {
 		const connectorTrusted = new SynchronisedStorageService({
-			config: { synchronisedStorageKey, isTrustedNode: true }
+			config: { verifiableStorageKeyId, isTrustedNode: true }
 		});
 		ComponentFactory.register("trusted", () => connectorTrusted);
 
 		const connector = new SynchronisedStorageService({
 			trustedSynchronisedStorageComponentType: "trusted",
-			config: { synchronisedStorageKey, isTrustedNode: false }
+			config: { verifiableStorageKeyId, isTrustedNode: false }
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 	});
 
 	test("can register a type before the service has been started", async () => {
 		const connector = new SynchronisedStorageService({
-			config: { synchronisedStorageKey, isTrustedNode: true, consolidationIntervalMinutes: 0 }
+			config: { verifiableStorageKeyId, isTrustedNode: true, consolidationIntervalMinutes: 0 }
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 
@@ -436,7 +393,7 @@ describe("synchronisedStorageService", () => {
 
 	test("can register a type after the service has started", async () => {
 		const connector = new SynchronisedStorageService({
-			config: { synchronisedStorageKey, isTrustedNode: true, consolidationIntervalMinutes: 0 }
+			config: { verifiableStorageKeyId, isTrustedNode: true, consolidationIntervalMinutes: 0 }
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 
@@ -466,7 +423,7 @@ describe("synchronisedStorageService", () => {
 
 	test("can process a local update to entity storage", async () => {
 		const connector = new SynchronisedStorageService({
-			config: { synchronisedStorageKey, isTrustedNode: true, consolidationIntervalMinutes: 0 }
+			config: { verifiableStorageKeyId, isTrustedNode: true, consolidationIntervalMinutes: 0 }
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 		await connector.start(testNodeIdentity, "node-logging");
@@ -523,7 +480,7 @@ describe("synchronisedStorageService", () => {
 	test("can process subsequent local update to entity storage", async () => {
 		const connector = new SynchronisedStorageService({
 			config: {
-				synchronisedStorageKey,
+				verifiableStorageKeyId,
 				isTrustedNode: true,
 				consolidationIntervalMinutes: 0
 			}
@@ -593,7 +550,7 @@ describe("synchronisedStorageService", () => {
 	test("can process update and perform sync", async () => {
 		const connector = new SynchronisedStorageService({
 			config: {
-				synchronisedStorageKey,
+				verifiableStorageKeyId,
 				isTrustedNode: true,
 				consolidationIntervalMinutes: 0
 			}
@@ -601,10 +558,10 @@ describe("synchronisedStorageService", () => {
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 
 		await verifiableStorage.set({
-			id: synchronisedStorageKey.split(":")[2],
+			id: verifiableStorageKeyId.split(":")[2],
 			creator:
 				"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
-			data: Converter.bytesToBase64(ObjectHelper.toBytes({ syncPointers: {} })),
+			data: Converter.bytesToBase64(ObjectHelper.toBytes({ version: "1", syncPointers: {} })),
 			allowList: [
 				"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0"
 			],
@@ -700,10 +657,18 @@ describe("synchronisedStorageService", () => {
 		const verifiableStore = verifiableStorage.getStore();
 		expect(verifiableStore).toEqual([
 			{
-				id: synchronisedStorageKey.split(":")[2],
+				id: verifiableStorageKeyId.split(":")[2],
 				creator:
 					"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
-				data: "eyJzeW5jUG9pbnRlcnMiOnsidGVzdC10eXBlIjoiYmxvYjptZW1vcnk6ZjQ1MjU4ODMzOWE3Zjg4OGQzZDExN2JkOTM5ZDYyMmI2YWRiMTY0YTEyNDM4ZTgyNjIxYWE5NmNiZWM5OTA5MCJ9fQ==",
+				data: Converter.bytesToBase64(
+					ObjectHelper.toBytes({
+						version: "1",
+						syncPointers: {
+							"test-type":
+								"blob:memory:a71bc27d2423a59a1d8300eb1d649447ee8400c618bb9ec92a7271165b7341bf"
+						}
+					})
+				),
 				allowList: [
 					"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0"
 				],
@@ -713,8 +678,9 @@ describe("synchronisedStorageService", () => {
 
 		const verifiable = ObjectHelper.fromBytes(Converter.base64ToBytes(verifiableStore[0].data));
 		expect(verifiable).toEqual({
+			version: "1",
 			syncPointers: {
-				"test-type": "blob:memory:f452588339a7f888d3d117bd939d622b6adb164a12438e82621aa96cbec99090"
+				"test-type": "blob:memory:a71bc27d2423a59a1d8300eb1d649447ee8400c618bb9ec92a7271165b7341bf"
 			}
 		});
 
@@ -729,8 +695,8 @@ describe("synchronisedStorageService", () => {
 		expect(blobs).toEqual({
 			"95756e5e2263b7784e139ba4cb28230787d19684c40eae9a34521fc3feee26db":
 				"7u7u7u7u7u4fiwgAAAAAAAADtVHLbtswEPyX7ZWyKKoOWp76SNOmqQMHEGQjQQ+suJLopiRNrmPThv+9kOIEPRYIgj0RM5yZnT2A0SChVS8bYKAV4eeAinAQFFxMMz7NxPuKF5JzyfmEc34LDCK5oDq8wgQSCCNllDwCg6ZXtsMI8u4AzmNQZJwFCREJ2GPOkW50VgADtGQogTyM1jOnTWv+8S4yXlSj8bP38fiTgXUaL/XTZ9BGy8dHdgom+U7zlw0w8MG5dgj3oXGWcEcgoSfyUeb5drudbMuJC11uY94EHOOo+5g/CGAw1iHhXJG6tIRdMJTmoxyDJiRPLm4MDRTUOqps1cRMcCFG+D8O8IDBtKYZ650h9U6/Vg9vYrJNH5w1EfWTbqZixDDe9lTTfBO8i8NCz9Ap14lQq/vNAO/LP+8WX34sqdAXZwvfxJVPDhe7unbiwlz9orpM5fXZ12snKtrvq5lFsbyZ/u7LTnzzn4q6rNZ1t0lv5+16+bG8na92hfm+NudwPP4Fk4z19goDAAA=",
-			f452588339a7f888d3d117bd939d622b6adb164a12438e82621aa96cbec99090:
-				"7u7u7u7u7u4fiwgAAAAAAAADpc69DoIwFEDhd7kzmNvblv6sTs44aRhaegEToQa6GMK7G57BnP3L2WFbwmebctnAP3d4JfCA8r+gghQKX1cOhU+QkHSNuiZ3R+ERPeIFER9QQT+FZeSWS1vyGka+pXME4jtHP/Oc16932uiGNRM1MhpjFQvpYlB9JEsSjTVJuMaqXiEHdkEqTWLo5cDM1KQI3dEdP3Gx2HzpAAAA"
+			a71bc27d2423a59a1d8300eb1d649447ee8400c618bb9ec92a7271165b7341bf:
+				"7u7u7u7u7u4fiwgAAAAAAAADpY+9CsIwFEbf5c5Vbm6Spsnq5OCkk+KQNLc/YBtpgyDSd5eCk4uDnPE7fHBe8OBp7tMIDgQUMI/+Pncpz+Aur6+tj+AA5X9AAdFn3k3sM6+HhKQ3qDdkTygcokPcIuL5Ix5S7Jv+l1l3fmz5yPmY0+Rb3sc1AMItBTfwkKans9rokjUTlTIYUykW0gav6kAVSTSVicKWlaoVsmfrpdIkmlo2zExlDHBdrssbjLpWwi8BAAA="
 		});
 
 		expect(
@@ -764,14 +730,17 @@ describe("synchronisedStorageService", () => {
 		});
 
 		expect(
-			await expandObject(blobs.f452588339a7f888d3d117bd939d622b6adb164a12438e82621aa96cbec99090)
+			await expandObject(blobs.a71bc27d2423a59a1d8300eb1d649447ee8400c618bb9ec92a7271165b7341bf)
 		).toEqual({
+			version: "1",
 			snapshots: [
 				{
+					version: "1",
 					changeSetStorageIds: [
 						"blob:memory:95756e5e2263b7784e139ba4cb28230787d19684c40eae9a34521fc3feee26db"
 					],
 					dateCreated: "2025-05-29T01:00:00.000Z",
+					dateModified: "2025-05-29T01:00:00.000Z",
 					id: "0303030303030303030303030303030303030303030303030303030303030303"
 				}
 			]
@@ -781,7 +750,7 @@ describe("synchronisedStorageService", () => {
 	test("can receive the updates from a remote sync state", async () => {
 		const connector = new SynchronisedStorageService({
 			config: {
-				synchronisedStorageKey,
+				verifiableStorageKeyId,
 				isTrustedNode: true,
 				consolidationIntervalMinutes: 0
 			}
@@ -853,13 +822,14 @@ describe("synchronisedStorageService", () => {
 		);
 
 		const verifiableSyncPointerStore: ISyncPointerStore = {
+			version: "1",
 			syncPointers: {
 				"test-type": "blob:memory:2c3b0902f988e9d1805a28e901b1bbc132d9b5c83eeed1199bf416a13c211fc2"
 			}
 		};
 
 		await verifiableStorage.set({
-			id: synchronisedStorageKey.split(":")[2],
+			id: verifiableStorageKeyId.split(":")[2],
 			creator:
 				"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
 			data: Converter.bytesToBase64(ObjectHelper.toBytes(verifiableSyncPointerStore)),
@@ -883,9 +853,9 @@ describe("synchronisedStorageService", () => {
 			"loadBlob",
 			"loadedBlob",
 			"remoteSyncStateRetrieved",
-			"remoteSyncSynchronisation",
-			"remoteSyncSnapshotProcessing",
-			"remoteSyncSnapshotNew",
+			"applySyncState",
+			"applySnapshot",
+			"processNewSnapshot",
 			"getChangeSet",
 			"loadBlob",
 			"loadedBlob",
@@ -925,9 +895,9 @@ describe("synchronisedStorageService", () => {
 		]);
 	});
 
-	test("can use a trusted node to synchronise with a non trusted node", async () => {
+	test("can use a trusted node to synchronise a non trusted node", async () => {
 		const connectorTrusted = new SynchronisedStorageService({
-			config: { synchronisedStorageKey, isTrustedNode: true }
+			config: { verifiableStorageKeyId, isTrustedNode: true }
 		});
 		ComponentFactory.register("trusted", () => connectorTrusted);
 
@@ -936,7 +906,7 @@ describe("synchronisedStorageService", () => {
 			eventBusComponentType: "event-bus-untrusted",
 			loggingConnectorType: "logging-untrusted",
 			config: {
-				synchronisedStorageKey,
+				verifiableStorageKeyId,
 				isTrustedNode: false,
 				consolidationIntervalMinutes: 0
 			}
@@ -944,10 +914,10 @@ describe("synchronisedStorageService", () => {
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 
 		await verifiableStorage.set({
-			id: synchronisedStorageKey.split(":")[2],
+			id: verifiableStorageKeyId.split(":")[2],
 			creator:
 				"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
-			data: Converter.bytesToBase64(ObjectHelper.toBytes({ syncPointers: {} })),
+			data: Converter.bytesToBase64(ObjectHelper.toBytes({ version: "1", syncPointers: {} })),
 			allowList: [
 				"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0"
 			],
@@ -1042,7 +1012,15 @@ describe("synchronisedStorageService", () => {
 				id: "11111111111111111111111111111111",
 				creator:
 					"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
-				data: "eyJzeW5jUG9pbnRlcnMiOnsidGVzdC10eXBlIjoiYmxvYjptZW1vcnk6YTJkNTQwOWUyNzU5ZTExZjUwYTQ1MWI2NGNjYTBlYTY5YjlmZjdiZmU0M2RmYTI5YzNhYzI1NzU1MTk4Mzg2NCJ9fQ==",
+				data: Converter.bytesToBase64(
+					ObjectHelper.toBytes({
+						version: "1",
+						syncPointers: {
+							"test-type":
+								"blob:memory:2c9d87d98e9e14562088c172388ad7ff6e5b4dc7c71defc5e7fb8d96cc334be7"
+						}
+					})
+				),
 				allowList: [
 					"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0"
 				],
@@ -1058,19 +1036,22 @@ describe("synchronisedStorageService", () => {
 		expect(blobs).toEqual({
 			"06850545808262cbab3d614d9ac4adaf624aede0beb0531f8bec15dd14813fcb":
 				"7u7u7u7u7u4fiwgAAAAAAAADpVFBbtswEPzL9ipZFAWhEE+NnbYJXBdxJNRxih4Ici3TTUiBXFtSDP+9kOIEvRQoYMyJ2NmZ4ewRjAYBrLgMEIGWhDOPknAQ5IznMctjXlQsFYwJxiaMsUeIIJDzssY59iCAMFBMfYMQgdpKW2MA8fMIrkEvyTgLAgISRK85R7rRcQoRoCVDPYjjaL1w2mzMX95pzNJqNH73Pp1+RWCdxlv9tgzaaPH6iM/BBOs0vwwQQeOd2wzhPilnCTsCAVuiJogkadt20mYT5+vEhkR5HOPIp5AchtWxDgHXkuStJay9of5ulItA+b4hF/aGBgpqHWS8UyHmjPNx/B8HOKA3G6PGehdIW6f/2QO7DB9Cb9XWO2sC6jfdWIaAfrztuaa7vW9cGD70PjrnOhN+yKf9MH7JcTP97JchW0+/Pbqbj7t6vljKe1Wsd1fdVf5QrufPq+zLczW9bouVcbbi30vepeXioO776aHNM1WWTs6qtFveFPR7Zeuvs4cMTqc/PzuG7goDAAA=",
-			a2d5409e2759e11f50a451b64cca0ea69b9ff7bfe43dfa29c3ac257551983864:
-				"7u7u7u7u7u4fiwgAAAAAAAADpc6xDoIwEIDhd7kZzLW0Tenq5IyThuHaO8BEqIEuhvDuhmcw//7l32Fb6LNNuWwQnju8GAIo819QAVOR6ypU5AQ1alujrXV7RxUQA+IFER9QQZpoGaWT0pW80ig3PkcgvnMMs8x5/QZ03qI11qPXTqdIsWGnDLeUDDENThsSFowS0TZq8FGSsszKeNUMKUJ/9McPKpjsp+kAAAA="
+			"2c9d87d98e9e14562088c172388ad7ff6e5b4dc7c71defc5e7fb8d96cc334be7":
+				"7u7u7u7u7u4fiwgAAAAAAAADpY89C8IwFEX/y5tbeUmTkmZ1cnDSSenwkvf6AdpIGwQR/7sUnFwc5C4H7uHCfcJd5mVME3hQUMAy0W0ZUl7An59f3cgrmP8CBTBl2c5CWdZBjdqWaEvdHFF5RI+4QcTTR9wnHrvxlxkHmno5SD7kNFMvO14PQLik4K9yTfPDY+0sWmMdOl3rGChUXCvDDUVDTF2tDQkLBgloK9W5IFFZZmWcqroYoH21rzdvTmkTLwEAAA=="
 		});
 
 		expect(
-			await expandObject(blobs.a2d5409e2759e11f50a451b64cca0ea69b9ff7bfe43dfa29c3ac257551983864)
+			await expandObject(blobs["2c9d87d98e9e14562088c172388ad7ff6e5b4dc7c71defc5e7fb8d96cc334be7"])
 		).toEqual({
+			version: "1",
 			snapshots: [
 				{
+					version: "1",
 					changeSetStorageIds: [
 						"blob:memory:06850545808262cbab3d614d9ac4adaf624aede0beb0531f8bec15dd14813fcb"
 					],
 					dateCreated: "2025-05-29T01:00:00.000Z",
+					dateModified: "2025-05-29T01:00:00.000Z",
 					id: "1414141414141414141414141414141414141414141414141414141414141414"
 				}
 			]

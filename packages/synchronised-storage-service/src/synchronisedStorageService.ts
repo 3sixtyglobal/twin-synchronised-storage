@@ -41,6 +41,7 @@ import {
 	type IVerifiableStorageConnector,
 	VerifiableStorageConnectorFactory
 } from "@twin.org/verifiable-storage-models";
+import verifiableStorageKeys from "./data/verifiableStorageKeys.json";
 import type { SyncSnapshotEntry } from "./entities/syncSnapshotEntry";
 import { BlobStorageHelper } from "./helpers/blobStorageHelper";
 import { ChangeSetHelper } from "./helpers/changeSetHelper";
@@ -165,6 +166,12 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	private readonly _config: Required<ISynchronisedStorageServiceConfig>;
 
 	/**
+	 * The synchronised storage key to use for the remote synchronised storage.
+	 * @internal
+	 */
+	private readonly _synchronisedStorageKey: string;
+
+	/**
 	 * The flag to determine if the service has been started.
 	 * @internal
 	 */
@@ -223,7 +230,6 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 		);
 
 		this._config = {
-			synchronisedStorageKey: options.config.synchronisedStorageKey,
 			synchronisedStorageMethodId:
 				options.config.synchronisedStorageMethodId ?? "synchronised-storage-assertion",
 			entityUpdateIntervalMinutes:
@@ -237,8 +243,14 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 				options.config.consolidationBatchSize ??
 				SynchronisedStorageService._DEFAULT_CONSOLIDATION_BATCH_SIZE,
 			blobStorageEncryptionKeyId:
-				options.config.blobStorageEncryptionKeyId ?? "synchronised-storage-blob-encryption-key"
+				options.config.blobStorageEncryptionKeyId ?? "synchronised-storage-blob-encryption-key",
+			verifiableStorageKeyId: options.config.verifiableStorageKeyId
 		};
+
+		this._synchronisedStorageKey =
+			verifiableStorageKeys[
+				options.config.verifiableStorageKeyId as keyof typeof verifiableStorageKeys
+			] ?? options.config.verifiableStorageKeyId;
 
 		// If this is not a trusted node, we need to use a synchronised storage service
 		// to synchronise with a trusted node.
@@ -282,7 +294,6 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 			this._verifiableSyncPointerStorageConnector,
 			this._blobStorageHelper,
 			this._changeSetHelper,
-			this._config.synchronisedStorageKey,
 			this._config.isTrustedNode
 		);
 
@@ -322,6 +333,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 		this._nodeIdentity = nodeIdentity;
 		this._remoteSyncStateHelper.setNodeIdentity(nodeIdentity);
 		this._changeSetHelper.setNodeIdentity(nodeIdentity);
+		this._remoteSyncStateHelper.setSynchronisedStorageKey(this._synchronisedStorageKey);
 		this._serviceStarted = true;
 
 		// If this is not a trusted node we need to request the decryption key from a trusted node
@@ -507,7 +519,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 
 			// If we got the sync state we can try and sync from it
 			if (!Is.undefined(remoteSyncState)) {
-				await this._localSyncStateHelper.syncFromRemote(storageKey, remoteSyncState);
+				await this._localSyncStateHelper.applySyncState(storageKey, remoteSyncState);
 			}
 		}
 	}
@@ -604,22 +616,21 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	private async startConsolidationSync(storageKey: string): Promise<void> {
 		let localChangeSnapshot: SyncSnapshotEntry<T> | undefined;
 		try {
-			// If we are performing a consolidation, we can remove the local changes
-			await this._localSyncStateHelper.getLocalChangeSnapshot(storageKey);
+			// If we are performing a consolidation, we can remove the local change snapshot
+			// as we are going to create a complete changeset from the DB
+			localChangeSnapshot = await this._localSyncStateHelper.getLocalChangeSnapshot(storageKey);
 			if (!Is.empty(localChangeSnapshot)) {
 				await this._localSyncStateHelper.removeLocalChangeSnapshot(localChangeSnapshot);
 			}
 
-			if (Is.stringValue(this._nodeIdentity)) {
-				await this._remoteSyncStateHelper.consolidateFromLocal(
-					storageKey,
-					this._config.consolidationBatchSize ??
-						SynchronisedStorageService._DEFAULT_CONSOLIDATION_BATCH_SIZE
-				);
+			await this._remoteSyncStateHelper.consolidationStart(
+				storageKey,
+				this._config.consolidationBatchSize ??
+					SynchronisedStorageService._DEFAULT_CONSOLIDATION_BATCH_SIZE
+			);
 
-				// The consolidation was successful, so we can remove the local change snapshot permanently
-				localChangeSnapshot = undefined;
-			}
+			// The consolidation was successful, so we can remove the local change snapshot permanently
+			localChangeSnapshot = undefined;
 		} catch (error) {
 			if (localChangeSnapshot) {
 				// If the consolidation failed, we can keep the local change snapshot

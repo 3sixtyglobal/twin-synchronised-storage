@@ -4,6 +4,14 @@ The object definition for the sync pointer store.
 
 ## Properties
 
+### version
+
+> **version**: `string`
+
+The version of the sync pointer store.
+
+***
+
 ### syncPointers
 
 > **syncPointers**: `object`

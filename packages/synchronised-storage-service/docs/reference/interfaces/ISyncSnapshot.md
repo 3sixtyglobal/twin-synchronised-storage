@@ -4,6 +4,14 @@ The object definition for a sync snapshot.
 
 ## Properties
 
+### version
+
+> **version**: `string`
+
+The version of the sync state.
+
+***
+
 ### id
 
 > **id**: `string`
@@ -20,9 +28,9 @@ The date the snapshot was created.
 
 ***
 
-### dateModified?
+### dateModified
 
-> `optional` **dateModified**: `string`
+> **dateModified**: `string`
 
 The date the snapshot was last modified.
 

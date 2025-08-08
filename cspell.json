@@ -21,10 +21,13 @@
 		"abbrev",
 		"autorelease",
 		"cryptosuite",
+		"devnet",
 		"eddsa",
+		"IPFS",
 		"nameof",
 		"openapi",
 		"Odrl",
+		"SPKI",
 		"Stiftung"
 	],
 	"ignoreRegExpList": [

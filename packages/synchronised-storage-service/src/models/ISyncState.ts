@@ -7,6 +7,11 @@ import type { ISyncSnapshot } from "./ISyncSnapshot";
  */
 export interface ISyncState {
 	/**
+	 * The version of the sync state.
+	 */
+	version: string;
+
+	/**
 	 * The snapshots.
 	 */
 	snapshots: ISyncSnapshot[];

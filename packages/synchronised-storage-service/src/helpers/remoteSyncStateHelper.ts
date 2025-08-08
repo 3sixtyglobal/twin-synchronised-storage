@@ -24,6 +24,7 @@ import {
 import type { IVerifiableStorageConnector } from "@twin.org/verifiable-storage-models";
 import type { BlobStorageHelper } from "./blobStorageHelper";
 import type { ChangeSetHelper } from "./changeSetHelper";
+import { SYNC_POINTER_STORE_VERSION, SYNC_SNAPSHOT_VERSION, SYNC_STATE_VERSION } from "./versions";
 import type { ISyncPointerStore } from "../models/ISyncPointerStore";
 import type { ISyncSnapshot } from "../models/ISyncSnapshot";
 import type { ISyncState } from "../models/ISyncState";
@@ -90,7 +91,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 * The synchronised storage key to use for verified storage operations.
 	 * @internal
 	 */
-	private readonly _synchronisedStorageKey: string;
+	private _synchronisedStorageKey?: string;
 
 	/**
 	 * The identity of the node that is performing the update.
@@ -111,7 +112,6 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 * @param verifiableSyncPointerStorageConnector The verifiable storage connector to use for storing sync pointers.
 	 * @param blobStorageHelper The blob storage helper to use for remote sync states.
 	 * @param changeSetHelper The change set helper to use for managing changesets.
-	 * @param synchronisedStorageKey The synchronised storage key to use for verified storage operations.
 	 * @param isTrustedNode Whether the node is trusted or not.
 	 */
 	constructor(
@@ -120,7 +120,6 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 		verifiableSyncPointerStorageConnector: IVerifiableStorageConnector,
 		blobStorageHelper: BlobStorageHelper,
 		changeSetHelper: ChangeSetHelper<T>,
-		synchronisedStorageKey: string,
 		isTrustedNode: boolean
 	) {
 		this._logging = logging;
@@ -128,7 +127,6 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 		this._verifiableSyncPointerStorageConnector = verifiableSyncPointerStorageConnector;
 		this._changeSetHelper = changeSetHelper;
 		this._blobStorageHelper = blobStorageHelper;
-		this._synchronisedStorageKey = synchronisedStorageKey;
 		this._isTrustedNode = isTrustedNode;
 
 		this._batchResponseStorageIds = {};
@@ -155,6 +153,14 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 */
 	public setNodeIdentity(nodeIdentity: string): void {
 		this._nodeIdentity = nodeIdentity;
+	}
+
+	/**
+	 * Set the synchronised storage key.
+	 * @param synchronisedStorageKey The synchronised storage key to use.
+	 */
+	public setSynchronisedStorageKey(synchronisedStorageKey: string): void {
+		this._synchronisedStorageKey = synchronisedStorageKey;
 	}
 
 	/**
@@ -316,7 +322,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 
 		// No current sync state, so we create a new one
 		if (Is.empty(syncState)) {
-			syncState = { snapshots: [] };
+			syncState = { version: SYNC_STATE_VERSION, snapshots: [] };
 		}
 
 		// Sort the snapshots so the newest snapshot is last in the array
@@ -326,16 +332,20 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 
 		// Get the current snapshot, if it does not exist we create a new one
 		let currentSnapshot: ISyncSnapshot | undefined = sortedSnapshots[sortedSnapshots.length - 1];
+		const now = new Date(Date.now()).toISOString();
+
 		if (Is.empty(currentSnapshot)) {
 			currentSnapshot = {
+				version: SYNC_SNAPSHOT_VERSION,
 				id: Converter.bytesToHex(RandomHelper.generate(32)),
-				dateCreated: new Date(Date.now()).toISOString(),
+				dateCreated: now,
+				dateModified: now,
 				changeSetStorageIds: []
 			};
 			syncState.snapshots.push(currentSnapshot);
 		} else {
 			// Snapshot exists, we update the dateModified
-			currentSnapshot.dateModified = new Date(Date.now()).toISOString();
+			currentSnapshot.dateModified = now;
 		}
 
 		// Add the changeset storage id to the current snapshot
@@ -354,13 +364,14 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 * @param batchSize The batch size to use for consolidation.
 	 * @returns Nothing.
 	 */
-	public async consolidateFromLocal(storageKey: string, batchSize: number): Promise<void> {
+	public async consolidationStart(storageKey: string, batchSize: number): Promise<void> {
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "consolidationStarting"
 		});
 
+		// Perform a batch request to start the consolidation
 		await this._eventBusComponent.publish<ISyncBatchRequest>(
 			SynchronisedStorageTopics.BatchRequest,
 			{ storageKey, batchSize }
@@ -372,48 +383,51 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 * @returns The sync pointer store.
 	 */
 	public async getVerifiableSyncPointerStore(): Promise<ISyncPointerStore> {
-		try {
-			await this._logging?.log({
-				level: "info",
-				source: this.CLASS_NAME,
-				message: "verifiableSyncPointerStoreRetrieving",
-				data: {
-					key: this._synchronisedStorageKey
-				}
-			});
-			const syncPointerStore = await this._verifiableSyncPointerStorageConnector.get(
-				this._synchronisedStorageKey,
-				{ includeData: true }
-			);
-			if (Is.uint8Array(syncPointerStore.data)) {
-				const syncPointer = ObjectHelper.fromBytes<ISyncPointerStore>(syncPointerStore.data);
+		if (Is.stringValue(this._synchronisedStorageKey)) {
+			try {
 				await this._logging?.log({
 					level: "info",
 					source: this.CLASS_NAME,
-					message: "verifiableSyncPointerStoreRetrieved",
+					message: "verifiableSyncPointerStoreRetrieving",
 					data: {
 						key: this._synchronisedStorageKey
 					}
 				});
-				return syncPointer;
+				const syncPointerStore = await this._verifiableSyncPointerStorageConnector.get(
+					this._synchronisedStorageKey,
+					{ includeData: true }
+				);
+				if (Is.uint8Array(syncPointerStore.data)) {
+					const syncPointer = ObjectHelper.fromBytes<ISyncPointerStore>(syncPointerStore.data);
+					await this._logging?.log({
+						level: "info",
+						source: this.CLASS_NAME,
+						message: "verifiableSyncPointerStoreRetrieved",
+						data: {
+							key: this._synchronisedStorageKey
+						}
+					});
+					return syncPointer;
+				}
+			} catch (err) {
+				if (!BaseError.someErrorName(err, NotFoundError.CLASS_NAME)) {
+					throw err;
+				}
 			}
-		} catch (err) {
-			if (!BaseError.someErrorName(err, NotFoundError.CLASS_NAME)) {
-				throw err;
-			}
-		}
 
-		await this._logging?.log({
-			level: "info",
-			source: this.CLASS_NAME,
-			message: "verifiableSyncPointerStoreNotFound",
-			data: {
-				key: this._synchronisedStorageKey
-			}
-		});
+			await this._logging?.log({
+				level: "info",
+				source: this.CLASS_NAME,
+				message: "verifiableSyncPointerStoreNotFound",
+				data: {
+					key: this._synchronisedStorageKey
+				}
+			});
+		}
 
 		// If no sync pointer store exists, we return an empty one
 		return {
+			version: SYNC_POINTER_STORE_VERSION,
 			syncPointers: {}
 		};
 	}
@@ -424,7 +438,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 * @returns Nothing.
 	 */
 	public async storeVerifiableSyncPointerStore(syncPointerStore: ISyncPointerStore): Promise<void> {
-		if (this._nodeIdentity) {
+		if (Is.stringValue(this._nodeIdentity) && Is.stringValue(this._synchronisedStorageKey)) {
 			await this._logging?.log({
 				level: "info",
 				source: this.CLASS_NAME,
@@ -513,15 +527,18 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	}
 
 	/**
-	 * Handle the batch response.
+	 * Handle the batch response which is triggered from a consolidation request.
 	 * @param response The batch response to handle.
 	 */
 	private async handleBatchResponse(response: ISyncBatchResponse<T>): Promise<void> {
 		if (Is.stringValue(this._nodeIdentity)) {
+			const now = new Date(Date.now()).toISOString();
+
 			// Create a new snapshot entry for the current batch
 			const syncChangeSet: ISyncChangeSet<T> = {
 				id: Converter.bytesToHex(RandomHelper.generate(32)),
-				dateCreated: new Date(Date.now()).toISOString(),
+				dateCreated: now,
+				dateModified: now,
 				changes: response.entities.map(change => ({
 					operation: SyncChangeOperation.Set,
 					id: change.id
@@ -540,12 +557,28 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 			this._batchResponseStorageIds[response.storageKey] ??= [];
 			this._batchResponseStorageIds[response.storageKey].push(changeSetStorageId);
 
+			// If this is the last entry in the batch response, we can create the consolidated snapshot
 			if (response.lastEntry) {
-				const syncState: ISyncState = { snapshots: [] };
+				// Get the current sync pointer store
+				const syncPointerStore = await this.getVerifiableSyncPointerStore();
+
+				let syncState: ISyncState | undefined;
+
+				if (Is.stringValue(syncPointerStore.syncPointers[response.storageKey])) {
+					// If the sync pointer exists, we load the current sync state
+					syncState = await this.getRemoteSyncState(
+						syncPointerStore.syncPointers[response.storageKey]
+					);
+				}
+
+				// If the sync state does not exist, we create a new one
+				syncState ??= { version: SYNC_STATE_VERSION, snapshots: [] };
 
 				const batchSnapshot: ISyncSnapshot = {
+					version: SYNC_SNAPSHOT_VERSION,
 					id: Converter.bytesToHex(RandomHelper.generate(32)),
-					dateCreated: new Date(Date.now()).toISOString(),
+					dateCreated: now,
+					dateModified: now,
 					changeSetStorageIds: this._batchResponseStorageIds[response.storageKey]
 				};
 				syncState.snapshots.push(batchSnapshot);
@@ -553,13 +586,14 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 				// Store the sync state in the blob storage
 				const syncStateId = await this.storeRemoteSyncState(syncState);
 
-				// Get the current sync pointer store
-				const syncPointerStore = await this.getVerifiableSyncPointerStore();
-
 				syncPointerStore.syncPointers[response.storageKey] = syncStateId;
 
 				// Store the verifiable sync pointer in the verifiable storage
 				await this.storeVerifiableSyncPointerStore(syncPointerStore);
+
+				// Remove the batch response storage ids for the storage key
+				// as we have consolidated the changes
+				delete this._batchResponseStorageIds[response.storageKey];
 
 				await this._logging?.log({
 					level: "info",

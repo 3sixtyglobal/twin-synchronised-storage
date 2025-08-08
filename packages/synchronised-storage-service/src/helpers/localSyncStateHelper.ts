@@ -32,9 +32,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	 * The storage connector for the sync snapshot entries.
 	 * @internal
 	 */
-	private readonly _localSyncSnapshotEntryEntityStorage: IEntityStorageConnector<
-		SyncSnapshotEntry<T>
-	>;
+	private readonly _snapshotEntryEntityStorage: IEntityStorageConnector<SyncSnapshotEntry<T>>;
 
 	/**
 	 * The change set helper to use for applying changesets.
@@ -45,16 +43,16 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	/**
 	 * Create a new instance of LocalSyncStateHelper.
 	 * @param logging The logging connector to use for logging.
-	 * @param localSyncSnapshotEntryEntityStorage The storage connector for the local sync snapshot entries.
+	 * @param snapshotEntryEntityStorage The storage connector for the sync snapshot entries.
 	 * @param changeSetHelper The change set helper to use for applying changesets.
 	 */
 	constructor(
 		logging: ILoggingConnector | undefined,
-		localSyncSnapshotEntryEntityStorage: IEntityStorageConnector<SyncSnapshotEntry<T>>,
+		snapshotEntryEntityStorage: IEntityStorageConnector<SyncSnapshotEntry<T>>,
 		changeSetHelper: ChangeSetHelper<T>
 	) {
 		this._logging = logging;
-		this._localSyncSnapshotEntryEntityStorage = localSyncSnapshotEntryEntityStorage;
+		this._snapshotEntryEntityStorage = snapshotEntryEntityStorage;
 		this._changeSetHelper = changeSetHelper;
 	}
 
@@ -103,7 +101,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	}
 
 	/**
-	 * Get the current local snapshot.
+	 * Get the current local snapshot which contains just the changes for this node.
 	 * @param storageKey The storage key of the snapshot to get.
 	 * @returns The local snapshot entry.
 	 */
@@ -117,7 +115,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 			}
 		});
 
-		const queryResult = await this._localSyncSnapshotEntryEntityStorage.query({
+		const queryResult = await this._snapshotEntryEntityStorage.query({
 			conditions: [
 				{
 					property: "isLocalSnapshot",
@@ -162,7 +160,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	}
 
 	/**
-	 * Set the current local snapshot.
+	 * Set the current local snapshot with changes for this node.
 	 * @param localChangeSnapshot The local change snapshot to set.
 	 * @returns Nothing.
 	 */
@@ -175,11 +173,11 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 				storageKey: localChangeSnapshot.storageKey
 			}
 		});
-		await this._localSyncSnapshotEntryEntityStorage.set(localChangeSnapshot);
+		await this._snapshotEntryEntityStorage.set(localChangeSnapshot);
 	}
 
 	/**
-	 * Get the current local snapshot.
+	 * Get the current local snapshot with the changes for this node.
 	 * @param localChangeSnapshot The local change snapshot to remove.
 	 * @returns Nothing.
 	 */
@@ -192,27 +190,27 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 				snapshotId: localChangeSnapshot.id
 			}
 		});
-		await this._localSyncSnapshotEntryEntityStorage.remove(localChangeSnapshot.id);
+		await this._snapshotEntryEntityStorage.remove(localChangeSnapshot.id);
 	}
 
 	/**
-	 * Sync local data using a remote sync state.
+	 * Apply a sync state to the local node.
 	 * @param storageKey The storage key of the snapshot to sync with.
-	 * @param remoteSyncState The sync state to sync with.
+	 * @param syncState The sync state to sync with.
 	 * @returns Nothing.
 	 */
-	public async syncFromRemote(storageKey: string, remoteSyncState: ISyncState): Promise<void> {
+	public async applySyncState(storageKey: string, syncState: ISyncState): Promise<void> {
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
-			message: "remoteSyncSynchronisation",
+			message: "applySyncState",
 			data: {
-				snapshotCount: remoteSyncState.snapshots.length
+				snapshotCount: syncState.snapshots.length
 			}
 		});
 
 		// Sort from newest to oldest
-		const sortedRemoteSnapshots = remoteSyncState.snapshots.sort(
+		const sortedSnapshots = syncState.snapshots.sort(
 			(a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime()
 		);
 
@@ -222,27 +220,27 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 			remoteSnapshot: SyncSnapshotEntry<T>;
 		}[] = [];
 
-		for (const remoteSnapshot of sortedRemoteSnapshots) {
+		for (const snapshot of sortedSnapshots) {
 			await this._logging?.log({
 				level: "info",
 				source: this.CLASS_NAME,
-				message: "remoteSyncSnapshotProcessing",
+				message: "applySnapshot",
 				data: {
-					snapshotId: remoteSnapshot.id,
-					dateCreated: new Date(remoteSnapshot.dateCreated).toISOString()
+					snapshotId: snapshot.id,
+					dateCreated: new Date(snapshot.dateCreated).toISOString()
 				}
 			});
 
-			const localSnapshot = await this._localSyncSnapshotEntryEntityStorage.get(remoteSnapshot.id);
+			const localSnapshot = await this._snapshotEntryEntityStorage.get(snapshot.id);
 			const remoteSnapshotWithContext: SyncSnapshotEntry<T> = {
-				...remoteSnapshot,
+				...snapshot,
 				storageKey
 			};
 
 			if (Is.empty(localSnapshot)) {
 				// We don't have the snapshot locally, so we need to process it
 				newSnapshots.push(remoteSnapshotWithContext);
-			} else if (localSnapshot.dateModified !== remoteSnapshot.dateModified) {
+			} else if (localSnapshot.dateModified !== snapshot.dateModified) {
 				// If the local snapshot has a different dateModified, we need to update it
 				modifiedSnapshots.push({
 					localSnapshot,
@@ -265,8 +263,9 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	 * Process the modified snapshots and store them in the local storage.
 	 * @param modifiedSnapshots The modified snapshots to process.
 	 * @returns Nothing.
+	 * @internal
 	 */
-	public async processModifiedSnapshots(
+	private async processModifiedSnapshots(
 		modifiedSnapshots: {
 			localSnapshot: SyncSnapshotEntry<T>;
 			remoteSnapshot: SyncSnapshotEntry<T>;
@@ -276,7 +275,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 			await this._logging?.log({
 				level: "info",
 				source: this.CLASS_NAME,
-				message: "remoteSyncSnapshotModified",
+				message: "processModifiedSnapshot",
 				data: {
 					snapshotId: modifiedSnapshot.remoteSnapshot.id,
 					localModified: new Date(
@@ -301,7 +300,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 				}
 			}
 
-			await this._localSyncSnapshotEntryEntityStorage.set(modifiedSnapshot.remoteSnapshot);
+			await this._snapshotEntryEntityStorage.set(modifiedSnapshot.remoteSnapshot);
 		}
 	}
 
@@ -309,13 +308,14 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	 * Process the new snapshots and store them in the local storage.
 	 * @param newSnapshots The new snapshots to process.
 	 * @returns Nothing.
+	 * @internal
 	 */
 	private async processNewSnapshots(newSnapshots: SyncSnapshotEntry<T>[]): Promise<void> {
 		for (const newSnapshot of newSnapshots) {
 			await this._logging?.log({
 				level: "info",
 				source: this.CLASS_NAME,
-				message: "remoteSyncSnapshotNew",
+				message: "processNewSnapshot",
 				data: {
 					snapshotId: newSnapshot.id,
 					localModified: new Date(newSnapshot.dateCreated).toISOString()
@@ -329,7 +329,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 				}
 			}
 
-			await this._localSyncSnapshotEntryEntityStorage.set(newSnapshot);
+			await this._snapshotEntryEntityStorage.set(newSnapshot);
 		}
 	}
 }

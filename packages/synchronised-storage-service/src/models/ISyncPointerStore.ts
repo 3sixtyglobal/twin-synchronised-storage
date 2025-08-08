@@ -6,6 +6,11 @@
  */
 export interface ISyncPointerStore {
 	/**
+	 * The version of the sync pointer store.
+	 */
+	version: string;
+
+	/**
 	 * The mapping from storage keys to sync pointers.
 	 */
 	syncPointers: { [key: string]: string };
