@@ -32,7 +32,8 @@
 	"dependencies": {
 		"@twin.org/core": "next",
 		"@twin.org/entity": "next",
-		"@twin.org/nameof": "next"
+		"@twin.org/nameof": "next",
+		"@twin.org/standards-w3c-did": "next"
 	},
 	"devDependencies": {
 		"@twin.org/nameof-transformer": "next",
