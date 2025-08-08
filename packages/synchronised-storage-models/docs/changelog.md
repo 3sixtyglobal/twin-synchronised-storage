@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.1-next.4](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-models-v0.0.1-next.3...synchronised-storage-models-v0.0.1-next.4) (2025-08-08)
+
+
+### Features
+
+* blob storage connector instead of component ([#7](https://github.com/twinfoundation/synchronised-storage/issues/7)) ([ea27241](https://github.com/twinfoundation/synchronised-storage/commit/ea27241cf0810b52ab7a6be7346809d127b7109a))
+
 ## [0.0.1-next.3](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-models-v0.0.1-next.2...synchronised-storage-models-v0.0.1-next.3) (2025-07-25)
 
 
