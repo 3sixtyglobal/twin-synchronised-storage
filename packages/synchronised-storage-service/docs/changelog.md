@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.1-next.6](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.1-next.5...synchronised-storage-service-v0.0.1-next.6) (2025-08-11)
+
+
+### Features
+
+* improve consolidation logic ([698232f](https://github.com/twinfoundation/synchronised-storage/commit/698232f57640f87642ecd323cb1e4670eda33343))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.1-next.5 to 0.0.1-next.6
+
 ## [0.0.1-next.5](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.1-next.4...synchronised-storage-service-v0.0.1-next.5) (2025-08-11)
 
 
