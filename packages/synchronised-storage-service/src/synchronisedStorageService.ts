@@ -631,30 +631,20 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	 * @internal
 	 */
 	private async startConsolidationSync(storageKey: string): Promise<void> {
-		let localChangeSnapshot: SyncSnapshotEntry<T> | undefined;
 		try {
-			// If we are performing a consolidation, we can remove the local change snapshot
-			// as we are going to create a complete changeset from the DB
-			const localChangeSnapshots = await this._localSyncStateHelper.getSnapshots(storageKey, true);
-			localChangeSnapshot = localChangeSnapshots[0];
+			// If we are going to perform a consolidation first take any local updates
+			// we have and create a changeset from them, so that anybody applying
+			// just changes since a consolidation can use the changeset
+			// and skip the consolidation
+			await this.updateFromLocalSyncState(storageKey);
 
-			if (!Is.empty(localChangeSnapshot)) {
-				await this._localSyncStateHelper.removeLocalChangeSnapshot(localChangeSnapshot);
-			}
-
+			// Now start the consolidation
 			await this._remoteSyncStateHelper.consolidationStart(
 				storageKey,
 				this._config.consolidationBatchSize ??
 					SynchronisedStorageService._DEFAULT_CONSOLIDATION_BATCH_SIZE
 			);
-
-			// The consolidation was successful, so we can remove the local change snapshot permanently
-			localChangeSnapshot = undefined;
 		} catch (error) {
-			if (localChangeSnapshot) {
-				// If the consolidation failed, we can keep the local change snapshot
-				await this._localSyncStateHelper.setLocalChangeSnapshot(localChangeSnapshot);
-			}
 			await this._logging?.log({
 				level: "error",
 				source: this.CLASS_NAME,

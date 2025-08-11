@@ -463,6 +463,7 @@ describe("synchronisedStorageService", () => {
 				changeSetStorageIds: [],
 				isLocal: true,
 				isConsolidated: false,
+				epoch: 0,
 				changes: [
 					{
 						operation: "set",
@@ -534,6 +535,7 @@ describe("synchronisedStorageService", () => {
 				changeSetStorageIds: [],
 				isLocal: true,
 				isConsolidated: false,
+				epoch: 0,
 				changes: [
 					{
 						operation: "delete",
@@ -630,6 +632,7 @@ describe("synchronisedStorageService", () => {
 				changeSetStorageIds: [],
 				isLocal: true,
 				isConsolidated: false,
+				epoch: 0,
 				changes: [
 					{
 						operation: "set",
@@ -689,7 +692,7 @@ describe("synchronisedStorageService", () => {
 						storageKey: "test-type",
 						syncPointers: {
 							"test-type":
-								"blob:memory:a5eea4171e5ac6161ad047a92fff28d7f4087265eca256567168046caecf5b55"
+								"blob:memory:ad378fe48ccbc2e341996c9427773f8f2d6721b8c14c8005b95edcac80d38345"
 						}
 					})
 				),
@@ -703,7 +706,7 @@ describe("synchronisedStorageService", () => {
 			version: "1",
 			storageKey: "test-type",
 			syncPointers: {
-				"test-type": "blob:memory:a5eea4171e5ac6161ad047a92fff28d7f4087265eca256567168046caecf5b55"
+				"test-type": "blob:memory:ad378fe48ccbc2e341996c9427773f8f2d6721b8c14c8005b95edcac80d38345"
 			}
 		});
 
@@ -718,8 +721,8 @@ describe("synchronisedStorageService", () => {
 		expect(blobs).toEqual({
 			fdf51549a05883e7b868d84f7cfb23e5f2c4fb0cb9e6dd5b64f9d9c2c3f8235e:
 				"7u7u7u7u7u4fiwgAAAAAAAADtVFdTxsxEPwvy+s55zhHIH4iUBUoRErV0PChPrjnvTunxDb2huOI8t+rOw6ekFoJoX2yZjwzO7sFo0FCoT42kIBWhCcBFWErKLjYZ3yficmCDyXnkvMB5/y2J86cNoX5FzOSC6rEC2xAAmEkRo1HSCCvlC0xgrzbgvMYFBlnQUJEguRlo45uNBtCAmjJUANy+773kPHhojN+897tfiVgncZz/foZtNHy5cH6YJI/af6xgQR8cK5owx3lzhI+EUioiHyUaVrX9aAeDVwoUxvTPGAXR93H9FFAAl0dEr4oUueWsAyGmnknl0AeGk8ubgy1FNQ6KrbKIxNciA7+j1M9YjCFybt6Z0iV05/Vw15sbF4FZ01E/arLVIwYutv2Nc03wbvYLvQG9bl6wk91v2nh56vpBOssu1T2bP07PODBphDZ9Wg5PfQHk2pclWY9vcTixv/B5en1WF9Novq+/mqK8egk+1ad3j7czEWmf2TzTD0vR7OVWxz64xXsdn8BDyXZhzMDAAA=",
-			a5eea4171e5ac6161ad047a92fff28d7f4087265eca256567168046caecf5b55:
-				"7u7u7u7u7u4fiwgAAAAAAAADpY8xa8MwEIX/y812OUuWI2vNFEqndGrJIOnuEoFjBUsUTMh/LyadunQob3zvffDd4YuXkvIMDjpooNS8+DO/8goOKpfa1vXGWzH7W7nkWsB93n+dEoED1P8LNEC+8n5hX3kDKlSmRdOq8R07h+gQXxDx42f4lilJ+muZyj7PJU+JnlTxU+EG4sXPZz5yPT59D7R5QZhycFe+5mV1QmI6048ejbWad8EOlmwvuyhBaTaiYi8BYxh5IDJh6GWkMaqoxSptGE6P0+Mb5/LBH18BAAA="
+			ad378fe48ccbc2e341996c9427773f8f2d6721b8c14c8005b95edcac80d38345:
+				"7u7u7u7u7u4fiwgAAAAAAAADpY+xasMwFEX/5c12eZYsR9KaKZRO6dSSQdJ7igWOZSxRMCH/Xkw6delQ7njvPXDu8MVrSXkGCx00UGpe3ZVfeQMLlUtt67bwXsxuKWOuBezn/dcpEVhA+b9AA+QqH1d2lXegQKFaVK0w79hZRIv4gogfP8O3TCmmv5apHPNc8pToSY1uKtwALzmMYLsGwujmK5+5np/mJ9oNwU/Z2xvf8rrZSFF1qjcOldaSD14PmnQfDyF6IVlFEfroMXjDA5HyQx8NmSCCjFpIxXB5XB7f1T6XdGkBAAA="
 		});
 
 		expect(
@@ -752,7 +755,7 @@ describe("synchronisedStorageService", () => {
 		});
 
 		expect(
-			await expandObject(blobs.a5eea4171e5ac6161ad047a92fff28d7f4087265eca256567168046caecf5b55)
+			await expandObject(blobs.ad378fe48ccbc2e341996c9427773f8f2d6721b8c14c8005b95edcac80d38345)
 		).toEqual({
 			version: "1",
 			storageKey: "test-type",
@@ -763,6 +766,7 @@ describe("synchronisedStorageService", () => {
 					dateCreated: "2025-05-29T01:00:00.000Z",
 					dateModified: "2025-05-29T01:00:00.000Z",
 					isConsolidated: false,
+					epoch: 1,
 					changeSetStorageIds: [
 						"blob:memory:fdf51549a05883e7b868d84f7cfb23e5f2c4fb0cb9e6dd5b64f9d9c2c3f8235e"
 					]
@@ -831,7 +835,8 @@ describe("synchronisedStorageService", () => {
 					id: "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
 					dateCreated: "2025-05-29T07:00:00.000Z",
 					dateModified: "2025-05-29T07:00:00.000Z",
-					isConsolidated: false,
+					isConsolidated: true,
+					epoch: 0,
 					changeSetStorageIds: [blobChangeSetId]
 				}
 			]
@@ -878,7 +883,9 @@ describe("synchronisedStorageService", () => {
 			"applySyncState",
 			"getSnapshots",
 			"getSnapshotsDoesNotExist",
-			"applySnapshot",
+			"applySnapshotNoExisting",
+			"applySnapshotFoundConsolidated",
+			"storageReset",
 			"processNewSnapshot",
 			"getChangeSet",
 			"loadBlob",
@@ -914,7 +921,8 @@ describe("synchronisedStorageService", () => {
 				dateModified: "2025-05-29T07:00:00.000Z",
 				storageKey: "test-type",
 				isLocal: false,
-				isConsolidated: false,
+				isConsolidated: true,
+				epoch: 0,
 				changeSetStorageIds: [
 					"blob:memory:88a32fb95e67da4ef8b28091ce85c127e465873717dc4727839391707e704ed8"
 				]
@@ -1044,7 +1052,7 @@ describe("synchronisedStorageService", () => {
 						storageKey: "test-type",
 						syncPointers: {
 							"test-type":
-								"blob:memory:82db5626ee5602221fd35a97b7821eaec56c331bd2d3241f4a7c49dcf999deb3"
+								"blob:memory:96d8f39e59ee0502fefd25a22aad9739d63b26fd2ec8633944b2cc2b2e64efe8"
 						}
 					})
 				),
@@ -1061,12 +1069,12 @@ describe("synchronisedStorageService", () => {
 		expect(blobs).toEqual({
 			"2f6b5996f09977f01c30a8c601cf6f86078d0491a9a65d5aafbb1b3055a23497":
 				"7u7u7u7u7u4fiwgAAAAAAAADpVHBbtpAEP2X6dXG6yWJwp6qlkZNUhAlAVyqHlbeMWwTdt2dAeMg/r2y4+TUKJXQnEbvzbw3bw5gDSgQg9MKIjCa8XNAzdgslEKex+I8loN7kSohlBA9IcSyI468sYV9j0nsg17hLdaggJE45rpEiCBfa7dCAvXzAL7EoNl6BwoIGaLni1q6NXEKEaBjyzWow7+101ik963wq/bx+CsC5w1em5dhMNao5ybujCmxN/K0ggjK4H3RmPuYe8e4Z1CwZi5JJUlVVb2q3/NhlThK8oCtHf1Iya4ZbeNQMNSsrx3jKliuJ+26CPJQl+xpa7mhoDGk4985xVJI2cL/8aodBlvYvI13hLz25s0cxGn1gWqXr4N3ltC87I01EYb2t11Mk20oPTUHvUKdr44w14/bBn7qj2fZcF4V6Vdfh/1iO9t9L24GdHY12+tLeTX+dnYjzXg+X2TZp4flYuLuON+MlsvL0XR8sflCt87+uRjeTbNMT6n/I2Qbb574geF4/AtctcMcNAMAAA==",
-			"82db5626ee5602221fd35a97b7821eaec56c331bd2d3241f4a7c49dcf999deb3":
-				"7u7u7u7u7u4fiwgAAAAAAAADpY8xa8MwFIT/y5vt8CRbsqU1Uyid0qklw5P1FAscK1giYEL+ezHp1CVDuOXgvju4O9x4yTHNYEFABbmkhc78wStYKJxLXdYrb8FM1zymksH+3P+Vot9M+56gAk+F9wtT4W1QolQ1qlqaLxQW0SLuEPH7D/xMPob4iox5n+acpuifq4GmzBUMI81nPnI5Pv8e/PYL3JScvfAlLauVQTtljA5oTNcFFEOD1A8axRB06DV2vcfWCDKklVdEwTnhGlSKZNOaDk6P0+MXPTUWwl8BAAA="
+			"96d8f39e59ee0502fefd25a22aad9739d63b26fd2ec8633944b2cc2b2e64efe8":
+				"7u7u7u7u7u4fiwgAAAAAAAADpY8xa8MwFIT/y5vt8GRbsqU1Uyid0qklw5P0FAscy1giYEL+ezHp1KVDueXgvju4B9x5zTHNYEBABbmkla78xhsYKJxLXbaF92CmJY+pZDBfj1+l6HfT/U9QgafCx5Wp8D7YYCNrlHWjP1AYRIN4QMTPH/A9+RjiX2TMxzTnNEX/Wg00Za6Al+RGMKICN9J85TOX8+v5ye8PwU7Jmhvf0rqZJigrtVYBte77gMK1SINTKFxQYVDYDx47LUiTkl4SBWuFbVFKatpO93B5Xp7fdkTYzmkBAAA="
 		});
 
 		expect(
-			await expandObject(blobs["82db5626ee5602221fd35a97b7821eaec56c331bd2d3241f4a7c49dcf999deb3"])
+			await expandObject(blobs["96d8f39e59ee0502fefd25a22aad9739d63b26fd2ec8633944b2cc2b2e64efe8"])
 		).toEqual({
 			version: "1",
 			storageKey: "test-type",
@@ -1077,6 +1085,7 @@ describe("synchronisedStorageService", () => {
 					dateCreated: "2025-05-29T01:00:00.000Z",
 					dateModified: "2025-05-29T01:00:00.000Z",
 					isConsolidated: false,
+					epoch: 1,
 					changeSetStorageIds: [
 						"blob:memory:2f6b5996f09977f01c30a8c601cf6f86078d0491a9a65d5aafbb1b3055a23497"
 					]
@@ -1112,6 +1121,536 @@ describe("synchronisedStorageService", () => {
 				verificationMethod: `${testNodeIdentity}#synchronised-storage-assertion`
 			},
 			storageKey: "test-type"
+		});
+	});
+
+	describe("consolidation behavior", () => {
+		test("can handle multiple snapshots with consolidation present", async () => {
+			const connector = new SynchronisedStorageService({
+				config: {
+					verifiableStorageKeyId,
+					isTrustedNode: true,
+					consolidationIntervalMinutes: 0
+				}
+			});
+			await connector.start(testNodeIdentity, "node-logging");
+
+			// Create multiple changesets - some before consolidation, some after
+			const changeSet1: ISyncChangeSet = {
+				id: "1111111111111111111111111111111111111111111111111111111111111111",
+				dateCreated: "2025-05-29T01:00:00.000Z",
+				dateModified: "2025-05-29T01:00:00.000Z",
+				storageKey: "test-type",
+				nodeIdentity: testNodeIdentityUntrusted,
+				changes: [
+					{
+						entity: { dateModified: "2025-01-01T00:00:00.000Z" },
+						id: "test-id-1",
+						operation: "set"
+					}
+				],
+				proof: {
+					"@context": "https://www.w3.org/ns/credentials/v2",
+					created: "2025-05-29T01:00:00.000Z",
+					cryptosuite: "eddsa-jcs-2022",
+					proofPurpose: "assertionMethod",
+					proofValue:
+						"z3MzHDwnYUqZqTnYzxbzxkkWgy54oyXn4EpxCV7CtMgn7LMpxccX3im83Yz6isyvo9YpT7jmS9JqNMVZUw58C3cb8",
+					type: "DataIntegrityProof",
+					verificationMethod: `${testNodeIdentityUntrusted}#synchronised-storage-assertion`
+				}
+			};
+
+			const changeSet2: ISyncChangeSet = {
+				id: "2222222222222222222222222222222222222222222222222222222222222222",
+				dateCreated: "2025-05-29T02:00:00.000Z",
+				dateModified: "2025-05-29T02:00:00.000Z",
+				storageKey: "test-type",
+				nodeIdentity: testNodeIdentityUntrusted,
+				changes: [
+					{
+						entity: { dateModified: "2025-01-02T00:00:00.000Z" },
+						id: "test-id-2",
+						operation: "set"
+					}
+				],
+				proof: {
+					"@context": "https://www.w3.org/ns/credentials/v2",
+					created: "2025-05-29T02:00:00.000Z",
+					cryptosuite: "eddsa-jcs-2022",
+					proofPurpose: "assertionMethod",
+					proofValue:
+						"z3MzHDwnYUqZqTnYzxbzxkkWgy54oyXn4EpxCV7CtMgn7LMpxccX3im83Yz6isyvo9YpT7jmS9JqNMVZUw58C3cb8",
+					type: "DataIntegrityProof",
+					verificationMethod: `${testNodeIdentityUntrusted}#synchronised-storage-assertion`
+				}
+			};
+
+			const changeSet3: ISyncChangeSet = {
+				id: "3333333333333333333333333333333333333333333333333333333333333333",
+				dateCreated: "2025-05-29T04:00:00.000Z",
+				dateModified: "2025-05-29T04:00:00.000Z",
+				storageKey: "test-type",
+				nodeIdentity: testNodeIdentityUntrusted,
+				changes: [
+					{
+						entity: { dateModified: "2025-01-03T00:00:00.000Z" },
+						id: "test-id-3",
+						operation: "set"
+					}
+				],
+				proof: {
+					"@context": "https://www.w3.org/ns/credentials/v2",
+					created: "2025-05-29T04:00:00.000Z",
+					cryptosuite: "eddsa-jcs-2022",
+					proofPurpose: "assertionMethod",
+					proofValue:
+						"z3MzHDwnYUqZqTnYzxbzxkkWgy54oyXn4EpxCV7CtMgn7LMpxccX3im83Yz6isyvo9YpT7jmS9JqNMVZUw58C3cb8",
+					type: "DataIntegrityProof",
+					verificationMethod: `${testNodeIdentityUntrusted}#synchronised-storage-assertion`
+				}
+			};
+
+			// Store changesets
+			const blobChangeSetId1 = await blobStorageConnector.set(
+				await Compression.compress(ObjectHelper.toBytes(changeSet1), "gzip")
+			);
+			const blobChangeSetId2 = await blobStorageConnector.set(
+				await Compression.compress(ObjectHelper.toBytes(changeSet2), "gzip")
+			);
+			const blobChangeSetId3 = await blobStorageConnector.set(
+				await Compression.compress(ObjectHelper.toBytes(changeSet3), "gzip")
+			);
+
+			// Create sync state with consolidation in the middle
+			const syncState: ISyncState = {
+				version: "1",
+				storageKey: "test-type",
+				snapshots: [
+					// Latest snapshot (post-consolidation)
+					{
+						version: "1",
+						id: "snapshot-3",
+						dateCreated: "2025-05-29T04:00:00.000Z",
+						dateModified: "2025-05-29T04:00:00.000Z",
+						isConsolidated: false,
+						epoch: 2,
+						changeSetStorageIds: [blobChangeSetId3]
+					},
+					// Consolidation snapshot
+					{
+						version: "1",
+						id: "snapshot-consolidated",
+						dateCreated: "2025-05-29T03:00:00.000Z",
+						dateModified: "2025-05-29T03:00:00.000Z",
+						isConsolidated: true,
+						epoch: 1,
+						changeSetStorageIds: [blobChangeSetId1, blobChangeSetId2]
+					},
+					// Older snapshot (should be ignored due to consolidation)
+					{
+						version: "1",
+						id: "snapshot-1",
+						dateCreated: "2025-05-29T01:00:00.000Z",
+						dateModified: "2025-05-29T01:00:00.000Z",
+						isConsolidated: false,
+						epoch: 0,
+						changeSetStorageIds: [blobChangeSetId1]
+					}
+				]
+			};
+
+			const blobSnapshotId = await blobStorageConnector.set(
+				await Compression.compress(ObjectHelper.toBytes(syncState), "gzip")
+			);
+
+			const verifiableSyncPointerStore: ISyncPointerStore = {
+				version: "1",
+				syncPointers: {
+					"test-type": blobSnapshotId
+				}
+			};
+
+			await verifiableStorage.set({
+				id: verifiableStorageKeyId.split(":")[2],
+				creator: testNodeIdentity,
+				data: Converter.bytesToBase64(ObjectHelper.toBytes(verifiableSyncPointerStore)),
+				allowList: [testNodeIdentity],
+				maxAllowListSize: 100
+			});
+
+			await eventBusConnector.publish<ISyncRegisterStorageKey>(
+				SynchronisedStorageTopics.RegisterStorageKey,
+				{
+					storageKey: "test-type"
+				}
+			);
+
+			await waitForLogEntries(loggingMemoryEntityStorage, 25);
+
+			const logStore = loggingMemoryEntityStorage.getStore();
+			const logMessages = logStore.map(e => e.message);
+
+			// Should trigger full sync and process consolidation
+			expect(logMessages).toContain("applySnapshotNoExisting");
+			expect(logMessages).toContain("applySnapshotFoundConsolidated");
+			expect(logMessages).toContain("storageReset");
+
+			// Verify all three changesets were processed (consolidation contains first two, plus the third)
+			const processNewSnapshotCount = logMessages.filter(
+				msg => msg === "processNewSnapshot"
+			).length;
+			expect(processNewSnapshotCount).toBe(2); // Consolidation + post-consolidation snapshot
+
+			// Verify local snapshots contain only processed ones (consolidation + post-consolidation)
+			const localSnapshots = syncSnapshotStorageConnector.getStore();
+			expect(localSnapshots).toHaveLength(2);
+			expect(localSnapshots.some(s => s.id === "snapshot-consolidated")).toBe(true);
+			expect(localSnapshots.some(s => s.id === "snapshot-3")).toBe(true);
+			expect(localSnapshots.some(s => s.id === "snapshot-1")).toBe(false); // Should not be stored (pre-consolidation)
+		});
+
+		test("can handle sync with no consolidation available", async () => {
+			const connector = new SynchronisedStorageService({
+				config: {
+					verifiableStorageKeyId,
+					isTrustedNode: true,
+					consolidationIntervalMinutes: 0
+				}
+			});
+			await connector.start(testNodeIdentity, "node-logging");
+
+			const changeSet: ISyncChangeSet = {
+				id: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				dateCreated: "2025-05-29T01:00:00.000Z",
+				dateModified: "2025-05-29T01:00:00.000Z",
+				storageKey: "test-type",
+				nodeIdentity: testNodeIdentityUntrusted,
+				changes: [
+					{
+						entity: { dateModified: "2025-01-01T00:00:00.000Z" },
+						id: "test-id-1",
+						operation: "set"
+					}
+				],
+				proof: {
+					"@context": "https://www.w3.org/ns/credentials/v2",
+					created: "2025-05-29T01:00:00.000Z",
+					cryptosuite: "eddsa-jcs-2022",
+					proofPurpose: "assertionMethod",
+					proofValue:
+						"z3MzHDwnYUqZqTnYzxbzxkkWgy54oyXn4EpxCV7CtMgn7LMpxccX3im83Yz6isyvo9YpT7jmS9JqNMVZUw58C3cb8",
+					type: "DataIntegrityProof",
+					verificationMethod: `${testNodeIdentityUntrusted}#synchronised-storage-assertion`
+				}
+			};
+
+			const blobChangeSetId = await blobStorageConnector.set(
+				await Compression.compress(ObjectHelper.toBytes(changeSet), "gzip")
+			);
+
+			// Create sync state with NO consolidation
+			const syncState: ISyncState = {
+				version: "1",
+				storageKey: "test-type",
+				snapshots: [
+					{
+						version: "1",
+						id: "snapshot-no-consolidation",
+						dateCreated: "2025-05-29T01:00:00.000Z",
+						dateModified: "2025-05-29T01:00:00.000Z",
+						isConsolidated: false,
+						epoch: 0,
+						changeSetStorageIds: [blobChangeSetId]
+					}
+				]
+			};
+
+			const blobSnapshotId = await blobStorageConnector.set(
+				await Compression.compress(ObjectHelper.toBytes(syncState), "gzip")
+			);
+
+			const verifiableSyncPointerStore: ISyncPointerStore = {
+				version: "1",
+				syncPointers: {
+					"test-type": blobSnapshotId
+				}
+			};
+
+			await verifiableStorage.set({
+				id: verifiableStorageKeyId.split(":")[2],
+				creator: testNodeIdentity,
+				data: Converter.bytesToBase64(ObjectHelper.toBytes(verifiableSyncPointerStore)),
+				allowList: [testNodeIdentity],
+				maxAllowListSize: 100
+			});
+
+			await eventBusConnector.publish<ISyncRegisterStorageKey>(
+				SynchronisedStorageTopics.RegisterStorageKey,
+				{
+					storageKey: "test-type"
+				}
+			);
+
+			await waitForLogEntries(loggingMemoryEntityStorage, 15);
+
+			const logStore = loggingMemoryEntityStorage.getStore();
+			const logMessages = logStore.map(e => e.message);
+
+			// Should trigger full sync attempt but find no consolidation
+			expect(logMessages).toContain("applySnapshotNoExisting");
+			expect(logMessages).toContain("applySnapshotNoConsolidated");
+			expect(logMessages).not.toContain("applySnapshotFoundConsolidated");
+			expect(logMessages).not.toContain("processNewSnapshot");
+
+			// No snapshots should be stored locally since no consolidation was available
+			const localSnapshots = syncSnapshotStorageConnector.getStore();
+			expect(localSnapshots).toHaveLength(0);
+		});
+
+		test("can handle incremental sync with consolidation already present", async () => {
+			const connector = new SynchronisedStorageService({
+				config: {
+					verifiableStorageKeyId,
+					isTrustedNode: true,
+					consolidationIntervalMinutes: 0
+				}
+			});
+			await connector.start(testNodeIdentity, "node-logging");
+
+			// Pre-populate local storage with a consolidated snapshot
+			const existingConsolidation: SyncSnapshotEntry = {
+				version: "1",
+				id: "existing-consolidation",
+				storageKey: "test-type",
+				dateCreated: "2025-05-29T01:00:00.000Z",
+				dateModified: "2025-05-29T01:00:00.000Z",
+				isLocal: false,
+				isConsolidated: true,
+				epoch: 0,
+				changeSetStorageIds: []
+			};
+			await syncSnapshotStorageConnector.set(existingConsolidation);
+
+			// Create a new changeset for incremental sync
+			const changeSet: ISyncChangeSet = {
+				id: "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+				dateCreated: "2025-05-29T02:00:00.000Z",
+				dateModified: "2025-05-29T02:00:00.000Z",
+				storageKey: "test-type",
+				nodeIdentity: testNodeIdentityUntrusted,
+				changes: [
+					{
+						entity: { dateModified: "2025-01-02T00:00:00.000Z" },
+						id: "test-id-2",
+						operation: "set"
+					}
+				],
+				proof: {
+					"@context": "https://www.w3.org/ns/credentials/v2",
+					created: "2025-05-29T02:00:00.000Z",
+					cryptosuite: "eddsa-jcs-2022",
+					proofPurpose: "assertionMethod",
+					proofValue:
+						"z3MzHDwnYUqZqTnYzxbzxkkWgy54oyXn4EpxCV7CtMgn7LMpxccX3im83Yz6isyvo9YpT7jmS9JqNMVZUw58C3cb8",
+					type: "DataIntegrityProof",
+					verificationMethod: `${testNodeIdentityUntrusted}#synchronised-storage-assertion`
+				}
+			};
+
+			const blobChangeSetId = await blobStorageConnector.set(
+				await Compression.compress(ObjectHelper.toBytes(changeSet), "gzip")
+			);
+
+			// Sync state with incremental change (no gap from existing consolidation)
+			const syncState: ISyncState = {
+				version: "1",
+				storageKey: "test-type",
+				snapshots: [
+					// New incremental snapshot
+					{
+						version: "1",
+						id: "incremental-snapshot",
+						dateCreated: "2025-05-29T02:00:00.000Z",
+						dateModified: "2025-05-29T02:00:00.000Z",
+						isConsolidated: false,
+						epoch: 1, // Consecutive to existing epoch 0
+						changeSetStorageIds: [blobChangeSetId]
+					},
+					// Existing consolidation (unchanged, same as local)
+					{
+						version: "1",
+						id: "existing-consolidation",
+						dateCreated: "2025-05-29T01:00:00.000Z",
+						dateModified: "2025-05-29T01:00:00.000Z",
+						isConsolidated: true,
+						epoch: 0,
+						changeSetStorageIds: []
+					}
+				]
+			};
+
+			const blobSnapshotId = await blobStorageConnector.set(
+				await Compression.compress(ObjectHelper.toBytes(syncState), "gzip")
+			);
+
+			const verifiableSyncPointerStore: ISyncPointerStore = {
+				version: "1",
+				syncPointers: {
+					"test-type": blobSnapshotId
+				}
+			};
+
+			await verifiableStorage.set({
+				id: verifiableStorageKeyId.split(":")[2],
+				creator: testNodeIdentity,
+				data: Converter.bytesToBase64(ObjectHelper.toBytes(verifiableSyncPointerStore)),
+				allowList: [testNodeIdentity],
+				maxAllowListSize: 100
+			});
+
+			// Trigger sync
+			await eventBusConnector.publish<ISyncRegisterStorageKey>(
+				SynchronisedStorageTopics.RegisterStorageKey,
+				{
+					storageKey: "test-type"
+				}
+			);
+
+			await waitForLogEntries(loggingMemoryEntityStorage, 20);
+
+			const logStore = loggingMemoryEntityStorage.getStore();
+			const logMessages = logStore.map(e => e.message);
+
+			// Should NOT trigger full sync (no "applySnapshotNoExisting")
+			expect(logMessages).not.toContain("applySnapshotNoExisting");
+			expect(logMessages).not.toContain("applySnapshotFoundConsolidated");
+			expect(logMessages).not.toContain("storageReset");
+
+			// Should use incremental sync path
+			expect(logMessages).toContain("applySyncState");
+			expect(logMessages).toContain("applySnapshot");
+			expect(logMessages).toContain("processNewSnapshot");
+
+			// Should have both snapshots stored locally
+			const localSnapshots = syncSnapshotStorageConnector.getStore();
+			expect(localSnapshots).toHaveLength(2);
+			expect(localSnapshots.some(s => s.id === "existing-consolidation")).toBe(true);
+			expect(localSnapshots.some(s => s.id === "incremental-snapshot")).toBe(true);
+		});
+
+		test("can handle epoch gap requiring full sync", async () => {
+			const connector = new SynchronisedStorageService({
+				config: {
+					verifiableStorageKeyId,
+					isTrustedNode: true,
+					consolidationIntervalMinutes: 0
+				}
+			});
+			await connector.start(testNodeIdentity, "node-logging");
+
+			// Simulate existing local state at epoch 5
+			const existingSnapshot: SyncSnapshotEntry = {
+				version: "1",
+				id: "existing-local",
+				storageKey: "test-type",
+				dateCreated: "2025-05-29T01:00:00.000Z",
+				dateModified: "2025-05-29T01:00:00.000Z",
+				isLocal: false,
+				isConsolidated: true,
+				epoch: 5,
+				changeSetStorageIds: []
+			};
+			await syncSnapshotStorageConnector.set(existingSnapshot);
+
+			const changeSet: ISyncChangeSet = {
+				id: "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+				dateCreated: "2025-05-29T03:00:00.000Z",
+				dateModified: "2025-05-29T03:00:00.000Z",
+				storageKey: "test-type",
+				nodeIdentity: testNodeIdentityUntrusted,
+				changes: [
+					{
+						entity: { dateModified: "2025-01-01T00:00:00.000Z" },
+						id: "test-id-gap",
+						operation: "set"
+					}
+				],
+				proof: {
+					"@context": "https://www.w3.org/ns/credentials/v2",
+					created: "2025-05-29T03:00:00.000Z",
+					cryptosuite: "eddsa-jcs-2022",
+					proofPurpose: "assertionMethod",
+					proofValue:
+						"z3MzHDwnYUqZqTnYzxbzxkkWgy54oyXn4EpxCV7CtMgn7LMpxccX3im83Yz6isyvo9YpT7jmS9JqNMVZUw58C3cb8",
+					type: "DataIntegrityProof",
+					verificationMethod: `${testNodeIdentityUntrusted}#synchronised-storage-assertion`
+				}
+			};
+
+			const blobChangeSetId = await blobStorageConnector.set(
+				await Compression.compress(ObjectHelper.toBytes(changeSet), "gzip")
+			);
+
+			// Remote sync state starting at epoch 10 (gap from local epoch 5)
+			const syncState: ISyncState = {
+				version: "1",
+				storageKey: "test-type",
+				snapshots: [
+					{
+						version: "1",
+						id: "gap-consolidation",
+						dateCreated: "2025-05-29T03:00:00.000Z",
+						dateModified: "2025-05-29T03:00:00.000Z",
+						isConsolidated: true,
+						epoch: 10, // Gap: local has epoch 5, remote starts at 10
+						changeSetStorageIds: [blobChangeSetId]
+					}
+				]
+			};
+
+			const blobSnapshotId = await blobStorageConnector.set(
+				await Compression.compress(ObjectHelper.toBytes(syncState), "gzip")
+			);
+
+			const verifiableSyncPointerStore: ISyncPointerStore = {
+				version: "1",
+				syncPointers: {
+					"test-type": blobSnapshotId
+				}
+			};
+
+			await verifiableStorage.set({
+				id: verifiableStorageKeyId.split(":")[2],
+				creator: testNodeIdentity,
+				data: Converter.bytesToBase64(ObjectHelper.toBytes(verifiableSyncPointerStore)),
+				allowList: [testNodeIdentity],
+				maxAllowListSize: 100
+			});
+
+			await eventBusConnector.publish<ISyncRegisterStorageKey>(
+				SynchronisedStorageTopics.RegisterStorageKey,
+				{
+					storageKey: "test-type"
+				}
+			);
+
+			await waitForLogEntries(loggingMemoryEntityStorage, 25);
+
+			const logStore = loggingMemoryEntityStorage.getStore();
+			const logMessages = logStore.map(e => e.message);
+
+			// Should detect epoch gap and trigger full sync
+			expect(logMessages).toContain("applySnapshotNoExisting");
+			expect(logMessages).toContain("applySnapshotFoundConsolidated");
+			expect(logMessages).toContain("storageReset");
+
+			// Should have the new consolidation snapshot
+			const localSnapshots = syncSnapshotStorageConnector.getStore();
+			expect(localSnapshots.length).toBeGreaterThan(0);
+			expect(localSnapshots.some(s => s.id === "gap-consolidation")).toBe(true);
+			const gapConsolidation = localSnapshots.find(s => s.id === "gap-consolidation");
+			expect(gapConsolidation?.epoch).toBe(10);
 		});
 	});
 });

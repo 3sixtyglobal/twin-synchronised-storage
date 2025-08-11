@@ -96,6 +96,9 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 				localChangeSnapshot.changes.splice(previousChangeIndex, 1);
 			}
 
+			// If we already have changes from previous updates
+			// then make sure we update the dateModified, otherwise
+			// we assume this is the first change and setting modified is not necessary
 			if (localChangeSnapshot.changes.length > 0) {
 				localChangeSnapshot.dateModified = new Date(Date.now()).toISOString();
 			}
@@ -167,7 +170,8 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 				dateModified: now,
 				changeSetStorageIds: [],
 				isLocal,
-				isConsolidated: false
+				isConsolidated: false,
+				epoch: 0
 			}
 		];
 	}
@@ -223,17 +227,32 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 		});
 
 		// Get all the existing snapshots that we have processed previously
-		const existingRemoteSnapshots = await this.getSnapshots(storageKey, false);
+		let existingSnapshots = await this.getSnapshots(storageKey, false);
 
 		// Sort from newest to oldest
-		const sortedSnapshots = syncState.snapshots.sort(
+		existingSnapshots = existingSnapshots.sort(
 			(a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime()
 		);
 
-		// If we have no existing snapshots we can't have yet synced
-		// in this case we need to find the most recent consolidation
-		// and use that to build a complete DB table
-		if (existingRemoteSnapshots.length === 0) {
+		// Sort from newest to oldest
+		const syncStateSnapshots = syncState.snapshots.sort(
+			(a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime()
+		);
+
+		// Get the newest epoch from the local storage
+		const newestExistingEpoch = existingSnapshots[0]?.epoch ?? 0;
+
+		// Get the oldest epoch from the remote storage
+		const oldestSyncStateEpoch = syncStateSnapshots[syncStateSnapshots.length - 1]?.epoch ?? 0;
+
+		// If there is a gap between the largest epoch we have locally
+		// and the smallest epoch we have remotely then we have missed
+		// data so we need to perform a full sync
+		const hasEpochGap = newestExistingEpoch + 1 < oldestSyncStateEpoch;
+
+		// If we have an epoch gap or no existing snapshots then we need to apply
+		// a full sync from a consolidation
+		if (!existingSnapshots.some(s => s.isConsolidated) || hasEpochGap) {
 			await this._logging?.log({
 				level: "info",
 				source: this.CLASS_NAME,
@@ -242,30 +261,39 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 					storageKey
 				}
 			});
-			const firstConsolidated = sortedSnapshots.find(snapshot => snapshot.isConsolidated);
-			if (firstConsolidated) {
-				// We found a consolidated snapshot, we can use it
+			const mostRecentConsolidation = syncStateSnapshots.findIndex(
+				snapshot => snapshot.isConsolidated
+			);
+			if (mostRecentConsolidation !== -1) {
+				// We found the most recent consolidated snapshot, we can use it
 				await this._logging?.log({
 					level: "info",
 					source: this.CLASS_NAME,
 					message: "applySnapshotFoundConsolidated",
 					data: {
 						storageKey,
-						snapshotId: firstConsolidated.id
+						snapshotId: syncStateSnapshots[mostRecentConsolidation].id
 					}
 				});
 
 				// We need to reset the entity storage and remove all the remote items
-				// so that we use just the ones from the consolidation
+				// so that we use just the ones from the consolidation, since
+				// we don't have any existing there shouldn't be any remote entries
+				// but we reset nonetheless
 				await this._changeSetHelper.reset(storageKey, SyncNodeIdentityMode.Remote);
 
-				await this.processNewSnapshots([
-					{
-						...firstConsolidated,
-						storageKey,
-						isLocal: false
-					}
-				]);
+				// We need to process the most recent consolidation and all changes
+				// that were made since then, from newest to oldest (so newer changes override older ones)
+				// Process snapshots from the consolidation point (most recent) back to the newest
+				for (let i = mostRecentConsolidation; i >= 0; i--) {
+					await this.processNewSnapshots([
+						{
+							...syncStateSnapshots[i],
+							storageKey,
+							isLocal: false
+						}
+					]);
+				}
 			} else {
 				await this._logging?.log({
 					level: "info",
@@ -277,10 +305,15 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 				});
 			}
 		} else {
+			// We have existing consolidated remote snapshots, so we can assume that we have
+			// applied at least one consolidation snapshot, in this case we need to look at the changes since
+			// then and apply them if we haven't already
+			// We don't need to apply any additional consolidated snapshots, just the changesets
+
 			// Create a lookup map for the existing snapshots
-			const existingSnapshots: { [id: string]: SyncSnapshotEntry<T> } = {};
-			for (const snapshot of existingRemoteSnapshots) {
-				existingSnapshots[snapshot.id] = snapshot;
+			const existingSnapshotsMap: { [id: string]: SyncSnapshotEntry<T> } = {};
+			for (const snapshot of existingSnapshots) {
+				existingSnapshotsMap[snapshot.id] = snapshot;
 			}
 
 			const newSnapshots: SyncSnapshotEntry<T>[] = [];
@@ -288,9 +321,10 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 				currentSnapshot: SyncSnapshotEntry<T>;
 				updatedSnapshot: SyncSnapshotEntry<T>;
 			}[] = [];
-			const referencedExistingSnapshots: string[] = Object.keys(existingSnapshots);
+			const referencedExistingSnapshots: string[] = Object.keys(existingSnapshotsMap);
 
-			for (const snapshot of sortedSnapshots) {
+			let completedProcessing = false;
+			for (const snapshot of syncStateSnapshots) {
 				await this._logging?.log({
 					level: "info",
 					source: this.CLASS_NAME,
@@ -301,8 +335,8 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 					}
 				});
 
-				// See if we have the local snapshot
-				const currentSnapshot = existingSnapshots[snapshot.id];
+				// See if we have the snapshot stored locally
+				const currentSnapshot = existingSnapshotsMap[snapshot.id];
 
 				// As we are referencing an existing snapshot, we need to remove it from the list
 				// to allow us to cleanup any unreferenced snapshots later
@@ -311,25 +345,28 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 					referencedExistingSnapshots.splice(idx, 1);
 				}
 
-				const updatedSnapshot: SyncSnapshotEntry<T> = {
-					...snapshot,
-					storageKey,
-					isLocal: false
-				};
+				// No need to apply consolidated snapshots
+				if (!snapshot.isConsolidated && !completedProcessing) {
+					const updatedSnapshot: SyncSnapshotEntry<T> = {
+						...snapshot,
+						storageKey,
+						isLocal: false
+					};
 
-				if (Is.empty(currentSnapshot)) {
-					// We don't have the snapshot locally, so we need to process it
-					newSnapshots.push(updatedSnapshot);
-				} else if (currentSnapshot.dateModified !== snapshot.dateModified) {
-					// If the local snapshot has a different dateModified, we need to update it
-					modifiedSnapshots.push({
-						currentSnapshot,
-						updatedSnapshot
-					});
-				} else {
-					// we sorted the snapshots from newest to oldest, so if we found a local snapshot
-					// with the same dateModified as the remote snapshot, we can stop processing further
-					break;
+					if (Is.empty(currentSnapshot)) {
+						// We don't have the snapshot locally, so we need to process all of it
+						newSnapshots.push(updatedSnapshot);
+					} else if (currentSnapshot.dateModified !== snapshot.dateModified) {
+						// If the local snapshot has a different dateModified, we need to update it
+						modifiedSnapshots.push({
+							currentSnapshot,
+							updatedSnapshot
+						});
+					} else {
+						// we sorted the snapshots from newest to oldest, so if we found a local snapshot
+						// with the same dateModified as the remote snapshot, we can stop processing further
+						completedProcessing = true;
+					}
 				}
 			}
 

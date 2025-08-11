@@ -76,6 +76,14 @@ The flag to determine if this is a consolidated snapshot.
 
 ***
 
+### epoch
+
+> **epoch**: `number`
+
+The epoch for the changeset.
+
+***
+
 ### changeSetStorageIds?
 
 > `optional` **changeSetStorageIds**: `string`[]

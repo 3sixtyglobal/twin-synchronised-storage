@@ -31,6 +31,11 @@ export interface ISyncSnapshot {
 	isConsolidated: boolean;
 
 	/**
+	 * The epoch of the snapshot.
+	 */
+	epoch: number;
+
+	/**
 	 * The ids of the storage for the change sets in the snapshot.
 	 */
 	changeSetStorageIds: string[];

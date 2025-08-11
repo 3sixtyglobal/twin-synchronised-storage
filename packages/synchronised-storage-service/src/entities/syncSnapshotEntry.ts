@@ -51,6 +51,12 @@ export class SyncSnapshotEntry<T extends ISynchronisedEntity = ISynchronisedEnti
 	public isConsolidated!: boolean;
 
 	/**
+	 * The epoch for the changeset.
+	 */
+	@property({ type: "number" })
+	public epoch!: number;
+
+	/**
 	 * The ids of the storage for the change sets in the snapshot, if this is not a local snapshot.
 	 */
 	@property({ type: "array", itemType: "string", optional: true })

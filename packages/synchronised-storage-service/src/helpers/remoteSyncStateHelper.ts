@@ -344,6 +344,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 
 		// Get the current snapshot, if it does not exist we create a new one
 		let currentSnapshot: ISyncSnapshot | undefined = sortedSnapshots[sortedSnapshots.length - 1];
+		const currentEpoch = currentSnapshot?.epoch ?? 0;
 		const now = new Date(Date.now()).toISOString();
 
 		// If there is no snapshot or the current one is a consolidation
@@ -355,6 +356,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 				dateCreated: now,
 				dateModified: now,
 				isConsolidated: false,
+				epoch: currentEpoch + 1,
 				changeSetStorageIds: []
 			};
 			syncState.snapshots.push(currentSnapshot);
@@ -514,7 +516,12 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 			);
 
 			for (const snapshot of toRemove) {
-				await this._blobStorageHelper.removeBlob(snapshot.id);
+				// We need to remove all the storage ids associated with the snapshot
+				if (Is.arrayValue(snapshot.changeSetStorageIds)) {
+					for (const storageId of snapshot.changeSetStorageIds) {
+						await this._blobStorageHelper.removeBlob(storageId);
+					}
+				}
 			}
 		}
 
@@ -622,12 +629,21 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 					snapshots: []
 				};
 
+				// Sort the snapshots so the newest snapshot is last in the array
+				const sortedSnapshots = syncState.snapshots.sort((a, b) =>
+					a.dateCreated.localeCompare(b.dateCreated)
+				);
+				const currentSnapshot: ISyncSnapshot | undefined =
+					sortedSnapshots[sortedSnapshots.length - 1];
+				const currentEpoch = currentSnapshot?.epoch ?? 0;
+
 				const batchSnapshot: ISyncSnapshot = {
 					version: SYNC_SNAPSHOT_VERSION,
 					id: Converter.bytesToHex(RandomHelper.generate(32)),
 					dateCreated: now,
 					dateModified: now,
 					isConsolidated: true,
+					epoch: currentEpoch + 1,
 					changeSetStorageIds: this._batchResponseStorageIds[response.storageKey]
 				};
 				syncState.snapshots.push(batchSnapshot);

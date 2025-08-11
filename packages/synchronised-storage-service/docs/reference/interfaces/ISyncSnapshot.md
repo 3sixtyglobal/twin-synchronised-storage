@@ -44,6 +44,14 @@ Is this a consolidated snapshot?
 
 ***
 
+### epoch
+
+> **epoch**: `number`
+
+The epoch of the snapshot.
+
+***
+
 ### changeSetStorageIds
 
 > **changeSetStorageIds**: `string`[]
