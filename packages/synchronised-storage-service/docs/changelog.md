@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.1-next.5](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.1-next.4...synchronised-storage-service-v0.0.1-next.5) (2025-08-11)
+
+
+### Features
+
+* additional node identity checks ([76257c4](https://github.com/twinfoundation/synchronised-storage/commit/76257c4173303d484391f71f581fd0e214204029))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.1-next.4 to 0.0.1-next.5
+
 ## [0.0.1-next.4](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.1-next.3...synchronised-storage-service-v0.0.1-next.4) (2025-08-08)
 
 
