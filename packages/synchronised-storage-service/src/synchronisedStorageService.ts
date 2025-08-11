@@ -75,6 +75,12 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	private static readonly _DEFAULT_CONSOLIDATION_BATCH_SIZE: number = 100;
 
 	/**
+	 * The default max number of consolidations to keep in storage.
+	 * @internal
+	 */
+	private static readonly _DEFAULT_MAX_CONSOLIDATIONS: number = 5;
+
+	/**
 	 * Runtime name for the class.
 	 */
 	public readonly CLASS_NAME: string = nameof<SynchronisedStorageService>();
@@ -242,6 +248,8 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 			consolidationBatchSize:
 				options.config.consolidationBatchSize ??
 				SynchronisedStorageService._DEFAULT_CONSOLIDATION_BATCH_SIZE,
+			maxConsolidations:
+				options.config.maxConsolidations ?? SynchronisedStorageService._DEFAULT_MAX_CONSOLIDATIONS,
 			blobStorageEncryptionKeyId:
 				options.config.blobStorageEncryptionKeyId ?? "synchronised-storage-blob-encryption-key",
 			verifiableStorageKeyId: options.config.verifiableStorageKeyId
@@ -294,7 +302,8 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 			this._verifiableSyncPointerStorageConnector,
 			this._blobStorageHelper,
 			this._changeSetHelper,
-			this._config.isTrustedNode
+			this._config.isTrustedNode,
+			this._config.maxConsolidations
 		);
 
 		this._serviceStarted = false;
@@ -307,12 +316,16 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 
 		this._eventBusComponent.subscribe<ISyncItemChange>(
 			SynchronisedStorageTopics.LocalItemChange,
-			async event =>
-				this._localSyncStateHelper.addLocalChange(
-					event.data.storageKey,
-					event.data.operation,
-					event.data.id
-				)
+			async event => {
+				// Make sure the change event is from this node
+				if (Is.stringValue(this._nodeIdentity) && this._nodeIdentity === event.data.nodeIdentity) {
+					await this._localSyncStateHelper.addLocalChange(
+						event.data.storageKey,
+						event.data.operation,
+						event.data.id
+					);
+				}
+			}
 		);
 	}
 
@@ -446,7 +459,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 
 		const copy = await this._changeSetHelper.copyChangeset(syncChangeSet);
 
-		if (!Is.empty(copy) && Is.stringValue(this._nodeIdentity)) {
+		if (!Is.empty(copy)) {
 			// Apply the changes to this node
 			await this._changeSetHelper.applyChangeset(copy.syncChangeSet);
 
@@ -513,7 +526,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 		if (!Is.empty(verifiableSyncPointerStore.syncPointers[storageKey])) {
 			// Load the sync state from the remote blob storage using the sync pointer
 			// to load the sync state
-			const remoteSyncState = await this._remoteSyncStateHelper.getRemoteSyncState(
+			const remoteSyncState = await this._remoteSyncStateHelper.getSyncState(
 				verifiableSyncPointerStore.syncPointers[storageKey]
 			);
 
@@ -539,71 +552,75 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 			}
 		});
 
-		const localChangeSnapshot = await this._localSyncStateHelper.getLocalChangeSnapshot(storageKey);
+		const localChangeSnapshots = await this._localSyncStateHelper.getSnapshots(storageKey, true);
 
-		if (Is.arrayValue(localChangeSnapshot.changes)) {
-			await this._remoteSyncStateHelper.buildChangeSet(
-				storageKey,
-				localChangeSnapshot.changes,
-				async (syncChangeSet, changeSetStorageId) => {
-					if (Is.empty(syncChangeSet) && Is.empty(changeSetStorageId)) {
-						await this._logging?.log({
-							level: "info",
-							source: this.CLASS_NAME,
-							message: "builtStorageChangeSetNone",
-							data: {
-								storageKey
-							}
-						});
-					} else {
-						await this._logging?.log({
-							level: "info",
-							source: this.CLASS_NAME,
-							message: "builtStorageChangeSet",
-							data: {
-								storageKey,
-								changeSetStorageId
-							}
-						});
-						// Send the local changes to the remote storage if we are a trusted node
-						if (this._config.isTrustedNode && Is.stringValue(changeSetStorageId)) {
-							// If we are a trusted node, we can add the change set to the sync state
-							// and remove the local change snapshot
-							await this._remoteSyncStateHelper.addChangeSetToSyncState(
-								storageKey,
-								changeSetStorageId
-							);
-							await this._localSyncStateHelper.removeLocalChangeSnapshot(localChangeSnapshot);
-						} else if (
-							!Is.empty(this._trustedSynchronisedStorageComponent) &&
-							Is.object(syncChangeSet)
-						) {
-							// If we are not a trusted node, we need to send the changes to the trusted node
-							// and then remove the local change snapshot
+		if (localChangeSnapshots.length > 0) {
+			const localChangeSnapshot = localChangeSnapshots[0];
+
+			if (Is.arrayValue(localChangeSnapshot.changes)) {
+				await this._remoteSyncStateHelper.buildChangeSet(
+					storageKey,
+					localChangeSnapshot.changes,
+					async (syncChangeSet, changeSetStorageId) => {
+						if (Is.empty(syncChangeSet) && Is.empty(changeSetStorageId)) {
 							await this._logging?.log({
 								level: "info",
 								source: this.CLASS_NAME,
-								message: "sendingChangeSetToTrustedNode",
+								message: "builtStorageChangeSetNone",
+								data: {
+									storageKey
+								}
+							});
+						} else {
+							await this._logging?.log({
+								level: "info",
+								source: this.CLASS_NAME,
+								message: "builtStorageChangeSet",
 								data: {
 									storageKey,
 									changeSetStorageId
 								}
 							});
-							await this._trustedSynchronisedStorageComponent.syncChangeSet(syncChangeSet);
-							await this._localSyncStateHelper.removeLocalChangeSnapshot(localChangeSnapshot);
+							// Send the local changes to the remote storage if we are a trusted node
+							if (this._config.isTrustedNode && Is.stringValue(changeSetStorageId)) {
+								// If we are a trusted node, we can add the change set to the sync state
+								// and remove the local change snapshot
+								await this._remoteSyncStateHelper.addChangeSetToSyncState(
+									storageKey,
+									changeSetStorageId
+								);
+								await this._localSyncStateHelper.removeLocalChangeSnapshot(localChangeSnapshot);
+							} else if (
+								!Is.empty(this._trustedSynchronisedStorageComponent) &&
+								Is.object(syncChangeSet)
+							) {
+								// If we are not a trusted node, we need to send the changes to the trusted node
+								// and then remove the local change snapshot
+								await this._logging?.log({
+									level: "info",
+									source: this.CLASS_NAME,
+									message: "sendingChangeSetToTrustedNode",
+									data: {
+										storageKey,
+										changeSetStorageId
+									}
+								});
+								await this._trustedSynchronisedStorageComponent.syncChangeSet(syncChangeSet);
+								await this._localSyncStateHelper.removeLocalChangeSnapshot(localChangeSnapshot);
+							}
 						}
 					}
-				}
-			);
-		} else {
-			await this._logging?.log({
-				level: "info",
-				source: this.CLASS_NAME,
-				message: "updateFromLocalSyncStateNoChanges",
-				data: {
-					storageKey
-				}
-			});
+				);
+			} else {
+				await this._logging?.log({
+					level: "info",
+					source: this.CLASS_NAME,
+					message: "updateFromLocalSyncStateNoChanges",
+					data: {
+						storageKey
+					}
+				});
+			}
 		}
 	}
 
@@ -618,7 +635,9 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 		try {
 			// If we are performing a consolidation, we can remove the local change snapshot
 			// as we are going to create a complete changeset from the DB
-			localChangeSnapshot = await this._localSyncStateHelper.getLocalChangeSnapshot(storageKey);
+			const localChangeSnapshots = await this._localSyncStateHelper.getSnapshots(storageKey, true);
+			localChangeSnapshot = localChangeSnapshots[0];
+
 			if (!Is.empty(localChangeSnapshot)) {
 				await this._localSyncStateHelper.removeLocalChangeSnapshot(localChangeSnapshot);
 			}

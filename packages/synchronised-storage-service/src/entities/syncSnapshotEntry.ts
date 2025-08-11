@@ -15,6 +15,12 @@ export class SyncSnapshotEntry<T extends ISynchronisedEntity = ISynchronisedEnti
 	public id!: string;
 
 	/**
+	 * The version for the snapshot.
+	 */
+	@property({ type: "string" })
+	public version!: string;
+
+	/**
 	 * The storage key for the snapshot i.e. which entity is being synchronized.
 	 */
 	@property({ type: "string", isSecondary: true })
@@ -29,14 +35,20 @@ export class SyncSnapshotEntry<T extends ISynchronisedEntity = ISynchronisedEnti
 	/**
 	 * The date the snapshot was last modified.
 	 */
-	@property({ type: "string", optional: true })
-	public dateModified?: string;
+	@property({ type: "string" })
+	public dateModified!: string;
 
 	/**
-	 * The flag to determine if this is the current local snapshot containing changes for this node.
+	 * The flag to determine if this is the snapshot is the local one containing changes for this node.
 	 */
-	@property({ type: "boolean", optional: true })
-	public isLocalSnapshot?: boolean;
+	@property({ type: "boolean" })
+	public isLocal!: boolean;
+
+	/**
+	 * The flag to determine if this is a consolidated snapshot.
+	 */
+	@property({ type: "boolean" })
+	public isConsolidated!: boolean;
 
 	/**
 	 * The ids of the storage for the change sets in the snapshot, if this is not a local snapshot.

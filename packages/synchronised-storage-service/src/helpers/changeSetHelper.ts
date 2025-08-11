@@ -12,6 +12,8 @@ import {
 	type ISynchronisedEntity,
 	type ISyncItemRemove,
 	type ISyncItemSet,
+	type ISyncReset,
+	type SyncNodeIdentityMode,
 	SyncChangeOperation,
 	SynchronisedStorageTopics
 } from "@twin.org/synchronised-storage-models";
@@ -110,7 +112,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 		});
 
 		try {
-			const syncChangeSet = await this._blobStorageHelper.load(changeSetStorageId);
+			const syncChangeSet = await this._blobStorageHelper.loadBlob(changeSetStorageId);
 
 			if (Is.object<ISyncChangeSet<T>>(syncChangeSet)) {
 				const verified = await this.verifyChangesetProof(syncChangeSet);
@@ -148,7 +150,9 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 	): Promise<ISyncChangeSet<T> | undefined> {
 		const syncChangeset = await this.getAndVerifyChangeset(changeSetStorageId);
 
-		if (!Is.empty(syncChangeset)) {
+		// Only apply changesets from other nodes, we don't want to overwrite
+		// any changes we have made to local entity storage
+		if (!Is.empty(syncChangeset) && syncChangeset.nodeIdentity !== this._nodeIdentity) {
 			await this.applyChangeset(syncChangeset);
 		}
 
@@ -200,7 +204,8 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 								SynchronisedStorageTopics.RemoteItemRemove,
 								{
 									storageKey: syncChangeset.storageKey,
-									id: change.id
+									id: change.id,
+									nodeIdentity: syncChangeset.nodeIdentity
 								}
 							);
 						}
@@ -373,5 +378,28 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 				};
 			}
 		}
+	}
+
+	/**
+	 * Reset the storage for a given storage key.
+	 * @param storageKey The key of the storage to reset.
+	 * @param resetMode The reset mode, this will use the nodeIdentity in the entities to determine which are local/remote.
+	 * @returns Nothing.
+	 */
+	public async reset(storageKey: string, resetMode: SyncNodeIdentityMode): Promise<void> {
+		// If we are applying a consolidation we need to reset the local db
+		// but keep any entries from the local node, as they might have been updated
+		await this._logging?.log({
+			level: "info",
+			source: this.CLASS_NAME,
+			message: "storageReset",
+			data: {
+				storageKey
+			}
+		});
+		await this._eventBusComponent.publish<ISyncReset>(SynchronisedStorageTopics.Reset, {
+			storageKey,
+			resetMode
+		});
 	}
 }

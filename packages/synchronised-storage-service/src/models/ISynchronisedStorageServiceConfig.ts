@@ -36,6 +36,12 @@ export interface ISynchronisedStorageServiceConfig {
 	consolidationBatchSize?: number;
 
 	/**
+	 * The maximum number of consolidations to keep in storage.
+	 * @default 5
+	 */
+	maxConsolidations?: number;
+
+	/**
 	 * The encryption key id from the vault to use for blob storage, only required for trusted nodes, untrusted nodes will request the key.
 	 * @default synchronised-storage-blob-encryption-key
 	 */

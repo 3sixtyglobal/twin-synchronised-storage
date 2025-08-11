@@ -27,6 +27,11 @@ export const SynchronisedStorageTopics = {
 	LocalItemResponse: "synchronised-storage:local-item-response",
 
 	/**
+	 * Reset the storage.
+	 */
+	Reset: "synchronised-storage:reset",
+
+	/**
 	 * A request has been made for a batch.
 	 */
 	BatchRequest: "synchronised-storage:batch-request",

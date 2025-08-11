@@ -74,6 +74,20 @@ The number of entities to process in a single consolidation batch.
 
 ***
 
+### maxConsolidations?
+
+> `optional` **maxConsolidations**: `number`
+
+The maximum number of consolidations to keep in storage.
+
+#### Default
+
+```ts
+5
+```
+
+***
+
 ### blobStorageEncryptionKeyId?
 
 > `optional` **blobStorageEncryptionKeyId**: `string`

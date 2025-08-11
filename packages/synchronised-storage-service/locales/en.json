@@ -10,14 +10,18 @@
 			"createdChangeSetProof": "Created change proof for change set with id \"{id}\", proof value is \"{proofValue}\"",
 			"getChangeSet": "Retrieving change set with id \"{changeSetStorageId}\"",
 			"getChangeSetEmpty": "No change set found with id \"{changeSetStorageId}\"",
-			"copyChangeSet": "Copying change set with id \"{changeSetStorageId}\""
+			"copyChangeSet": "Copying change set with id \"{changeSetStorageId}\"",
+			"storageReset": "Resetting storage for storage key \"{storageKey}\""
 		},
 		"localSyncStateHelper": {
-			"getLocalChangeSnapshot": "Retrieving local change snapshot for storage key \"{storageKey}\"",
-			"localChangeSnapshotExists": "Found existing local change snapshot for storage key \"{storageKey}\"",
-			"localChangeSnapshotDoesNotExist": "No local change snapshot found for storage key \"{storageKey}\", creating new one",
+			"getSnapshots": "Retrieving snapshot for storage key \"{storageKey}\"",
+			"getSnapshotsExists": "Found existing snapshot for storage key \"{storageKey}\"",
+			"getSnapshotsDoesNotExist": "No local change snapshot found for storage key \"{storageKey}\", creating new one",
 			"applySyncState": "Syncing from remote state with \"{snapshotCount}\" snapshots",
 			"applySnapshot": "Processing sync snapshot with id \"{snapshotId}\" created on \"{dateCreated}\"",
+			"applySnapshotNoExisting": "There are no existing snapshots, find a consolidated snapshot for storage key \"{storageKey}\"",
+			"applySnapshotFoundConsolidated": "Found consolidated snapshot with id \"{snapshotId}\" for storage key \"{storageKey}\"",
+			"applySnapshotNoConsolidated": "No consolidated snapshot found, cannot apply sync state for storage key \"{storageKey}\"",
 			"processModifiedSnapshot": "Processing modified sync snapshot with id \"{snapshotId}\", remote modified on \"{remoteModified}\", local modified on \"{localModified}\"",
 			"processNewSnapshot": "Processing new sync snapshot with id \"{snapshotId}\", created on \"{dateCreated}\"",
 			"removeLocalChangeSnapshot": "Removing local change snapshot with id \"{snapshotId}\"",
@@ -29,10 +33,10 @@
 			"verifiableSyncPointerStoreNotFound": "No verifiable sync pointer store found for key \"{key}\"",
 			"verifiableSyncPointerStoreRetrieved": "Retrieved verifiable sync pointer for key \"{key}\"",
 			"verifiableSyncPointerStoreStoring": "Storing verifiable sync pointer store for key \"{key}\"",
-			"remoteSyncStateStoring": "Storing remote sync state entry with \"{snapshotCount}\" snapshots",
-			"remoteSyncStateRetrieving": "Retrieving remote sync state entry for syncPointerId \"{syncPointerId}\"",
-			"remoteSyncStateRetrieved": "Retrieving remote sync state entry for syncPointerId \"{syncPointerId}\" with \"{snapshotCount}\" snapshots",
-			"remoteSyncStateNotFound": "No remote sync state entry found for syncPointerId \"{syncPointerId}\"",
+			"syncStateStoring": "Storing sync state entry with \"{snapshotCount}\" snapshots",
+			"syncStateRetrieving": "Retrieving sync state entry for syncPointerId \"{syncPointerId}\"",
+			"syncStateRetrieved": "Retrieving sync state entry for syncPointerId \"{syncPointerId}\" with \"{snapshotCount}\" snapshots",
+			"syncStateNotFound": "No sync state entry found for syncPointerId \"{syncPointerId}\"",
 			"consolidationStarting": "Starting consolidation of remote sync state",
 			"consolidationCompleted": "Consolidation of remote sync state completed",
 			"addChangeSetToSyncState": "Adding change set with id \"{changeSetStorageId}\" to remote sync state for storage key \"{storageKey}\"",
@@ -58,7 +62,10 @@
 			"loadedBlob": "Loaded blob with id \"{blobId}\"",
 			"loadBlobEmpty": "No blob found with id \"{blobId}\"",
 			"saveBlob": "Saving blob",
-			"savedBlob": "Saved blob with id \"{blobId}\""
+			"savedBlob": "Saved blob with id \"{blobId}\"",
+			"removeBlob": "Removing blob with id \"{blobId}\"",
+			"removedBlob": "Removed blob with id \"{blobId}\"",
+			"removeBlobEmpty": "No blob found to remove with id \"{blobId}\""
 		}
 	},
 	"error": {

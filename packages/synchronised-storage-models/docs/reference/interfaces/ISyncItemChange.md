@@ -20,6 +20,14 @@ The operation being performed on the item.
 
 ***
 
+### nodeIdentity
+
+> **nodeIdentity**: `string`
+
+The node performing the operation.
+
+***
+
 ### id
 
 > **id**: `string`

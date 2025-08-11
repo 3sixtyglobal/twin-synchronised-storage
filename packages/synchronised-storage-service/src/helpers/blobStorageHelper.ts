@@ -81,7 +81,7 @@ export class BlobStorageHelper {
 	 * @param blobId The id of the blob to apply.
 	 * @returns The blob.
 	 */
-	public async load<T>(blobId: string): Promise<T | undefined> {
+	public async loadBlob<T>(blobId: string): Promise<T | undefined> {
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
@@ -195,5 +195,53 @@ export class BlobStorageHelper {
 			});
 			throw error;
 		}
+	}
+
+	/**
+	 * Remove a blob from storage.
+	 * @param blobId The id of the blob to remove.
+	 * @returns Nothing.
+	 */
+	public async removeBlob(blobId: string): Promise<void> {
+		await this._logging?.log({
+			level: "info",
+			source: this.CLASS_NAME,
+			message: "removeBlob",
+			data: {
+				blobId
+			}
+		});
+
+		try {
+			await this._blobStorageConnector.remove(blobId);
+
+			await this._logging?.log({
+				level: "info",
+				source: this.CLASS_NAME,
+				message: "removedBlob",
+				data: {
+					blobId
+				}
+			});
+		} catch (error) {
+			await this._logging?.log({
+				level: "error",
+				source: this.CLASS_NAME,
+				message: "removeBlobFailed",
+				data: {
+					blobId
+				},
+				error: BaseError.fromError(error)
+			});
+		}
+
+		await this._logging?.log({
+			level: "info",
+			source: this.CLASS_NAME,
+			message: "removeBlobEmpty",
+			data: {
+				blobId
+			}
+		});
 	}
 }

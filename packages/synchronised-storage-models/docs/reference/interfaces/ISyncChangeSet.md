@@ -34,9 +34,9 @@ The storage key of the change set. This is used to identify the entities being s
 
 ***
 
-### dateModified?
+### dateModified
 
-> `optional` **dateModified**: `string`
+> **dateModified**: `string`
 
 The date the change set was last modified.
 

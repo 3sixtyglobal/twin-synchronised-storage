@@ -18,6 +18,7 @@ import {
 	type ISyncChangeSet,
 	type ISynchronisedEntity,
 	type ISyncItemResponse,
+	SyncNodeIdentityMode,
 	SyncChangeOperation,
 	SynchronisedStorageTopics
 } from "@twin.org/synchronised-storage-models";
@@ -106,6 +107,12 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	private readonly _isTrustedNode: boolean;
 
 	/**
+	 * Maximum number of consolidations to keep in storage.
+	 * @internal
+	 */
+	private readonly _maxConsolidations: number;
+
+	/**
 	 * Create a new instance of DecentralisedEntityStorageConnector.
 	 * @param logging The logging connector to use for logging.
 	 * @param eventBusComponent The event bus component to use for events.
@@ -113,6 +120,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 * @param blobStorageHelper The blob storage helper to use for remote sync states.
 	 * @param changeSetHelper The change set helper to use for managing changesets.
 	 * @param isTrustedNode Whether the node is trusted or not.
+	 * @param maxConsolidations The maximum number of consolidations to keep in storage.
 	 */
 	constructor(
 		logging: ILoggingConnector | undefined,
@@ -120,7 +128,8 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 		verifiableSyncPointerStorageConnector: IVerifiableStorageConnector,
 		blobStorageHelper: BlobStorageHelper,
 		changeSetHelper: ChangeSetHelper<T>,
-		isTrustedNode: boolean
+		isTrustedNode: boolean,
+		maxConsolidations: number
 	) {
 		this._logging = logging;
 		this._eventBusComponent = eventBusComponent;
@@ -128,6 +137,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 		this._changeSetHelper = changeSetHelper;
 		this._blobStorageHelper = blobStorageHelper;
 		this._isTrustedNode = isTrustedNode;
+		this._maxConsolidations = maxConsolidations;
 
 		this._batchResponseStorageIds = {};
 		this._populateFullChanges = {};
@@ -256,9 +266,11 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 				}
 			}
 
+			const now = new Date(Date.now()).toISOString();
 			const syncChangeSet: ISyncChangeSet<T> = {
 				id: Converter.bytesToHex(RandomHelper.generate(32)),
-				dateCreated: new Date(Date.now()).toISOString(),
+				dateCreated: now,
+				dateModified: now,
 				storageKey,
 				changes,
 				nodeIdentity: this._nodeIdentity
@@ -317,12 +329,12 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 
 		let syncState: ISyncState | undefined;
 		if (!Is.empty(syncPointerStore.syncPointers[storageKey])) {
-			syncState = await this.getRemoteSyncState(syncPointerStore.syncPointers[storageKey]);
+			syncState = await this.getSyncState(syncPointerStore.syncPointers[storageKey]);
 		}
 
 		// No current sync state, so we create a new one
 		if (Is.empty(syncState)) {
-			syncState = { version: SYNC_STATE_VERSION, snapshots: [] };
+			syncState = { version: SYNC_STATE_VERSION, storageKey, snapshots: [] };
 		}
 
 		// Sort the snapshots so the newest snapshot is last in the array
@@ -334,12 +346,15 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 		let currentSnapshot: ISyncSnapshot | undefined = sortedSnapshots[sortedSnapshots.length - 1];
 		const now = new Date(Date.now()).toISOString();
 
-		if (Is.empty(currentSnapshot)) {
+		// If there is no snapshot or the current one is a consolidation
+		// we start a new snapshot
+		if (Is.empty(currentSnapshot) || currentSnapshot.isConsolidated) {
 			currentSnapshot = {
 				version: SYNC_SNAPSHOT_VERSION,
 				id: Converter.bytesToHex(RandomHelper.generate(32)),
 				dateCreated: now,
 				dateModified: now,
+				isConsolidated: false,
 				changeSetStorageIds: []
 			};
 			syncState.snapshots.push(currentSnapshot);
@@ -374,7 +389,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 		// Perform a batch request to start the consolidation
 		await this._eventBusComponent.publish<ISyncBatchRequest>(
 			SynchronisedStorageTopics.BatchRequest,
-			{ storageKey, batchSize }
+			{ storageKey, batchSize, requestMode: SyncNodeIdentityMode.All }
 		);
 	}
 
@@ -466,11 +481,42 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
-			message: "remoteSyncStateStoring",
+			message: "syncStateStoring",
 			data: {
 				snapshotCount: syncState.snapshots.length
 			}
 		});
+
+		// Limits the number of consolidations in the list so that we can shrink decentralised
+		// storage requirements, sort from newest to oldest so that we can easily find the
+		// oldest snapshots to remove.
+		const snapshots = syncState.snapshots.sort(
+			(a, b) => new Date(a.dateCreated).getTime() - new Date(b.dateCreated).getTime()
+		);
+
+		// Find all the consolidation indexes
+		const consolidationIndexes = [];
+		for (let i = 0; i < snapshots.length; i++) {
+			const snapshot = snapshots[i];
+			if (snapshot.isConsolidated) {
+				consolidationIndexes.push(i);
+			}
+		}
+
+		if (consolidationIndexes.length > this._maxConsolidations) {
+			// Once we have reached the max for consolidations we need to remove
+			// all the snapshots, including non consolidated ones, beyond this point
+			const toRemove = snapshots.slice(consolidationIndexes[this._maxConsolidations - 1] + 1);
+
+			syncState.snapshots = snapshots.slice(
+				0,
+				consolidationIndexes[this._maxConsolidations - 1] + 1
+			);
+
+			for (const snapshot of toRemove) {
+				await this._blobStorageHelper.removeBlob(snapshot.id);
+			}
+		}
 
 		return this._blobStorageHelper.saveBlob(syncState);
 	}
@@ -480,23 +526,23 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 * @param syncPointerId The id of the sync pointer to retrieve the state for.
 	 * @returns The remote sync state.
 	 */
-	public async getRemoteSyncState(syncPointerId: string): Promise<ISyncState | undefined> {
+	public async getSyncState(syncPointerId: string): Promise<ISyncState | undefined> {
 		try {
 			await this._logging?.log({
 				level: "info",
 				source: this.CLASS_NAME,
-				message: "remoteSyncStateRetrieving",
+				message: "syncStateRetrieving",
 				data: {
 					syncPointerId
 				}
 			});
-			const syncState = await this._blobStorageHelper.load<ISyncState>(syncPointerId);
+			const syncState = await this._blobStorageHelper.loadBlob<ISyncState>(syncPointerId);
 
 			if (Is.object(syncState)) {
 				await this._logging?.log({
 					level: "info",
 					source: this.CLASS_NAME,
-					message: "remoteSyncStateRetrieved",
+					message: "syncStateRetrieved",
 					data: {
 						syncPointerId,
 						snapshotCount: syncState.snapshots.length
@@ -519,7 +565,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
-			message: "remoteSyncStateNotFound",
+			message: "syncStateNotFound",
 			data: {
 				syncPointerId
 			}
@@ -566,24 +612,27 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 
 				if (Is.stringValue(syncPointerStore.syncPointers[response.storageKey])) {
 					// If the sync pointer exists, we load the current sync state
-					syncState = await this.getRemoteSyncState(
-						syncPointerStore.syncPointers[response.storageKey]
-					);
+					syncState = await this.getSyncState(syncPointerStore.syncPointers[response.storageKey]);
 				}
 
 				// If the sync state does not exist, we create a new one
-				syncState ??= { version: SYNC_STATE_VERSION, snapshots: [] };
+				syncState ??= {
+					version: SYNC_STATE_VERSION,
+					storageKey: response.storageKey,
+					snapshots: []
+				};
 
 				const batchSnapshot: ISyncSnapshot = {
 					version: SYNC_SNAPSHOT_VERSION,
 					id: Converter.bytesToHex(RandomHelper.generate(32)),
 					dateCreated: now,
 					dateModified: now,
+					isConsolidated: true,
 					changeSetStorageIds: this._batchResponseStorageIds[response.storageKey]
 				};
 				syncState.snapshots.push(batchSnapshot);
 
-				// Store the sync state in the blob storage
+				// Store the updated sync state
 				const syncStateId = await this.storeRemoteSyncState(syncState);
 
 				syncPointerStore.syncPointers[response.storageKey] = syncStateId;
@@ -618,6 +667,8 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 				id: response.id
 			}
 		});
+		// We have received a response to an item request, find the right storage
+		// for the request id
 		if (!Is.empty(this._populateFullChanges[response.storageKey])) {
 			const idx = this._populateFullChanges[response.storageKey].requestIds.indexOf(response.id);
 
@@ -625,6 +676,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 				this._populateFullChanges[response.storageKey].requestIds.splice(idx, 1);
 				this._populateFullChanges[response.storageKey].entities[response.id] = response.entity;
 
+				// If there are no request ids remaining we can complete the population
 				if (this._populateFullChanges[response.storageKey].requestIds.length === 0) {
 					await this._populateFullChanges[response.storageKey].completeCallback();
 				}

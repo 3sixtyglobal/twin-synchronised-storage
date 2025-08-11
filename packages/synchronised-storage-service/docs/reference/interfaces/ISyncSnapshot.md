@@ -36,6 +36,14 @@ The date the snapshot was last modified.
 
 ***
 
+### isConsolidated
+
+> **isConsolidated**: `boolean`
+
+Is this a consolidated snapshot?
+
+***
+
 ### changeSetStorageIds
 
 > **changeSetStorageIds**: `string`[]

@@ -12,6 +12,14 @@ The version of the sync state.
 
 ***
 
+### storageKey
+
+> **storageKey**: `string`
+
+The storage type contained in the sync state.
+
+***
+
 ### snapshots
 
 > **snapshots**: [`ISyncSnapshot`](ISyncSnapshot.md)[]

@@ -37,6 +37,7 @@ import {
 import { LoggingConnectorFactory } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
 import {
+	type ISyncChangeSet,
 	type ISyncItemChange,
 	type ISyncItemRequest,
 	type ISyncItemResponse,
@@ -59,6 +60,7 @@ import {
 import { VerifiableStorageConnectorFactory } from "@twin.org/verifiable-storage-models";
 import type { SyncSnapshotEntry } from "../src/entities/syncSnapshotEntry";
 import type { ISyncPointerStore } from "../src/models/ISyncPointerStore";
+import type { ISyncState } from "../src/models/ISyncState";
 import { initSchema } from "../src/schema";
 import { SynchronisedStorageService } from "../src/synchronisedStorageService";
 
@@ -139,11 +141,19 @@ async function waitForLogEntries(
 	store: MemoryEntityStorageConnector<LogEntry>,
 	count: number
 ): Promise<void> {
+	let retries = 0;
 	let logEntries: LogEntry[] = [];
 	do {
 		logEntries = store.getStore();
 		await new Promise(resolve => setTimeout(resolve, 100));
-	} while (logEntries.length < count);
+		if (logEntries.length >= count) {
+			return;
+		}
+		retries++;
+	} while (retries < 100);
+
+	// eslint-disable-next-line no-restricted-syntax
+	throw new Error("Failed while waiting for log entries");
 }
 
 describe("synchronisedStorageService", () => {
@@ -367,14 +377,14 @@ describe("synchronisedStorageService", () => {
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 
+		await connector.start(testNodeIdentity, "node-logging");
+
 		await eventBusConnector.publish<ISyncRegisterStorageKey>(
 			SynchronisedStorageTopics.RegisterStorageKey,
 			{
 				storageKey: "test-type"
 			}
 		);
-
-		await connector.start(testNodeIdentity, "node-logging");
 
 		const logStore = loggingMemoryEntityStorage.getStore();
 		expect(logStore.map(e => e.message)).toEqual([
@@ -385,8 +395,8 @@ describe("synchronisedStorageService", () => {
 			"verifiableSyncPointerStoreRetrieving",
 			"verifiableSyncPointerStoreNotFound",
 			"updateFromLocalSyncState",
-			"getLocalChangeSnapshot",
-			"localChangeSnapshotDoesNotExist",
+			"getSnapshots",
+			"getSnapshotsDoesNotExist",
 			"updateFromLocalSyncStateNoChanges"
 		]);
 	});
@@ -415,8 +425,8 @@ describe("synchronisedStorageService", () => {
 			"verifiableSyncPointerStoreRetrieving",
 			"verifiableSyncPointerStoreNotFound",
 			"updateFromLocalSyncState",
-			"getLocalChangeSnapshot",
-			"localChangeSnapshotDoesNotExist",
+			"getSnapshots",
+			"getSnapshotsDoesNotExist",
 			"updateFromLocalSyncStateNoChanges"
 		]);
 	});
@@ -438,17 +448,21 @@ describe("synchronisedStorageService", () => {
 		await eventBusConnector.publish<ISyncItemChange>(SynchronisedStorageTopics.LocalItemChange, {
 			id: "test-id-1",
 			storageKey: "test-type",
+			nodeIdentity: testNodeIdentity,
 			operation: "set"
 		});
 
 		const localSnapshots = syncSnapshotStorageConnector.getStore();
 		expect(localSnapshots).toEqual([
 			{
+				version: "1",
 				id: "f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0",
 				storageKey: "test-type",
-				dateCreated: expect.any(String),
+				dateCreated: "2025-05-29T01:00:00.000Z",
+				dateModified: "2025-05-29T01:00:00.000Z",
 				changeSetStorageIds: [],
-				isLocalSnapshot: true,
+				isLocal: true,
+				isConsolidated: false,
 				changes: [
 					{
 						operation: "set",
@@ -467,12 +481,12 @@ describe("synchronisedStorageService", () => {
 			"verifiableSyncPointerStoreRetrieving",
 			"verifiableSyncPointerStoreNotFound",
 			"updateFromLocalSyncState",
-			"getLocalChangeSnapshot",
-			"localChangeSnapshotDoesNotExist",
+			"getSnapshots",
+			"getSnapshotsDoesNotExist",
 			"updateFromLocalSyncStateNoChanges",
 			"addLocalChange",
-			"getLocalChangeSnapshot",
-			"localChangeSnapshotDoesNotExist",
+			"getSnapshots",
+			"getSnapshotsDoesNotExist",
 			"setLocalChangeSnapshot"
 		]);
 	});
@@ -498,23 +512,28 @@ describe("synchronisedStorageService", () => {
 		await eventBusConnector.publish<ISyncItemChange>(SynchronisedStorageTopics.LocalItemChange, {
 			storageKey: "test-type",
 			id: "test-id-1",
+			nodeIdentity: testNodeIdentity,
 			operation: "set"
 		});
 
 		await eventBusConnector.publish<ISyncItemChange>(SynchronisedStorageTopics.LocalItemChange, {
 			storageKey: "test-type",
 			id: "test-id-1",
+			nodeIdentity: testNodeIdentity,
 			operation: "delete"
 		});
 
 		const localSnapshots = syncSnapshotStorageConnector.getStore();
 		expect(localSnapshots).toEqual([
 			{
+				version: "1",
 				id: "f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0",
 				storageKey: "test-type",
-				dateCreated: expect.any(String),
+				dateCreated: "2025-05-29T01:00:00.000Z",
+				dateModified: "2025-05-29T01:00:00.000Z",
 				changeSetStorageIds: [],
-				isLocalSnapshot: true,
+				isLocal: true,
+				isConsolidated: false,
 				changes: [
 					{
 						operation: "delete",
@@ -533,16 +552,16 @@ describe("synchronisedStorageService", () => {
 			"verifiableSyncPointerStoreRetrieving",
 			"verifiableSyncPointerStoreNotFound",
 			"updateFromLocalSyncState",
-			"getLocalChangeSnapshot",
-			"localChangeSnapshotDoesNotExist",
+			"getSnapshots",
+			"getSnapshotsDoesNotExist",
 			"updateFromLocalSyncStateNoChanges",
 			"addLocalChange",
-			"getLocalChangeSnapshot",
-			"localChangeSnapshotDoesNotExist",
+			"getSnapshots",
+			"getSnapshotsDoesNotExist",
 			"setLocalChangeSnapshot",
 			"addLocalChange",
-			"getLocalChangeSnapshot",
-			"localChangeSnapshotExists",
+			"getSnapshots",
+			"getSnapshotsExists",
 			"setLocalChangeSnapshot"
 		]);
 	});
@@ -556,29 +575,16 @@ describe("synchronisedStorageService", () => {
 			}
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
+		await connector.start(testNodeIdentity, "node-logging");
 
 		await verifiableStorage.set({
 			id: verifiableStorageKeyId.split(":")[2],
-			creator:
-				"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
-			data: Converter.bytesToBase64(ObjectHelper.toBytes({ version: "1", syncPointers: {} })),
-			allowList: [
-				"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0"
-			],
+			creator: testNodeIdentity,
+			data: Converter.bytesToBase64(
+				ObjectHelper.toBytes({ version: "1", storageKey: "test-type", syncPointers: {} })
+			),
+			allowList: [testNodeIdentity],
 			maxAllowListSize: 100
-		});
-
-		await eventBusConnector.publish<ISyncRegisterStorageKey>(
-			SynchronisedStorageTopics.RegisterStorageKey,
-			{
-				storageKey: "test-type"
-			}
-		);
-
-		await eventBusConnector.publish<ISyncItemChange>(SynchronisedStorageTopics.LocalItemChange, {
-			storageKey: "test-type",
-			id: "test-id-1",
-			operation: "set"
 		});
 
 		await eventBusConnector.subscribe<ISyncItemRequest>(
@@ -599,42 +605,60 @@ describe("synchronisedStorageService", () => {
 			}
 		);
 
+		await eventBusConnector.publish<ISyncItemChange>(SynchronisedStorageTopics.LocalItemChange, {
+			storageKey: "test-type",
+			id: "test-id-1",
+			nodeIdentity: testNodeIdentity,
+			operation: "set"
+		});
+
+		await eventBusConnector.publish<ISyncRegisterStorageKey>(
+			SynchronisedStorageTopics.RegisterStorageKey,
+			{
+				storageKey: "test-type"
+			}
+		);
+
 		const localSnapshots = syncSnapshotStorageConnector.getStore();
 		expect(localSnapshots).toEqual([
 			{
-				id: "e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4",
+				version: "1",
+				id: "e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3",
 				storageKey: "test-type",
 				dateCreated: "2025-05-29T01:00:00.000Z",
+				dateModified: "2025-05-29T01:00:00.000Z",
 				changeSetStorageIds: [],
-				isLocalSnapshot: true,
+				isLocal: true,
+				isConsolidated: false,
 				changes: [
 					{
 						operation: "set",
-						id: "test-id-1"
+						id: "test-id-1",
+						entity: {
+							dateModified: "2025-01-01T00:00:00.000Z"
+						}
 					}
 				]
 			}
 		]);
 
-		await connector.start(testNodeIdentity, "node-logging");
-
 		await waitForLogEntries(loggingMemoryEntityStorage, 20);
 
 		const logStore = loggingMemoryEntityStorage.getStore();
 		expect(logStore.map(e => e.message)).toEqual([
-			"registerStorageKey",
 			"addLocalChange",
-			"getLocalChangeSnapshot",
-			"localChangeSnapshotDoesNotExist",
+			"getSnapshots",
+			"getSnapshotsDoesNotExist",
 			"setLocalChangeSnapshot",
+			"registerStorageKey",
 			"activateStorageKey",
 			"startEntitySync",
 			"updateFromRemoteSyncState",
 			"verifiableSyncPointerStoreRetrieving",
 			"verifiableSyncPointerStoreRetrieved",
 			"updateFromLocalSyncState",
-			"getLocalChangeSnapshot",
-			"localChangeSnapshotExists",
+			"getSnapshots",
+			"getSnapshotsExists",
 			"buildingChangeSet",
 			"createChangeSetRequestingItem",
 			"createChangeSetRespondingItem",
@@ -647,7 +671,7 @@ describe("synchronisedStorageService", () => {
 			"addChangeSetToSyncState",
 			"verifiableSyncPointerStoreRetrieving",
 			"verifiableSyncPointerStoreRetrieved",
-			"remoteSyncStateStoring",
+			"syncStateStoring",
 			"saveBlob",
 			"savedBlob",
 			"verifiableSyncPointerStoreStoring",
@@ -658,20 +682,18 @@ describe("synchronisedStorageService", () => {
 		expect(verifiableStore).toEqual([
 			{
 				id: verifiableStorageKeyId.split(":")[2],
-				creator:
-					"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+				creator: testNodeIdentity,
 				data: Converter.bytesToBase64(
 					ObjectHelper.toBytes({
 						version: "1",
+						storageKey: "test-type",
 						syncPointers: {
 							"test-type":
-								"blob:memory:a71bc27d2423a59a1d8300eb1d649447ee8400c618bb9ec92a7271165b7341bf"
+								"blob:memory:a5eea4171e5ac6161ad047a92fff28d7f4087265eca256567168046caecf5b55"
 						}
 					})
 				),
-				allowList: [
-					"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0"
-				],
+				allowList: [testNodeIdentity],
 				maxAllowListSize: 100
 			}
 		]);
@@ -679,8 +701,9 @@ describe("synchronisedStorageService", () => {
 		const verifiable = ObjectHelper.fromBytes(Converter.base64ToBytes(verifiableStore[0].data));
 		expect(verifiable).toEqual({
 			version: "1",
+			storageKey: "test-type",
 			syncPointers: {
-				"test-type": "blob:memory:a71bc27d2423a59a1d8300eb1d649447ee8400c618bb9ec92a7271165b7341bf"
+				"test-type": "blob:memory:a5eea4171e5ac6161ad047a92fff28d7f4087265eca256567168046caecf5b55"
 			}
 		});
 
@@ -693,15 +716,20 @@ describe("synchronisedStorageService", () => {
 			blobs[blobKey] = Converter.bytesToBase64(blobStorageStore[blobKey]);
 		}
 		expect(blobs).toEqual({
-			"95756e5e2263b7784e139ba4cb28230787d19684c40eae9a34521fc3feee26db":
-				"7u7u7u7u7u4fiwgAAAAAAAADtVHLbtswEPyX7ZWyKKoOWp76SNOmqQMHEGQjQQ+suJLopiRNrmPThv+9kOIEPRYIgj0RM5yZnT2A0SChVS8bYKAV4eeAinAQFFxMMz7NxPuKF5JzyfmEc34LDCK5oDq8wgQSCCNllDwCg6ZXtsMI8u4AzmNQZJwFCREJ2GPOkW50VgADtGQogTyM1jOnTWv+8S4yXlSj8bP38fiTgXUaL/XTZ9BGy8dHdgom+U7zlw0w8MG5dgj3oXGWcEcgoSfyUeb5drudbMuJC11uY94EHOOo+5g/CGAw1iHhXJG6tIRdMJTmoxyDJiRPLm4MDRTUOqps1cRMcCFG+D8O8IDBtKYZ650h9U6/Vg9vYrJNH5w1EfWTbqZixDDe9lTTfBO8i8NCz9Ap14lQq/vNAO/LP+8WX34sqdAXZwvfxJVPDhe7unbiwlz9orpM5fXZ12snKtrvq5lFsbyZ/u7LTnzzn4q6rNZ1t0lv5+16+bG8na92hfm+NudwPP4Fk4z19goDAAA=",
-			a71bc27d2423a59a1d8300eb1d649447ee8400c618bb9ec92a7271165b7341bf:
-				"7u7u7u7u7u4fiwgAAAAAAAADpY+9CsIwFEbf5c5Vbm6Spsnq5OCkk+KQNLc/YBtpgyDSd5eCk4uDnPE7fHBe8OBp7tMIDgQUMI/+Pncpz+Aur6+tj+AA5X9AAdFn3k3sM6+HhKQ3qDdkTygcokPcIuL5Ix5S7Jv+l1l3fmz5yPmY0+Rb3sc1AMItBTfwkKans9rokjUTlTIYUykW0gav6kAVSTSVicKWlaoVsmfrpdIkmlo2zExlDHBdrssbjLpWwi8BAAA="
+			fdf51549a05883e7b868d84f7cfb23e5f2c4fb0cb9e6dd5b64f9d9c2c3f8235e:
+				"7u7u7u7u7u4fiwgAAAAAAAADtVFdTxsxEPwvy+s55zhHIH4iUBUoRErV0PChPrjnvTunxDb2huOI8t+rOw6ekFoJoX2yZjwzO7sFo0FCoT42kIBWhCcBFWErKLjYZ3yficmCDyXnkvMB5/y2J86cNoX5FzOSC6rEC2xAAmEkRo1HSCCvlC0xgrzbgvMYFBlnQUJEguRlo45uNBtCAmjJUANy+773kPHhojN+897tfiVgncZz/foZtNHy5cH6YJI/af6xgQR8cK5owx3lzhI+EUioiHyUaVrX9aAeDVwoUxvTPGAXR93H9FFAAl0dEr4oUueWsAyGmnknl0AeGk8ubgy1FNQ6KrbKIxNciA7+j1M9YjCFybt6Z0iV05/Vw15sbF4FZ01E/arLVIwYutv2Nc03wbvYLvQG9bl6wk91v2nh56vpBOssu1T2bP07PODBphDZ9Wg5PfQHk2pclWY9vcTixv/B5en1WF9Novq+/mqK8egk+1ad3j7czEWmf2TzTD0vR7OVWxz64xXsdn8BDyXZhzMDAAA=",
+			a5eea4171e5ac6161ad047a92fff28d7f4087265eca256567168046caecf5b55:
+				"7u7u7u7u7u4fiwgAAAAAAAADpY8xa8MwEIX/y812OUuWI2vNFEqndGrJIOnuEoFjBUsUTMh/LyadunQob3zvffDd4YuXkvIMDjpooNS8+DO/8goOKpfa1vXGWzH7W7nkWsB93n+dEoED1P8LNEC+8n5hX3kDKlSmRdOq8R07h+gQXxDx42f4lilJ+muZyj7PJU+JnlTxU+EG4sXPZz5yPT59D7R5QZhycFe+5mV1QmI6048ejbWad8EOlmwvuyhBaTaiYi8BYxh5IDJh6GWkMaqoxSptGE6P0+Mb5/LBH18BAAA="
 		});
 
 		expect(
-			await expandObject(blobs["95756e5e2263b7784e139ba4cb28230787d19684c40eae9a34521fc3feee26db"])
+			await expandObject(blobs.fdf51549a05883e7b868d84f7cfb23e5f2c4fb0cb9e6dd5b64f9d9c2c3f8235e)
 		).toEqual({
+			id: "fafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafa",
+			dateCreated: "2025-05-29T01:00:00.000Z",
+			dateModified: "2025-05-29T01:00:00.000Z",
+			storageKey: "test-type",
+			nodeIdentity: testNodeIdentity,
 			changes: [
 				{
 					entity: {
@@ -711,37 +739,33 @@ describe("synchronisedStorageService", () => {
 					operation: "set"
 				}
 			],
-			dateCreated: "2025-05-29T01:00:00.000Z",
-			id: "fafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafa",
-			nodeIdentity:
-				"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
 			proof: {
 				"@context": "https://www.w3.org/ns/credentials/v2",
 				created: "2025-05-29T01:00:00.000Z",
 				cryptosuite: "eddsa-jcs-2022",
 				proofPurpose: "assertionMethod",
 				proofValue:
-					"z3m8WELXt1dF6WpcsjpyoeWxVVo2FiKbtV3y3N6GNo2TtzzTMne2XQ5kh3g2HpB1V3TqVguy4PfqXA3ZPjx1iJqiD",
+					"zUA9ew44LanHmbrqe7uf24X3WA8p79h6hgimALefYpkeWGX6dU9saQmFif63C4JhGZqYP24dS4P4azW3MjoT8pBj",
 				type: "DataIntegrityProof",
-				verificationMethod:
-					"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0#synchronised-storage-assertion"
-			},
-			storageKey: "test-type"
+				verificationMethod: `${testNodeIdentity}#synchronised-storage-assertion`
+			}
 		});
 
 		expect(
-			await expandObject(blobs.a71bc27d2423a59a1d8300eb1d649447ee8400c618bb9ec92a7271165b7341bf)
+			await expandObject(blobs.a5eea4171e5ac6161ad047a92fff28d7f4087265eca256567168046caecf5b55)
 		).toEqual({
 			version: "1",
+			storageKey: "test-type",
 			snapshots: [
 				{
 					version: "1",
-					changeSetStorageIds: [
-						"blob:memory:95756e5e2263b7784e139ba4cb28230787d19684c40eae9a34521fc3feee26db"
-					],
+					id: "0303030303030303030303030303030303030303030303030303030303030303",
 					dateCreated: "2025-05-29T01:00:00.000Z",
 					dateModified: "2025-05-29T01:00:00.000Z",
-					id: "0303030303030303030303030303030303030303030303030303030303030303"
+					isConsolidated: false,
+					changeSetStorageIds: [
+						"blob:memory:fdf51549a05883e7b868d84f7cfb23e5f2c4fb0cb9e6dd5b64f9d9c2c3f8235e"
+					]
 				}
 			]
 		});
@@ -756,13 +780,7 @@ describe("synchronisedStorageService", () => {
 			}
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
-
-		await eventBusConnector.publish<ISyncRegisterStorageKey>(
-			SynchronisedStorageTopics.RegisterStorageKey,
-			{
-				storageKey: "test-type"
-			}
-		);
+		await connector.start(testNodeIdentity, "node-logging");
 
 		let remoteData;
 
@@ -773,73 +791,77 @@ describe("synchronisedStorageService", () => {
 			}
 		);
 
-		await blobStorageConnector.set(
-			await Compression.compress(
-				ObjectHelper.toBytes({
-					id: "f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8",
-					dateCreated: "2025-05-29T07:00:00.000Z",
-					storageKey: "test-type",
-					changes: [
-						{
-							operation: "set",
-							id: "test-id-1",
-							entity: { id: "test-id-1", dateModified: "2025-01-01T00:00:00.000Z" }
-						}
-					],
-					nodeIdentity:
-						"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
-					proof: {
-						"@context": "https://www.w3.org/ns/credentials/v2",
-						type: "DataIntegrityProof",
-						cryptosuite: "eddsa-jcs-2022",
-						created: "2025-05-29T07:00:00.000Z",
-						verificationMethod:
-							"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0#synchronised-storage-assertion",
-						proofPurpose: "assertionMethod",
-						proofValue:
-							"z4f3Knb6vVTjyL4tiWzVnc3KxAnDpJZjKFED9r7MA2r4RHh2dboZGQtbT4adMARiwNPCk2PqrzS2AA3RajZ6pWZXX"
-					}
-				}),
-				"gzip"
-			)
+		const changeSet: ISyncChangeSet = {
+			id: "fafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafa",
+			dateCreated: "2025-05-29T01:00:00.000Z",
+			dateModified: "2025-05-29T01:00:00.000Z",
+			storageKey: "test-type",
+			nodeIdentity: testNodeIdentityUntrusted,
+			changes: [
+				{
+					entity: {
+						dateModified: "2025-01-01T00:00:00.000Z"
+					},
+					id: "test-id-1",
+					operation: "set"
+				}
+			],
+			proof: {
+				"@context": "https://www.w3.org/ns/credentials/v2",
+				created: "2025-05-29T01:00:00.000Z",
+				cryptosuite: "eddsa-jcs-2022",
+				proofPurpose: "assertionMethod",
+				proofValue:
+					"z3MzHDwnYUqZqTnYzxbzxkkWgy54oyXn4EpxCV7CtMgn7LMpxccX3im83Yz6isyvo9YpT7jmS9JqNMVZUw58C3cb8",
+				type: "DataIntegrityProof",
+				verificationMethod: `${testNodeIdentityUntrusted}#synchronised-storage-assertion`
+			}
+		};
+
+		const blobChangeSetId = await blobStorageConnector.set(
+			await Compression.compress(ObjectHelper.toBytes(changeSet), "gzip")
 		);
 
-		await blobStorageConnector.set(
-			await Compression.compress(
-				ObjectHelper.toBytes({
-					snapshots: [
-						{
-							id: "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-							dateCreated: "2025-05-29T07:00:00.000Z",
-							changeSetStorageIds: [
-								"blob:memory:6cd9c358696f5885e37542955d68b7bf71f0ef53e46a65b3c1873ca0e7dcc3f4"
-							]
-						}
-					]
-				}),
-				"gzip"
-			)
+		const syncState: ISyncState = {
+			version: "1",
+			storageKey: "test-type",
+			snapshots: [
+				{
+					version: "1",
+					id: "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+					dateCreated: "2025-05-29T07:00:00.000Z",
+					dateModified: "2025-05-29T07:00:00.000Z",
+					isConsolidated: false,
+					changeSetStorageIds: [blobChangeSetId]
+				}
+			]
+		};
+
+		const blobSnapshotId = await blobStorageConnector.set(
+			await Compression.compress(ObjectHelper.toBytes(syncState), "gzip")
 		);
 
 		const verifiableSyncPointerStore: ISyncPointerStore = {
 			version: "1",
 			syncPointers: {
-				"test-type": "blob:memory:2c3b0902f988e9d1805a28e901b1bbc132d9b5c83eeed1199bf416a13c211fc2"
+				"test-type": blobSnapshotId
 			}
 		};
 
 		await verifiableStorage.set({
 			id: verifiableStorageKeyId.split(":")[2],
-			creator:
-				"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+			creator: testNodeIdentity,
 			data: Converter.bytesToBase64(ObjectHelper.toBytes(verifiableSyncPointerStore)),
-			allowList: [
-				"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0"
-			],
+			allowList: [testNodeIdentity],
 			maxAllowListSize: 100
 		});
 
-		await connector.start(testNodeIdentity, "node-logging");
+		await eventBusConnector.publish<ISyncRegisterStorageKey>(
+			SynchronisedStorageTopics.RegisterStorageKey,
+			{
+				storageKey: "test-type"
+			}
+		);
 
 		const logStore = loggingMemoryEntityStorage.getStore();
 		expect(logStore.map(e => e.message)).toEqual([
@@ -849,11 +871,13 @@ describe("synchronisedStorageService", () => {
 			"updateFromRemoteSyncState",
 			"verifiableSyncPointerStoreRetrieving",
 			"verifiableSyncPointerStoreRetrieved",
-			"remoteSyncStateRetrieving",
+			"syncStateRetrieving",
 			"loadBlob",
 			"loadedBlob",
-			"remoteSyncStateRetrieved",
+			"syncStateRetrieved",
 			"applySyncState",
+			"getSnapshots",
+			"getSnapshotsDoesNotExist",
 			"applySnapshot",
 			"processNewSnapshot",
 			"getChangeSet",
@@ -862,8 +886,8 @@ describe("synchronisedStorageService", () => {
 			"verifyChangeSetProofValid",
 			"changeSetApplyingChange",
 			"updateFromLocalSyncState",
-			"getLocalChangeSnapshot",
-			"localChangeSnapshotDoesNotExist",
+			"getSnapshots",
+			"getSnapshotsDoesNotExist",
 			"updateFromLocalSyncStateNoChanges"
 		]);
 
@@ -872,8 +896,7 @@ describe("synchronisedStorageService", () => {
 				entity: {
 					dateModified: "2025-01-01T00:00:00.000Z",
 					id: "test-id-1",
-					nodeIdentity:
-						"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0"
+					nodeIdentity: testNodeIdentityUntrusted
 				},
 				storageKey: "test-type"
 			},
@@ -885,12 +908,16 @@ describe("synchronisedStorageService", () => {
 		const localSnapshots = syncSnapshotStorageConnector.getStore();
 		expect(localSnapshots).toEqual([
 			{
-				changeSetStorageIds: [
-					"blob:memory:6cd9c358696f5885e37542955d68b7bf71f0ef53e46a65b3c1873ca0e7dcc3f4"
-				],
-				dateCreated: "2025-05-29T07:00:00.000Z",
+				version: "1",
 				id: "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-				storageKey: "test-type"
+				dateCreated: "2025-05-29T07:00:00.000Z",
+				dateModified: "2025-05-29T07:00:00.000Z",
+				storageKey: "test-type",
+				isLocal: false,
+				isConsolidated: false,
+				changeSetStorageIds: [
+					"blob:memory:88a32fb95e67da4ef8b28091ce85c127e465873717dc4727839391707e704ed8"
+				]
 			}
 		]);
 	});
@@ -913,32 +940,18 @@ describe("synchronisedStorageService", () => {
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 
+		await connector.start(testNodeIdentityUntrusted, "node-logging");
+		await connectorTrusted.start(testNodeIdentity, "node-logging");
+
 		await verifiableStorage.set({
 			id: verifiableStorageKeyId.split(":")[2],
-			creator:
-				"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
-			data: Converter.bytesToBase64(ObjectHelper.toBytes({ version: "1", syncPointers: {} })),
-			allowList: [
-				"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0"
-			],
+			creator: testNodeIdentity,
+			data: Converter.bytesToBase64(
+				ObjectHelper.toBytes({ version: "1", storageKey: "test-type", syncPointers: {} })
+			),
+			allowList: [testNodeIdentity],
 			maxAllowListSize: 100
 		});
-
-		await eventBusUntrustedConnector.publish<ISyncRegisterStorageKey>(
-			SynchronisedStorageTopics.RegisterStorageKey,
-			{
-				storageKey: "test-type"
-			}
-		);
-
-		await eventBusUntrustedConnector.publish<ISyncItemChange>(
-			SynchronisedStorageTopics.LocalItemChange,
-			{
-				storageKey: "test-type",
-				id: "test-id-1",
-				operation: "set"
-			}
-		);
 
 		await eventBusUntrustedConnector.subscribe<ISyncItemRequest>(
 			SynchronisedStorageTopics.LocalItemRequest,
@@ -958,26 +971,40 @@ describe("synchronisedStorageService", () => {
 			}
 		);
 
-		await connector.start(testNodeIdentityUntrusted, "node-logging");
-		await connectorTrusted.start(testNodeIdentity, "node-logging");
+		await eventBusUntrustedConnector.publish<ISyncItemChange>(
+			SynchronisedStorageTopics.LocalItemChange,
+			{
+				storageKey: "test-type",
+				id: "test-id-1",
+				nodeIdentity: testNodeIdentityUntrusted,
+				operation: "set"
+			}
+		);
+
+		await eventBusUntrustedConnector.publish<ISyncRegisterStorageKey>(
+			SynchronisedStorageTopics.RegisterStorageKey,
+			{
+				storageKey: "test-type"
+			}
+		);
 
 		await waitForLogEntries(loggingUntrustedMemoryEntityStorage, 20);
 
 		const logStoreUntrusted = loggingUntrustedMemoryEntityStorage.getStore();
 		expect(logStoreUntrusted.map(e => e.message)).toEqual([
-			"registerStorageKey",
 			"addLocalChange",
-			"getLocalChangeSnapshot",
-			"localChangeSnapshotDoesNotExist",
+			"getSnapshots",
+			"getSnapshotsDoesNotExist",
 			"setLocalChangeSnapshot",
+			"registerStorageKey",
 			"activateStorageKey",
 			"startEntitySync",
 			"updateFromRemoteSyncState",
 			"verifiableSyncPointerStoreRetrieving",
 			"verifiableSyncPointerStoreRetrieved",
 			"updateFromLocalSyncState",
-			"getLocalChangeSnapshot",
-			"localChangeSnapshotExists",
+			"getSnapshots",
+			"getSnapshotsExists",
 			"buildingChangeSet",
 			"createChangeSetRequestingItem",
 			"createChangeSetRespondingItem",
@@ -1001,7 +1028,7 @@ describe("synchronisedStorageService", () => {
 			"addChangeSetToSyncState",
 			"verifiableSyncPointerStoreRetrieving",
 			"verifiableSyncPointerStoreRetrieved",
-			"remoteSyncStateStoring",
+			"syncStateStoring",
 			"saveBlob",
 			"savedBlob",
 			"verifiableSyncPointerStoreStoring"
@@ -1010,20 +1037,18 @@ describe("synchronisedStorageService", () => {
 		expect(verifiableStorage.getStore()).toEqual([
 			{
 				id: "11111111111111111111111111111111",
-				creator:
-					"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+				creator: testNodeIdentity,
 				data: Converter.bytesToBase64(
 					ObjectHelper.toBytes({
 						version: "1",
+						storageKey: "test-type",
 						syncPointers: {
 							"test-type":
-								"blob:memory:2c9d87d98e9e14562088c172388ad7ff6e5b4dc7c71defc5e7fb8d96cc334be7"
+								"blob:memory:82db5626ee5602221fd35a97b7821eaec56c331bd2d3241f4a7c49dcf999deb3"
 						}
 					})
 				),
-				allowList: [
-					"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0"
-				],
+				allowList: [testNodeIdentity],
 				maxAllowListSize: 100
 			}
 		]);
@@ -1034,31 +1059,33 @@ describe("synchronisedStorageService", () => {
 			blobs[blobKey] = Converter.bytesToBase64(blobStorageStore[blobKey]);
 		}
 		expect(blobs).toEqual({
-			"06850545808262cbab3d614d9ac4adaf624aede0beb0531f8bec15dd14813fcb":
-				"7u7u7u7u7u4fiwgAAAAAAAADpVFBbtswEPzL9ipZFAWhEE+NnbYJXBdxJNRxih4Ici3TTUiBXFtSDP+9kOIEvRQoYMyJ2NmZ4ewRjAYBrLgMEIGWhDOPknAQ5IznMctjXlQsFYwJxiaMsUeIIJDzssY59iCAMFBMfYMQgdpKW2MA8fMIrkEvyTgLAgISRK85R7rRcQoRoCVDPYjjaL1w2mzMX95pzNJqNH73Pp1+RWCdxlv9tgzaaPH6iM/BBOs0vwwQQeOd2wzhPilnCTsCAVuiJogkadt20mYT5+vEhkR5HOPIp5AchtWxDgHXkuStJay9of5ulItA+b4hF/aGBgpqHWS8UyHmjPNx/B8HOKA3G6PGehdIW6f/2QO7DB9Cb9XWO2sC6jfdWIaAfrztuaa7vW9cGD70PjrnOhN+yKf9MH7JcTP97JchW0+/Pbqbj7t6vljKe1Wsd1fdVf5QrufPq+zLczW9bouVcbbi30vepeXioO776aHNM1WWTs6qtFveFPR7Zeuvs4cMTqc/PzuG7goDAAA=",
-			"2c9d87d98e9e14562088c172388ad7ff6e5b4dc7c71defc5e7fb8d96cc334be7":
-				"7u7u7u7u7u4fiwgAAAAAAAADpY89C8IwFEX/y5tbeUmTkmZ1cnDSSenwkvf6AdpIGwQR/7sUnFwc5C4H7uHCfcJd5mVME3hQUMAy0W0ZUl7An59f3cgrmP8CBTBl2c5CWdZBjdqWaEvdHFF5RI+4QcTTR9wnHrvxlxkHmno5SD7kNFMvO14PQLik4K9yTfPDY+0sWmMdOl3rGChUXCvDDUVDTF2tDQkLBgloK9W5IFFZZmWcqroYoH21rzdvTmkTLwEAAA=="
+			"2f6b5996f09977f01c30a8c601cf6f86078d0491a9a65d5aafbb1b3055a23497":
+				"7u7u7u7u7u4fiwgAAAAAAAADpVHBbtpAEP2X6dXG6yWJwp6qlkZNUhAlAVyqHlbeMWwTdt2dAeMg/r2y4+TUKJXQnEbvzbw3bw5gDSgQg9MKIjCa8XNAzdgslEKex+I8loN7kSohlBA9IcSyI468sYV9j0nsg17hLdaggJE45rpEiCBfa7dCAvXzAL7EoNl6BwoIGaLni1q6NXEKEaBjyzWow7+101ik963wq/bx+CsC5w1em5dhMNao5ybujCmxN/K0ggjK4H3RmPuYe8e4Z1CwZi5JJUlVVb2q3/NhlThK8oCtHf1Iya4ZbeNQMNSsrx3jKliuJ+26CPJQl+xpa7mhoDGk4985xVJI2cL/8aodBlvYvI13hLz25s0cxGn1gWqXr4N3ltC87I01EYb2t11Mk20oPTUHvUKdr44w14/bBn7qj2fZcF4V6Vdfh/1iO9t9L24GdHY12+tLeTX+dnYjzXg+X2TZp4flYuLuON+MlsvL0XR8sflCt87+uRjeTbNMT6n/I2Qbb574geF4/AtctcMcNAMAAA==",
+			"82db5626ee5602221fd35a97b7821eaec56c331bd2d3241f4a7c49dcf999deb3":
+				"7u7u7u7u7u4fiwgAAAAAAAADpY8xa8MwFIT/y5vt8CRbsqU1Uyid0qklw5P1FAscK1giYEL+ezHp1CVDuOXgvju4O9x4yTHNYEFABbmkhc78wStYKJxLXdYrb8FM1zymksH+3P+Vot9M+56gAk+F9wtT4W1QolQ1qlqaLxQW0SLuEPH7D/xMPob4iox5n+acpuifq4GmzBUMI81nPnI5Pv8e/PYL3JScvfAlLauVQTtljA5oTNcFFEOD1A8axRB06DV2vcfWCDKklVdEwTnhGlSKZNOaDk6P0+MXPTUWwl8BAAA="
 		});
 
 		expect(
-			await expandObject(blobs["2c9d87d98e9e14562088c172388ad7ff6e5b4dc7c71defc5e7fb8d96cc334be7"])
+			await expandObject(blobs["82db5626ee5602221fd35a97b7821eaec56c331bd2d3241f4a7c49dcf999deb3"])
 		).toEqual({
 			version: "1",
+			storageKey: "test-type",
 			snapshots: [
 				{
 					version: "1",
-					changeSetStorageIds: [
-						"blob:memory:06850545808262cbab3d614d9ac4adaf624aede0beb0531f8bec15dd14813fcb"
-					],
+					id: "1414141414141414141414141414141414141414141414141414141414141414",
 					dateCreated: "2025-05-29T01:00:00.000Z",
 					dateModified: "2025-05-29T01:00:00.000Z",
-					id: "1414141414141414141414141414141414141414141414141414141414141414"
+					isConsolidated: false,
+					changeSetStorageIds: [
+						"blob:memory:2f6b5996f09977f01c30a8c601cf6f86078d0491a9a65d5aafbb1b3055a23497"
+					]
 				}
 			]
 		});
 
 		expect(
-			await expandObject(blobs["06850545808262cbab3d614d9ac4adaf624aede0beb0531f8bec15dd14813fcb"])
+			await expandObject(blobs["2f6b5996f09977f01c30a8c601cf6f86078d0491a9a65d5aafbb1b3055a23497"])
 		).toEqual({
 			changes: [
 				{
@@ -1070,6 +1097,7 @@ describe("synchronisedStorageService", () => {
 				}
 			],
 			dateCreated: "2025-05-29T01:00:00.000Z",
+			dateModified: "2025-05-29T01:00:00.000Z",
 			id: "0909090909090909090909090909090909090909090909090909090909090909",
 			nodeIdentity:
 				"did:entity-storage:0xd2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2",
@@ -1079,10 +1107,9 @@ describe("synchronisedStorageService", () => {
 				cryptosuite: "eddsa-jcs-2022",
 				proofPurpose: "assertionMethod",
 				proofValue:
-					"z5efBErQs3YBLZoH7jgKMQaRc9YjAxA5XSYKmW3FmTBDw9WionT2NS2x1SMvcRyBvw53cSSoaCT1xQH9tkWngGCX3",
+					"z3NUXDVwf1HoyrxWuUvQfJ9s4FUxa82FNL4J2dNVVWXXBkZWPnStcmMZZ8MRN6mEsKniq6DSRXXaRs3YrXmodztkt",
 				type: "DataIntegrityProof",
-				verificationMethod:
-					"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0#synchronised-storage-assertion"
+				verificationMethod: `${testNodeIdentity}#synchronised-storage-assertion`
 			},
 			storageKey: "test-type"
 		});

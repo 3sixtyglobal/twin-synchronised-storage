@@ -26,6 +26,11 @@ export interface ISyncSnapshot {
 	dateModified: string;
 
 	/**
+	 * Is this a consolidated snapshot?
+	 */
+	isConsolidated: boolean;
+
+	/**
 	 * The ids of the storage for the change sets in the snapshot.
 	 */
 	changeSetStorageIds: string[];

@@ -28,6 +28,14 @@ The id for the snapshot.
 
 ***
 
+### version
+
+> **version**: `string`
+
+The version for the snapshot.
+
+***
+
 ### storageKey
 
 > **storageKey**: `string`
@@ -44,19 +52,27 @@ The date the snapshot was created.
 
 ***
 
-### dateModified?
+### dateModified
 
-> `optional` **dateModified**: `string`
+> **dateModified**: `string`
 
 The date the snapshot was last modified.
 
 ***
 
-### isLocalSnapshot?
+### isLocal
 
-> `optional` **isLocalSnapshot**: `boolean`
+> **isLocal**: `boolean`
 
-The flag to determine if this is the current local snapshot containing changes for this node.
+The flag to determine if this is the snapshot is the local one containing changes for this node.
+
+***
+
+### isConsolidated
+
+> **isConsolidated**: `boolean`
+
+The flag to determine if this is a consolidated snapshot.
 
 ***
 

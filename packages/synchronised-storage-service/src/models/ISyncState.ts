@@ -12,6 +12,11 @@ export interface ISyncState {
 	version: string;
 
 	/**
+	 * The storage type contained in the sync state.
+	 */
+	storageKey: string;
+
+	/**
 	 * The snapshots.
 	 */
 	snapshots: ISyncSnapshot[];

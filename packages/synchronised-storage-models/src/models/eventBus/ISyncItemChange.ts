@@ -17,6 +17,11 @@ export interface ISyncItemChange {
 	operation: SyncChangeOperation;
 
 	/**
+	 * The node performing the operation.
+	 */
+	nodeIdentity: string;
+
+	/**
 	 * The id of the item being changed.
 	 */
 	id: string;

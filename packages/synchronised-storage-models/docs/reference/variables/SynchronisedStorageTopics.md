@@ -30,6 +30,12 @@ A request has been made for a local item.
 
 A response to a local item request.
 
+### Reset
+
+> `readonly` **Reset**: `"synchronised-storage:reset"` = `"synchronised-storage:reset"`
+
+Reset the storage.
+
 ### BatchRequest
 
 > `readonly` **BatchRequest**: `"synchronised-storage:batch-request"` = `"synchronised-storage:batch-request"`

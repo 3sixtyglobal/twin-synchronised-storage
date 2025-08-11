@@ -26,7 +26,7 @@ export interface ISyncChangeSet<T extends ISynchronisedEntity = ISynchronisedEnt
 	/**
 	 * The date the change set was last modified.
 	 */
-	dateModified?: string;
+	dateModified: string;
 
 	/**
 	 * The changes to apply after a snapshot.

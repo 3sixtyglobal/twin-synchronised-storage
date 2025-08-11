@@ -5,11 +5,13 @@ import { ComparisonOperator } from "@twin.org/entity";
 import type { IEntityStorageConnector } from "@twin.org/entity-storage-models";
 import type { ILoggingConnector } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
-import type {
-	ISynchronisedEntity,
-	SyncChangeOperation
+import {
+	type ISynchronisedEntity,
+	type SyncChangeOperation,
+	SyncNodeIdentityMode
 } from "@twin.org/synchronised-storage-models";
 import type { ChangeSetHelper } from "./changeSetHelper";
+import { SYNC_SNAPSHOT_VERSION } from "./versions";
 import type { SyncSnapshotEntry } from "../entities/syncSnapshotEntry";
 import type { ISyncState } from "../models/ISyncState";
 
@@ -79,37 +81,42 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 			}
 		});
 
-		const localChangeSnapshot = await this.getLocalChangeSnapshot(storageKey);
+		const localChangeSnapshots = await this.getSnapshots(storageKey, true);
 
-		localChangeSnapshot.changes ??= [];
+		if (localChangeSnapshots.length > 0) {
+			const localChangeSnapshot = localChangeSnapshots[0];
 
-		// If we already have a change for this id we are
-		// about to supersede it, we remove the previous change
-		// to avoid having multiple changes for the same id
-		const previousChangeIndex = localChangeSnapshot.changes.findIndex(change => change.id === id);
-		if (previousChangeIndex !== -1) {
-			localChangeSnapshot.changes.splice(previousChangeIndex, 1);
+			localChangeSnapshot.changes ??= [];
+
+			// If we already have a change for this id we are
+			// about to supersede it, we remove the previous change
+			// to avoid having multiple changes for the same id
+			const previousChangeIndex = localChangeSnapshot.changes.findIndex(change => change.id === id);
+			if (previousChangeIndex !== -1) {
+				localChangeSnapshot.changes.splice(previousChangeIndex, 1);
+			}
+
+			if (localChangeSnapshot.changes.length > 0) {
+				localChangeSnapshot.dateModified = new Date(Date.now()).toISOString();
+			}
+
+			localChangeSnapshot.changes.push({ operation, id });
+
+			await this.setLocalChangeSnapshot(localChangeSnapshot);
 		}
-
-		if (localChangeSnapshot.changes.length > 0) {
-			localChangeSnapshot.dateModified = new Date(Date.now()).toISOString();
-		}
-
-		localChangeSnapshot.changes.push({ operation, id });
-
-		await this.setLocalChangeSnapshot(localChangeSnapshot);
 	}
 
 	/**
-	 * Get the current local snapshot which contains just the changes for this node.
+	 * Get the snapshot which contains just the changes for this node.
 	 * @param storageKey The storage key of the snapshot to get.
+	 * @param isLocal Whether to get the local snapshot or not.
 	 * @returns The local snapshot entry.
 	 */
-	public async getLocalChangeSnapshot(storageKey: string): Promise<SyncSnapshotEntry<T>> {
+	public async getSnapshots(storageKey: string, isLocal: boolean): Promise<SyncSnapshotEntry<T>[]> {
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
-			message: "getLocalChangeSnapshot",
+			message: "getSnapshots",
 			data: {
 				storageKey
 			}
@@ -118,8 +125,8 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 		const queryResult = await this._snapshotEntryEntityStorage.query({
 			conditions: [
 				{
-					property: "isLocalSnapshot",
-					value: true,
+					property: "isLocal",
+					value: isLocal,
 					comparison: ComparisonOperator.Equals
 				},
 				{
@@ -134,29 +141,35 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 			await this._logging?.log({
 				level: "info",
 				source: this.CLASS_NAME,
-				message: "localChangeSnapshotExists",
+				message: "getSnapshotsExists",
 				data: {
 					storageKey
 				}
 			});
-			return queryResult.entities[0] as SyncSnapshotEntry<T>;
+			return queryResult.entities as SyncSnapshotEntry<T>[];
 		}
 
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
-			message: "localChangeSnapshotDoesNotExist",
+			message: "getSnapshotsDoesNotExist",
 			data: {
 				storageKey
 			}
 		});
-		return {
-			id: Converter.bytesToHex(RandomHelper.generate(32)),
-			storageKey,
-			dateCreated: new Date(Date.now()).toISOString(),
-			changeSetStorageIds: [],
-			isLocalSnapshot: true
-		};
+		const now = new Date(Date.now()).toISOString();
+		return [
+			{
+				version: SYNC_SNAPSHOT_VERSION,
+				id: Converter.bytesToHex(RandomHelper.generate(32)),
+				storageKey,
+				dateCreated: now,
+				dateModified: now,
+				changeSetStorageIds: [],
+				isLocal,
+				isConsolidated: false
+			}
+		];
 	}
 
 	/**
@@ -209,54 +222,128 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 			}
 		});
 
+		// Get all the existing snapshots that we have processed previously
+		const existingRemoteSnapshots = await this.getSnapshots(storageKey, false);
+
 		// Sort from newest to oldest
 		const sortedSnapshots = syncState.snapshots.sort(
 			(a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime()
 		);
 
-		const newSnapshots: SyncSnapshotEntry<T>[] = [];
-		const modifiedSnapshots: {
-			localSnapshot: SyncSnapshotEntry<T>;
-			remoteSnapshot: SyncSnapshotEntry<T>;
-		}[] = [];
-
-		for (const snapshot of sortedSnapshots) {
+		// If we have no existing snapshots we can't have yet synced
+		// in this case we need to find the most recent consolidation
+		// and use that to build a complete DB table
+		if (existingRemoteSnapshots.length === 0) {
 			await this._logging?.log({
 				level: "info",
 				source: this.CLASS_NAME,
-				message: "applySnapshot",
+				message: "applySnapshotNoExisting",
 				data: {
-					snapshotId: snapshot.id,
-					dateCreated: new Date(snapshot.dateCreated).toISOString()
+					storageKey
 				}
 			});
-
-			const localSnapshot = await this._snapshotEntryEntityStorage.get(snapshot.id);
-			const remoteSnapshotWithContext: SyncSnapshotEntry<T> = {
-				...snapshot,
-				storageKey
-			};
-
-			if (Is.empty(localSnapshot)) {
-				// We don't have the snapshot locally, so we need to process it
-				newSnapshots.push(remoteSnapshotWithContext);
-			} else if (localSnapshot.dateModified !== snapshot.dateModified) {
-				// If the local snapshot has a different dateModified, we need to update it
-				modifiedSnapshots.push({
-					localSnapshot,
-					remoteSnapshot: remoteSnapshotWithContext
+			const firstConsolidated = sortedSnapshots.find(snapshot => snapshot.isConsolidated);
+			if (firstConsolidated) {
+				// We found a consolidated snapshot, we can use it
+				await this._logging?.log({
+					level: "info",
+					source: this.CLASS_NAME,
+					message: "applySnapshotFoundConsolidated",
+					data: {
+						storageKey,
+						snapshotId: firstConsolidated.id
+					}
 				});
+
+				// We need to reset the entity storage and remove all the remote items
+				// so that we use just the ones from the consolidation
+				await this._changeSetHelper.reset(storageKey, SyncNodeIdentityMode.Remote);
+
+				await this.processNewSnapshots([
+					{
+						...firstConsolidated,
+						storageKey,
+						isLocal: false
+					}
+				]);
 			} else {
-				// we sorted the snapshots from newest to oldest, so if we found a local snapshot
-				// with the same dateModified as the remote snapshot, we can stop processing further
-				break;
+				await this._logging?.log({
+					level: "info",
+					source: this.CLASS_NAME,
+					message: "applySnapshotNoConsolidated",
+					data: {
+						storageKey
+					}
+				});
+			}
+		} else {
+			// Create a lookup map for the existing snapshots
+			const existingSnapshots: { [id: string]: SyncSnapshotEntry<T> } = {};
+			for (const snapshot of existingRemoteSnapshots) {
+				existingSnapshots[snapshot.id] = snapshot;
+			}
+
+			const newSnapshots: SyncSnapshotEntry<T>[] = [];
+			const modifiedSnapshots: {
+				currentSnapshot: SyncSnapshotEntry<T>;
+				updatedSnapshot: SyncSnapshotEntry<T>;
+			}[] = [];
+			const referencedExistingSnapshots: string[] = Object.keys(existingSnapshots);
+
+			for (const snapshot of sortedSnapshots) {
+				await this._logging?.log({
+					level: "info",
+					source: this.CLASS_NAME,
+					message: "applySnapshot",
+					data: {
+						snapshotId: snapshot.id,
+						dateCreated: new Date(snapshot.dateCreated).toISOString()
+					}
+				});
+
+				// See if we have the local snapshot
+				const currentSnapshot = existingSnapshots[snapshot.id];
+
+				// As we are referencing an existing snapshot, we need to remove it from the list
+				// to allow us to cleanup any unreferenced snapshots later
+				const idx = referencedExistingSnapshots.indexOf(snapshot.id);
+				if (idx !== -1) {
+					referencedExistingSnapshots.splice(idx, 1);
+				}
+
+				const updatedSnapshot: SyncSnapshotEntry<T> = {
+					...snapshot,
+					storageKey,
+					isLocal: false
+				};
+
+				if (Is.empty(currentSnapshot)) {
+					// We don't have the snapshot locally, so we need to process it
+					newSnapshots.push(updatedSnapshot);
+				} else if (currentSnapshot.dateModified !== snapshot.dateModified) {
+					// If the local snapshot has a different dateModified, we need to update it
+					modifiedSnapshots.push({
+						currentSnapshot,
+						updatedSnapshot
+					});
+				} else {
+					// we sorted the snapshots from newest to oldest, so if we found a local snapshot
+					// with the same dateModified as the remote snapshot, we can stop processing further
+					break;
+				}
+			}
+
+			// We reverse the order of the snapshots to process them from oldest to newest
+			// because we want to apply the changes in the order they were created
+			await this.processModifiedSnapshots(modifiedSnapshots.reverse());
+			await this.processNewSnapshots(newSnapshots.reverse());
+
+			// Any ids remaining in this list are no longer referenced in the global state
+			// so we should remove them from the local storage as they will never be updated again
+			for (const referencedSnapshotId of referencedExistingSnapshots) {
+				await this._snapshotEntryEntityStorage.remove(referencedSnapshotId);
 			}
 		}
-
-		// We reverse the order of the snapshots to process them from oldest to newest
-		// because we want to apply the changes in the order they were created
-		await this.processModifiedSnapshots(modifiedSnapshots.reverse());
-		await this.processNewSnapshots(newSnapshots.reverse());
 	}
 
 	/**
@@ -267,8 +354,8 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	 */
 	private async processModifiedSnapshots(
 		modifiedSnapshots: {
-			localSnapshot: SyncSnapshotEntry<T>;
-			remoteSnapshot: SyncSnapshotEntry<T>;
+			currentSnapshot: SyncSnapshotEntry<T>;
+			updatedSnapshot: SyncSnapshotEntry<T>;
 		}[]
 	): Promise<void> {
 		for (const modifiedSnapshot of modifiedSnapshots) {
@@ -277,20 +364,20 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 				source: this.CLASS_NAME,
 				message: "processModifiedSnapshot",
 				data: {
-					snapshotId: modifiedSnapshot.remoteSnapshot.id,
+					snapshotId: modifiedSnapshot.updatedSnapshot.id,
 					localModified: new Date(
-						modifiedSnapshot.localSnapshot.dateModified ??
-							modifiedSnapshot.localSnapshot.dateCreated
+						modifiedSnapshot.currentSnapshot.dateModified ??
+							modifiedSnapshot.currentSnapshot.dateCreated
 					).toISOString(),
 					remoteModified: new Date(
-						modifiedSnapshot.remoteSnapshot.dateModified ??
-							modifiedSnapshot.remoteSnapshot.dateCreated
+						modifiedSnapshot.updatedSnapshot.dateModified ??
+							modifiedSnapshot.updatedSnapshot.dateCreated
 					).toISOString()
 				}
 			});
 
-			const remoteChangeSetStorageIds = modifiedSnapshot.remoteSnapshot.changeSetStorageIds;
-			const localChangeSetStorageIds = modifiedSnapshot.localSnapshot.changeSetStorageIds ?? [];
+			const remoteChangeSetStorageIds = modifiedSnapshot.updatedSnapshot.changeSetStorageIds;
+			const localChangeSetStorageIds = modifiedSnapshot.currentSnapshot.changeSetStorageIds ?? [];
 			if (Is.arrayValue(remoteChangeSetStorageIds)) {
 				for (const storageId of remoteChangeSetStorageIds) {
 					// Check if the local snapshot does not have the storageId
@@ -300,7 +387,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 				}
 			}
 
-			await this._snapshotEntryEntityStorage.set(modifiedSnapshot.remoteSnapshot);
+			await this._snapshotEntryEntityStorage.set(modifiedSnapshot.updatedSnapshot);
 		}
 	}
 
@@ -318,7 +405,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 				message: "processNewSnapshot",
 				data: {
 					snapshotId: newSnapshot.id,
-					localModified: new Date(newSnapshot.dateCreated).toISOString()
+					dateCreated: newSnapshot.dateCreated
 				}
 			});
 
