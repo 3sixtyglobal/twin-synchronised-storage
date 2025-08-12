@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.1-next.7](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-rest-client-v0.0.1-next.6...synchronised-storage-rest-client-v0.0.1-next.7) (2025-08-12)
+
+
+### Miscellaneous Chores
+
+* **synchronised-storage-rest-client:** Synchronize repo versions
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.1-next.6 to 0.0.1-next.7
+
 ## [0.0.1-next.6](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-rest-client-v0.0.1-next.5...synchronised-storage-rest-client-v0.0.1-next.6) (2025-08-11)
 
 
