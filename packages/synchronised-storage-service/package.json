@@ -57,6 +57,7 @@
 		"@twin.org/event-bus-service": "next",
 		"@twin.org/identity-connector-entity-storage": "next",
 		"@twin.org/logging-connector-entity-storage": "next",
+		"@twin.org/logging-service": "next",
 		"@twin.org/nameof-transformer": "next",
 		"@twin.org/nameof-vitest-plugin": "next",
 		"@twin.org/ts-to-openapi": "next",

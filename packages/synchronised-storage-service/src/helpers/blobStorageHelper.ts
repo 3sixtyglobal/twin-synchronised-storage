@@ -11,7 +11,7 @@ import {
 	ObjectHelper
 } from "@twin.org/core";
 import { RSA } from "@twin.org/crypto";
-import type { ILoggingConnector } from "@twin.org/logging-models";
+import type { ILoggingComponent } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
 import { type IVaultConnector, VaultEncryptionType } from "@twin.org/vault-models";
 
@@ -25,10 +25,10 @@ export class BlobStorageHelper {
 	public readonly CLASS_NAME: string = nameof<BlobStorageHelper>();
 
 	/**
-	 * The logging connector to use for logging.
+	 * The logging component to use for logging.
 	 * @internal
 	 */
-	private readonly _logging: ILoggingConnector | undefined;
+	private readonly _loggingComponent: ILoggingComponent | undefined;
 
 	/**
 	 * The vault connector.
@@ -56,20 +56,20 @@ export class BlobStorageHelper {
 
 	/**
 	 * Create a new instance of BlobStorageHelper.
-	 * @param logging The logging connector to use for logging.
+	 * @param loggingComponent The logging connector to use for logging.
 	 * @param vaultConnector The vault connector to use for for the encryption key.
 	 * @param blobStorageConnector The blob storage component to use.
 	 * @param blobStorageEncryptionKeyId The id of the vault key to use for encrypting/decrypting blobs.
 	 * @param isTrustedNode Is this a trusted node.
 	 */
 	constructor(
-		logging: ILoggingConnector | undefined,
+		loggingComponent: ILoggingComponent | undefined,
 		vaultConnector: IVaultConnector,
 		blobStorageConnector: IBlobStorageConnector,
 		blobStorageEncryptionKeyId: string,
 		isTrustedNode: boolean
 	) {
-		this._logging = logging;
+		this._loggingComponent = loggingComponent;
 		this._vaultConnector = vaultConnector;
 		this._blobStorageConnector = blobStorageConnector;
 		this._blobStorageEncryptionKeyId = blobStorageEncryptionKeyId;
@@ -82,7 +82,7 @@ export class BlobStorageHelper {
 	 * @returns The blob.
 	 */
 	public async loadBlob<T>(blobId: string): Promise<T | undefined> {
-		await this._logging?.log({
+		await this._loggingComponent?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "loadBlob",
@@ -114,7 +114,7 @@ export class BlobStorageHelper {
 				}
 
 				const decompressedBlob = await Compression.decompress(compressedBlob, CompressionType.Gzip);
-				await this._logging?.log({
+				await this._loggingComponent?.log({
 					level: "info",
 					source: this.CLASS_NAME,
 					message: "loadedBlob",
@@ -126,7 +126,7 @@ export class BlobStorageHelper {
 				return ObjectHelper.fromBytes<T>(decompressedBlob);
 			}
 		} catch (error) {
-			await this._logging?.log({
+			await this._loggingComponent?.log({
 				level: "error",
 				source: this.CLASS_NAME,
 				message: "loadBlobFailed",
@@ -137,7 +137,7 @@ export class BlobStorageHelper {
 			});
 		}
 
-		await this._logging?.log({
+		await this._loggingComponent?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "loadBlobEmpty",
@@ -153,7 +153,7 @@ export class BlobStorageHelper {
 	 * @returns The id of the blob.
 	 */
 	public async saveBlob<T>(blob: T): Promise<string> {
-		await this._logging?.log({
+		await this._loggingComponent?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "saveBlob"
@@ -177,7 +177,7 @@ export class BlobStorageHelper {
 		try {
 			const blobId = await this._blobStorageConnector.set(encryptedBlob);
 
-			await this._logging?.log({
+			await this._loggingComponent?.log({
 				level: "info",
 				source: this.CLASS_NAME,
 				message: "savedBlob",
@@ -187,7 +187,7 @@ export class BlobStorageHelper {
 			});
 			return blobId;
 		} catch (error) {
-			await this._logging?.log({
+			await this._loggingComponent?.log({
 				level: "error",
 				source: this.CLASS_NAME,
 				message: "saveBlobFailed",
@@ -203,7 +203,7 @@ export class BlobStorageHelper {
 	 * @returns Nothing.
 	 */
 	public async removeBlob(blobId: string): Promise<void> {
-		await this._logging?.log({
+		await this._loggingComponent?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "removeBlob",
@@ -215,7 +215,7 @@ export class BlobStorageHelper {
 		try {
 			await this._blobStorageConnector.remove(blobId);
 
-			await this._logging?.log({
+			await this._loggingComponent?.log({
 				level: "info",
 				source: this.CLASS_NAME,
 				message: "removedBlob",
@@ -224,7 +224,7 @@ export class BlobStorageHelper {
 				}
 			});
 		} catch (error) {
-			await this._logging?.log({
+			await this._loggingComponent?.log({
 				level: "error",
 				source: this.CLASS_NAME,
 				message: "removeBlobFailed",
@@ -235,7 +235,7 @@ export class BlobStorageHelper {
 			});
 		}
 
-		await this._logging?.log({
+		await this._loggingComponent?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "removeBlobEmpty",

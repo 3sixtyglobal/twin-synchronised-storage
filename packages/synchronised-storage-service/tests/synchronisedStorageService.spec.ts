@@ -35,6 +35,7 @@ import {
 	initSchema as initSchemaLogging
 } from "@twin.org/logging-connector-entity-storage";
 import { LoggingConnectorFactory } from "@twin.org/logging-models";
+import { LoggingService } from "@twin.org/logging-service";
 import { nameof } from "@twin.org/nameof";
 import {
 	type ISyncChangeSet,
@@ -283,6 +284,14 @@ describe("synchronisedStorageService", () => {
 			() =>
 				new EntityStorageLoggingConnector({ logEntryStorageConnectorType: "log-entry-untrusted" })
 		);
+
+		const loggingService = new LoggingService({ loggingConnectorType: "logging" });
+		ComponentFactory.register("logging", () => loggingService);
+
+		const loggingUntrustedService = new LoggingService({
+			loggingConnectorType: "logging-untrusted"
+		});
+		ComponentFactory.register("logging-untrusted", () => loggingUntrustedService);
 
 		Date.now = vi.fn().mockImplementation(() => 1748480400000);
 
@@ -939,7 +948,7 @@ describe("synchronisedStorageService", () => {
 		const connector = new SynchronisedStorageService({
 			trustedSynchronisedStorageComponentType: "trusted",
 			eventBusComponentType: "event-bus-untrusted",
-			loggingConnectorType: "logging-untrusted",
+			loggingComponentType: "logging-untrusted",
 			config: {
 				verifiableStorageKeyId,
 				isTrustedNode: false,

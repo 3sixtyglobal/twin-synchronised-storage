@@ -4,7 +4,7 @@ import { BaseError, Converter, Guards, Is, ObjectHelper, RandomHelper } from "@t
 import type { IJsonLdNodeObject } from "@twin.org/data-json-ld";
 import type { IEventBusComponent } from "@twin.org/event-bus-models";
 import { DocumentHelper, type IIdentityConnector } from "@twin.org/identity-models";
-import type { ILoggingConnector } from "@twin.org/logging-models";
+import type { ILoggingComponent } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
 import { type IProof, ProofTypes } from "@twin.org/standards-w3c-did";
 import {
@@ -29,10 +29,10 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 	public readonly CLASS_NAME: string = nameof<ChangeSetHelper>();
 
 	/**
-	 * The logging connector to use for logging.
+	 * The logging component to use for logging.
 	 * @internal
 	 */
-	private readonly _logging: ILoggingConnector | undefined;
+	private readonly _loggingComponent: ILoggingComponent | undefined;
 
 	/**
 	 * The event bus component.
@@ -66,20 +66,20 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 
 	/**
 	 * Create a new instance of ChangeSetHelper.
-	 * @param logging The logging connector to use for logging.
+	 * @param loggingComponent The logging connector to use for logging.
 	 * @param eventBusComponent The event bus component to use for events.
 	 * @param identityConnector The identity connector to use for signing/verifying changesets.
 	 * @param blobStorageHelper The blob storage component to use for remote sync states.
 	 * @param decentralisedStorageMethodId The id of the identity method to use when signing/verifying changesets.
 	 */
 	constructor(
-		logging: ILoggingConnector | undefined,
+		loggingComponent: ILoggingComponent | undefined,
 		eventBusComponent: IEventBusComponent,
 		identityConnector: IIdentityConnector,
 		blobStorageHelper: BlobStorageHelper,
 		decentralisedStorageMethodId: string
 	) {
-		this._logging = logging;
+		this._loggingComponent = loggingComponent;
 		this._eventBusComponent = eventBusComponent;
 		this._decentralisedStorageMethodId = decentralisedStorageMethodId;
 		this._blobStorageHelper = blobStorageHelper;
@@ -102,7 +102,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 	public async getAndVerifyChangeset(
 		changeSetStorageId: string
 	): Promise<ISyncChangeSet<T> | undefined> {
-		await this._logging?.log({
+		await this._loggingComponent?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "getChangeSet",
@@ -119,7 +119,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 				return verified ? syncChangeSet : undefined;
 			}
 		} catch (error) {
-			await this._logging?.log({
+			await this._loggingComponent?.log({
 				level: "warn",
 				source: this.CLASS_NAME,
 				message: "getChangeSetError",
@@ -130,7 +130,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 			});
 		}
 
-		await this._logging?.log({
+		await this._loggingComponent?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "getChangeSetEmpty",
@@ -167,7 +167,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 	public async applyChangeset(syncChangeset: ISyncChangeSet<T>): Promise<void> {
 		if (Is.arrayValue(syncChangeset.changes)) {
 			for (const change of syncChangeset.changes) {
-				await this._logging?.log({
+				await this._loggingComponent?.log({
 					level: "info",
 					source: this.CLASS_NAME,
 					message: "changeSetApplyingChange",
@@ -221,7 +221,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 	 * @returns The id of the change set.
 	 */
 	public async storeChangeSet(syncChangeSet: ISyncChangeSet): Promise<string> {
-		await this._logging?.log({
+		await this._loggingComponent?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "changeSetStoring",
@@ -240,7 +240,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 	 */
 	public async verifyChangesetProof(syncChangeset: ISyncChangeSet): Promise<boolean> {
 		if (Is.empty(syncChangeset.proof)) {
-			await this._logging?.log({
+			await this._loggingComponent?.log({
 				level: "info",
 				source: this.CLASS_NAME,
 				message: "verifyChangeSetProofMissing",
@@ -254,7 +254,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 		// If the proof or verification method is missing, the proof is invalid
 		const verificationMethod = syncChangeset.proof?.verificationMethod;
 		if (!Is.stringValue(verificationMethod)) {
-			await this._logging?.log({
+			await this._loggingComponent?.log({
 				level: "error",
 				source: this.CLASS_NAME,
 				message: "verifyChangeSetProofMissing",
@@ -269,7 +269,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 		// otherwise you could sign a changeset for another node
 		const changeSetNodeIdentity = DocumentHelper.parseId(verificationMethod ?? "");
 		if (changeSetNodeIdentity.id !== syncChangeset.nodeIdentity) {
-			await this._logging?.log({
+			await this._loggingComponent?.log({
 				level: "error",
 				source: this.CLASS_NAME,
 				message: "verifyChangeSetProofNodeIdentityMismatch",
@@ -288,7 +288,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 		);
 
 		if (!isValid) {
-			await this._logging?.log({
+			await this._loggingComponent?.log({
 				level: "error",
 				source: this.CLASS_NAME,
 				message: "verifyChangeSetProofInvalid",
@@ -297,7 +297,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 				}
 			});
 		} else {
-			await this._logging?.log({
+			await this._loggingComponent?.log({
 				level: "error",
 				source: this.CLASS_NAME,
 				message: "verifyChangeSetProofValid",
@@ -328,7 +328,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 			changeSetWithoutProof as unknown as IJsonLdNodeObject
 		);
 
-		await this._logging?.log({
+		await this._loggingComponent?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "createdChangeSetProof",
@@ -357,7 +357,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 			const verified = await this.verifyChangesetProof(syncChangeSet);
 
 			if (verified) {
-				await this._logging?.log({
+				await this._loggingComponent?.log({
 					level: "info",
 					source: this.CLASS_NAME,
 					message: "copyChangeSet",
@@ -389,7 +389,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 	public async reset(storageKey: string, resetMode: SyncNodeIdentityMode): Promise<void> {
 		// If we are applying a consolidation we need to reset the local db
 		// but keep any entries from the local node, as they might have been updated
-		await this._logging?.log({
+		await this._loggingComponent?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "storageReset",

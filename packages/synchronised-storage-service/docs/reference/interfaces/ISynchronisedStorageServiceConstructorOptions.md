@@ -4,11 +4,11 @@ Options for the Synchronised Storage Service constructor.
 
 ## Properties
 
-### loggingConnectorType?
+### loggingComponentType?
 
-> `optional` **loggingConnectorType**: `string`
+> `optional` **loggingComponentType**: `string`
 
-The logging connector.
+The logging component.
 
 ***
 

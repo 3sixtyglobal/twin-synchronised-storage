@@ -25,7 +25,7 @@ import {
 	IdentityConnectorFactory,
 	type IIdentityConnector
 } from "@twin.org/identity-models";
-import { type ILoggingConnector, LoggingConnectorFactory } from "@twin.org/logging-models";
+import type { ILoggingComponent } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
 import { type IProof, ProofTypes } from "@twin.org/standards-w3c-did";
 import {
@@ -86,10 +86,10 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	public readonly CLASS_NAME: string = nameof<SynchronisedStorageService>();
 
 	/**
-	 * The logging connector to use for logging.
+	 * The logging component to use for logging.
 	 * @internal
 	 */
-	private readonly _logging: ILoggingConnector | undefined;
+	private readonly _loggingComponent: ILoggingComponent | undefined;
 
 	/**
 	 * The event bus component.
@@ -212,7 +212,9 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 		);
 
 		this._eventBusComponent = ComponentFactory.get(options.eventBusComponentType ?? "event-bus");
-		this._logging = LoggingConnectorFactory.getIfExists(options.loggingConnectorType ?? "logging");
+		this._loggingComponent = ComponentFactory.getIfExists(
+			options.loggingComponentType ?? "logging"
+		);
 		this._vaultConnector = VaultConnectorFactory.get(options.vaultConnectorType ?? "vault");
 
 		this._localSyncSnapshotEntryEntityStorage = EntityStorageConnectorFactory.get<
@@ -275,7 +277,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 		}
 
 		this._blobStorageHelper = new BlobStorageHelper(
-			this._logging,
+			this._loggingComponent,
 			this._vaultConnector,
 			this._blobStorageConnector,
 			this._config.blobStorageEncryptionKeyId,
@@ -283,7 +285,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 		);
 
 		this._changeSetHelper = new ChangeSetHelper<T>(
-			this._logging,
+			this._loggingComponent,
 			this._eventBusComponent,
 			this._identityConnector,
 			this._blobStorageHelper,
@@ -291,13 +293,13 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 		);
 
 		this._localSyncStateHelper = new LocalSyncStateHelper<T>(
-			this._logging,
+			this._loggingComponent,
 			this._localSyncSnapshotEntryEntityStorage,
 			this._changeSetHelper
 		);
 
 		this._remoteSyncStateHelper = new RemoteSyncStateHelper<T>(
-			this._logging,
+			this._loggingComponent,
 			this._eventBusComponent,
 			this._verifiableSyncPointerStorageConnector,
 			this._blobStorageHelper,
@@ -442,7 +444,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 
 		Guards.object<ISyncChangeSet>(this.CLASS_NAME, nameof(syncChangeSet), syncChangeSet);
 
-		await this._logging?.log({
+		await this._loggingComponent?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "syncChangeSetForRemoteNode",
@@ -479,7 +481,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	 */
 	private async startEntitySync(storageKey: string): Promise<void> {
 		try {
-			await this._logging?.log({
+			await this._loggingComponent?.log({
 				level: "info",
 				source: this.CLASS_NAME,
 				message: "startEntitySync",
@@ -494,7 +496,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 			// Now send any updates we have to the remote storage
 			await this.updateFromLocalSyncState(storageKey);
 		} catch (error) {
-			await this._logging?.log({
+			await this._loggingComponent?.log({
 				level: "error",
 				source: this.CLASS_NAME,
 				message: "entitySyncFailed",
@@ -510,7 +512,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	 * @internal
 	 */
 	private async updateFromRemoteSyncState(storageKey: string): Promise<void> {
-		await this._logging?.log({
+		await this._loggingComponent?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "updateFromRemoteSyncState",
@@ -543,7 +545,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	 * @internal
 	 */
 	private async updateFromLocalSyncState(storageKey: string): Promise<void> {
-		await this._logging?.log({
+		await this._loggingComponent?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "updateFromLocalSyncState",
@@ -563,7 +565,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 					localChangeSnapshot.changes,
 					async (syncChangeSet, changeSetStorageId) => {
 						if (Is.empty(syncChangeSet) && Is.empty(changeSetStorageId)) {
-							await this._logging?.log({
+							await this._loggingComponent?.log({
 								level: "info",
 								source: this.CLASS_NAME,
 								message: "builtStorageChangeSetNone",
@@ -572,7 +574,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 								}
 							});
 						} else {
-							await this._logging?.log({
+							await this._loggingComponent?.log({
 								level: "info",
 								source: this.CLASS_NAME,
 								message: "builtStorageChangeSet",
@@ -596,7 +598,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 							) {
 								// If we are not a trusted node, we need to send the changes to the trusted node
 								// and then remove the local change snapshot
-								await this._logging?.log({
+								await this._loggingComponent?.log({
 									level: "info",
 									source: this.CLASS_NAME,
 									message: "sendingChangeSetToTrustedNode",
@@ -612,7 +614,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 					}
 				);
 			} else {
-				await this._logging?.log({
+				await this._loggingComponent?.log({
 					level: "info",
 					source: this.CLASS_NAME,
 					message: "updateFromLocalSyncStateNoChanges",
@@ -645,7 +647,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 					SynchronisedStorageService._DEFAULT_CONSOLIDATION_BATCH_SIZE
 			);
 		} catch (error) {
-			await this._logging?.log({
+			await this._loggingComponent?.log({
 				level: "error",
 				source: this.CLASS_NAME,
 				message: "consolidationSyncFailed",
@@ -660,7 +662,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	 * @internal
 	 */
 	private async registerStorageKey(syncRegisterStorageKey: ISyncRegisterStorageKey): Promise<void> {
-		await this._logging?.log({
+		await this._loggingComponent?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "registerStorageKey",
@@ -685,7 +687,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	 */
 	private async activateStorageKey(storageKey: string): Promise<void> {
 		if (!Is.empty(this._activeStorageKeys[storageKey]) && !this._activeStorageKeys[storageKey]) {
-			await this._logging?.log({
+			await this._loggingComponent?.log({
 				level: "info",
 				source: this.CLASS_NAME,
 				message: "activateStorageKey",

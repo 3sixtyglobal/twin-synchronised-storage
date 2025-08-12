@@ -7,9 +7,9 @@ import type { ISynchronisedStorageServiceConfig } from "./ISynchronisedStorageSe
  */
 export interface ISynchronisedStorageServiceConstructorOptions {
 	/**
-	 * The logging connector.
+	 * The logging component.
 	 */
-	loggingConnectorType?: string;
+	loggingComponentType?: string;
 
 	/**
 	 * The event bus component type.
