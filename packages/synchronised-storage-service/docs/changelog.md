@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.1-next.8](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.1-next.7...synchronised-storage-service-v0.0.1-next.8) (2025-08-13)
+
+
+### Features
+
+* remove isTrustedNode from config and rely on trusted component ([cc2d987](https://github.com/twinfoundation/synchronised-storage/commit/cc2d98795044fc97b33fadf871188f6103f5c987))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.1-next.7 to 0.0.1-next.8
+
 ## [0.0.1-next.7](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.1-next.6...synchronised-storage-service-v0.0.1-next.7) (2025-08-12)
 
 
