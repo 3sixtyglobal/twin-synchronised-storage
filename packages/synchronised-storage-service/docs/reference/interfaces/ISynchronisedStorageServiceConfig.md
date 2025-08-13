@@ -32,20 +32,6 @@ How often to check for entity updates in minutes.
 
 ***
 
-### isTrustedNode?
-
-> `optional` **isTrustedNode**: `boolean`
-
-Is this a node that has permission to write to the verifiable storage?
-
-#### Default
-
-```ts
-false
-```
-
-***
-
 ### consolidationIntervalMinutes?
 
 > `optional` **consolidationIntervalMinutes**: `number`

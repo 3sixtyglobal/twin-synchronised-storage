@@ -53,6 +53,7 @@ export interface ISynchronisedStorageServiceConstructorOptions {
 
 	/**
 	 * The synchronised entity storage component type to use if this node is not trusted.
+	 * If this is set, this node uses it as the trusted node to store changesets.
 	 */
 	trustedSynchronisedStorageComponentType?: string;
 

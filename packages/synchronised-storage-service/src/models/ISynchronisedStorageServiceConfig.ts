@@ -18,12 +18,6 @@ export interface ISynchronisedStorageServiceConfig {
 	entityUpdateIntervalMinutes?: number;
 
 	/**
-	 * Is this a node that has permission to write to the verifiable storage?
-	 * @default false
-	 */
-	isTrustedNode?: boolean;
-
-	/**
 	 * Interval to perform consolidation of changesets, only used if isTrustedNode is set.
 	 * @default 60
 	 */

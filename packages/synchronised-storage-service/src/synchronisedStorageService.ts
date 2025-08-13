@@ -237,13 +237,24 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 			options.taskSchedulerComponentType ?? "task-scheduler"
 		);
 
+		// If this is empty we assume the local node has the rights to write to the verifiable storage.
+		let isTrustedNode = true;
+		if (!Is.empty(options.trustedSynchronisedStorageComponentType)) {
+			isTrustedNode = false;
+
+			// If it is set then we used the trusted component to send changesets to
+			this._trustedSynchronisedStorageComponent =
+				ComponentFactory.get<ISynchronisedStorageComponent>(
+					options.trustedSynchronisedStorageComponentType
+				);
+		}
+
 		this._config = {
 			synchronisedStorageMethodId:
 				options.config.synchronisedStorageMethodId ?? "synchronised-storage-assertion",
 			entityUpdateIntervalMinutes:
 				options.config.entityUpdateIntervalMinutes ??
 				SynchronisedStorageService._DEFAULT_ENTITY_UPDATE_INTERVAL_MINUTES,
-			isTrustedNode: options.config.isTrustedNode ?? false,
 			consolidationIntervalMinutes:
 				options.config.consolidationIntervalMinutes ??
 				SynchronisedStorageService._DEFAULT_CONSOLIDATION_INTERVAL_MINUTES,
@@ -262,26 +273,12 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 				options.config.verifiableStorageKeyId as keyof typeof verifiableStorageKeys
 			] ?? options.config.verifiableStorageKeyId;
 
-		// If this is not a trusted node, we need to use a synchronised storage service
-		// to synchronise with a trusted node.
-		if (!this._config.isTrustedNode) {
-			Guards.stringValue(
-				this.CLASS_NAME,
-				nameof(options.trustedSynchronisedStorageComponentType),
-				options.trustedSynchronisedStorageComponentType
-			);
-			this._trustedSynchronisedStorageComponent =
-				ComponentFactory.get<ISynchronisedStorageComponent>(
-					options.trustedSynchronisedStorageComponentType
-				);
-		}
-
 		this._blobStorageHelper = new BlobStorageHelper(
 			this._loggingComponent,
 			this._vaultConnector,
 			this._blobStorageConnector,
 			this._config.blobStorageEncryptionKeyId,
-			this._config.isTrustedNode
+			isTrustedNode
 		);
 
 		this._changeSetHelper = new ChangeSetHelper<T>(
@@ -304,7 +301,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 			this._verifiableSyncPointerStorageConnector,
 			this._blobStorageHelper,
 			this._changeSetHelper,
-			this._config.isTrustedNode,
+			isTrustedNode,
 			this._config.maxConsolidations
 		);
 
@@ -352,7 +349,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 		this._serviceStarted = true;
 
 		// If this is not a trusted node we need to request the decryption key from a trusted node
-		if (!this._config.isTrustedNode && !Is.empty(this._trustedSynchronisedStorageComponent)) {
+		if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
 			const proof = await this._identityConnector.createProof(
 				this._nodeIdentity,
 				DocumentHelper.joinId(this._nodeIdentity, this._config.synchronisedStorageMethodId),
@@ -405,7 +402,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	 * @returns The decryption key.
 	 */
 	public async getDecryptionKey(nodeIdentity: string, proof: IProof): Promise<string> {
-		if (!this._config.isTrustedNode) {
+		if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
 			throw new GeneralError(this.CLASS_NAME, "notTrustedNode");
 		}
 
@@ -438,7 +435,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	 * @returns Nothing.
 	 */
 	public async syncChangeSet(syncChangeSet: ISyncChangeSet<T>): Promise<void> {
-		if (!this._config.isTrustedNode) {
+		if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
 			throw new GeneralError(this.CLASS_NAME, "notTrustedNode");
 		}
 
@@ -584,7 +581,10 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 								}
 							});
 							// Send the local changes to the remote storage if we are a trusted node
-							if (this._config.isTrustedNode && Is.stringValue(changeSetStorageId)) {
+							if (
+								Is.empty(this._trustedSynchronisedStorageComponent) &&
+								Is.stringValue(changeSetStorageId)
+							) {
 								// If we are a trusted node, we can add the change set to the sync state
 								// and remove the local change snapshot
 								await this._remoteSyncStateHelper.addChangeSetToSyncState(
@@ -711,7 +711,10 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 				);
 			}
 
-			if (this._config.isTrustedNode && this._config.consolidationIntervalMinutes > 0) {
+			if (
+				!Is.empty(this._trustedSynchronisedStorageComponent) &&
+				this._config.consolidationIntervalMinutes > 0
+			) {
 				await this._taskSchedulerComponent.addTask(
 					`synchronised-storage-consolidation-${storageKey}`,
 					[
