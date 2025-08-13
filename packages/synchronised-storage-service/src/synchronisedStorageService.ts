@@ -210,6 +210,11 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 			nameof(options.config),
 			options.config
 		);
+		Guards.stringValue(
+			this.CLASS_NAME,
+			nameof(options.config.verifiableStorageKeyId),
+			options.config.verifiableStorageKeyId
+		);
 
 		this._eventBusComponent = ComponentFactory.get(options.eventBusComponentType ?? "event-bus");
 		this._loggingComponent = ComponentFactory.getIfExists(
@@ -272,6 +277,8 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 			verifiableStorageKeys[
 				options.config.verifiableStorageKeyId as keyof typeof verifiableStorageKeys
 			] ?? options.config.verifiableStorageKeyId;
+
+		Guards.stringValue(this.CLASS_NAME, "synchronisedStorageKey", this._synchronisedStorageKey);
 
 		this._blobStorageHelper = new BlobStorageHelper(
 			this._loggingComponent,
