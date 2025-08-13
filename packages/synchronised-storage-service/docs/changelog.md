@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.1-next.9](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.1-next.8...synchronised-storage-service-v0.0.1-next.9) (2025-08-13)
+
+
+### Features
+
+* add guards for verifiable storage keys ([5182e8b](https://github.com/twinfoundation/synchronised-storage/commit/5182e8b2a7868e8d396fd02964b0ed7f0c0a5947))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.1-next.8 to 0.0.1-next.9
+
 ## [0.0.1-next.8](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.1-next.7...synchronised-storage-service-v0.0.1-next.8) (2025-08-13)
 
 
