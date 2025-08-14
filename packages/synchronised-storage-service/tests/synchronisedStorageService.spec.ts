@@ -362,27 +362,27 @@ describe("synchronisedStorageService", () => {
 
 	test("can create an instance of the service as a trusted node", async () => {
 		const connector = new SynchronisedStorageService({
-			config: { verifiableStorageKeyId, isTrustedNode: true }
+			config: { verifiableStorageKeyId }
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 	});
 
 	test("can create an instance of the service as a non trusted node", async () => {
 		const connectorTrusted = new SynchronisedStorageService({
-			config: { verifiableStorageKeyId, isTrustedNode: true }
+			config: { verifiableStorageKeyId }
 		});
 		ComponentFactory.register("trusted", () => connectorTrusted);
 
 		const connector = new SynchronisedStorageService({
 			trustedSynchronisedStorageComponentType: "trusted",
-			config: { verifiableStorageKeyId, isTrustedNode: false }
+			config: { verifiableStorageKeyId }
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 	});
 
 	test("can register a type before the service has been started", async () => {
 		const connector = new SynchronisedStorageService({
-			config: { verifiableStorageKeyId, isTrustedNode: true, consolidationIntervalMinutes: 0 }
+			config: { verifiableStorageKeyId, consolidationIntervalMinutes: 0 }
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 
@@ -412,7 +412,7 @@ describe("synchronisedStorageService", () => {
 
 	test("can register a type after the service has started", async () => {
 		const connector = new SynchronisedStorageService({
-			config: { verifiableStorageKeyId, isTrustedNode: true, consolidationIntervalMinutes: 0 }
+			config: { verifiableStorageKeyId, consolidationIntervalMinutes: 0 }
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 
@@ -442,7 +442,7 @@ describe("synchronisedStorageService", () => {
 
 	test("can process a local update to entity storage", async () => {
 		const connector = new SynchronisedStorageService({
-			config: { verifiableStorageKeyId, isTrustedNode: true, consolidationIntervalMinutes: 0 }
+			config: { verifiableStorageKeyId, consolidationIntervalMinutes: 0 }
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 		await connector.start(testNodeIdentity, "node-logging");
@@ -505,7 +505,6 @@ describe("synchronisedStorageService", () => {
 		const connector = new SynchronisedStorageService({
 			config: {
 				verifiableStorageKeyId,
-				isTrustedNode: true,
 				consolidationIntervalMinutes: 0
 			}
 		});
@@ -581,7 +580,6 @@ describe("synchronisedStorageService", () => {
 		const connector = new SynchronisedStorageService({
 			config: {
 				verifiableStorageKeyId,
-				isTrustedNode: true,
 				consolidationIntervalMinutes: 0
 			}
 		});
@@ -788,7 +786,6 @@ describe("synchronisedStorageService", () => {
 		const connector = new SynchronisedStorageService({
 			config: {
 				verifiableStorageKeyId,
-				isTrustedNode: true,
 				consolidationIntervalMinutes: 0
 			}
 		});
@@ -941,7 +938,7 @@ describe("synchronisedStorageService", () => {
 
 	test("can use a trusted node to synchronise a non trusted node", async () => {
 		const connectorTrusted = new SynchronisedStorageService({
-			config: { verifiableStorageKeyId, isTrustedNode: true }
+			config: { verifiableStorageKeyId }
 		});
 		ComponentFactory.register("trusted", () => connectorTrusted);
 
@@ -951,7 +948,6 @@ describe("synchronisedStorageService", () => {
 			loggingComponentType: "logging-untrusted",
 			config: {
 				verifiableStorageKeyId,
-				isTrustedNode: false,
 				consolidationIntervalMinutes: 0
 			}
 		});
@@ -1138,7 +1134,6 @@ describe("synchronisedStorageService", () => {
 			const connector = new SynchronisedStorageService({
 				config: {
 					verifiableStorageKeyId,
-					isTrustedNode: true,
 					consolidationIntervalMinutes: 0
 				}
 			});
@@ -1323,7 +1318,6 @@ describe("synchronisedStorageService", () => {
 			const connector = new SynchronisedStorageService({
 				config: {
 					verifiableStorageKeyId,
-					isTrustedNode: true,
 					consolidationIntervalMinutes: 0
 				}
 			});
@@ -1421,7 +1415,6 @@ describe("synchronisedStorageService", () => {
 			const connector = new SynchronisedStorageService({
 				config: {
 					verifiableStorageKeyId,
-					isTrustedNode: true,
 					consolidationIntervalMinutes: 0
 				}
 			});
@@ -1552,7 +1545,6 @@ describe("synchronisedStorageService", () => {
 			const connector = new SynchronisedStorageService({
 				config: {
 					verifiableStorageKeyId,
-					isTrustedNode: true,
 					consolidationIntervalMinutes: 0
 				}
 			});

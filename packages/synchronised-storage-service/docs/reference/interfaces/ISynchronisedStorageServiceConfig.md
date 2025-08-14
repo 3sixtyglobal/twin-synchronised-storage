@@ -36,7 +36,7 @@ How often to check for entity updates in minutes.
 
 > `optional` **consolidationIntervalMinutes**: `number`
 
-Interval to perform consolidation of changesets, only used if isTrustedNode is set.
+Interval to perform consolidation of changesets, only used if this is a trusted node.
 
 #### Default
 
@@ -50,7 +50,7 @@ Interval to perform consolidation of changesets, only used if isTrustedNode is s
 
 > `optional` **consolidationBatchSize**: `number`
 
-The number of entities to process in a single consolidation batch.
+The number of entities to process in a single consolidation batch, only used if this is a trusted node.
 
 #### Default
 
@@ -64,7 +64,7 @@ The number of entities to process in a single consolidation batch.
 
 > `optional` **maxConsolidations**: `number`
 
-The maximum number of consolidations to keep in storage.
+The maximum number of consolidations to keep in storage, only used if this is a trusted node.
 
 #### Default
 
