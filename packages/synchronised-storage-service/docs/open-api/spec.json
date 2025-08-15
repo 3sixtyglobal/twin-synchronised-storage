@@ -307,13 +307,13 @@
 						"type": "string",
 						"description": "The id of the change set."
 					},
-					"dateCreated": {
-						"type": "string",
-						"description": "The date the change set was created."
-					},
 					"storageKey": {
 						"type": "string",
 						"description": "The storage key of the change set. This is used to identify the entities being synchronised."
+					},
+					"dateCreated": {
+						"type": "string",
+						"description": "The date the change set was created."
 					},
 					"dateModified": {
 						"type": "string",
@@ -339,8 +339,8 @@
 				},
 				"required": [
 					"id",
-					"dateCreated",
 					"storageKey",
+					"dateCreated",
 					"dateModified",
 					"changes",
 					"nodeIdentity"

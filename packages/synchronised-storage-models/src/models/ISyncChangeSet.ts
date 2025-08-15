@@ -14,14 +14,14 @@ export interface ISyncChangeSet<T extends ISynchronisedEntity = ISynchronisedEnt
 	id: string;
 
 	/**
-	 * The date the change set was created.
-	 */
-	dateCreated: string;
-
-	/**
 	 * The storage key of the change set. This is used to identify the entities being synchronised.
 	 */
 	storageKey: string;
+
+	/**
+	 * The date the change set was created.
+	 */
+	dateCreated: string;
 
 	/**
 	 * The date the change set was last modified.

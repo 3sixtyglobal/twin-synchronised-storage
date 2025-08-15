@@ -18,19 +18,19 @@ The id of the change set.
 
 ***
 
-### dateCreated
-
-> **dateCreated**: `string`
-
-The date the change set was created.
-
-***
-
 ### storageKey
 
 > **storageKey**: `string`
 
 The storage key of the change set. This is used to identify the entities being synchronised.
+
+***
+
+### dateCreated
+
+> **dateCreated**: `string`
+
+The date the change set was created.
 
 ***
 
