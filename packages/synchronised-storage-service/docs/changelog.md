@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.1-next.11](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.1-next.10...synchronised-storage-service-v0.0.1-next.11) (2025-08-15)
+
+
+### Features
+
+* switch to chacha20poly1305 for encryption ([ecc7137](https://github.com/twinfoundation/synchronised-storage/commit/ecc713775bc958c15453729aa1d6dacafd789906))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.1-next.10 to 0.0.1-next.11
+
 ## [0.0.1-next.10](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.1-next.9...synchronised-storage-service-v0.0.1-next.10) (2025-08-15)
 
 
