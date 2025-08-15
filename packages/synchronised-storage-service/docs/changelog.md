@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.1-next.10](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.1-next.9...synchronised-storage-service-v0.0.1-next.10) (2025-08-15)
+
+
+### Features
+
+* update RSA components ([c57c7b8](https://github.com/twinfoundation/synchronised-storage/commit/c57c7b85d4225deb6efa1228c77b8148bf6e11f7))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.1-next.9 to 0.0.1-next.10
+
 ## [0.0.1-next.9](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.1-next.8...synchronised-storage-service-v0.0.1-next.9) (2025-08-13)
 
 

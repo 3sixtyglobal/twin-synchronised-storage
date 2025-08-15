@@ -1,6 +1,6 @@
 {
 	"name": "@twin.org/synchronised-storage-service",
-	"version": "0.0.1-next.9",
+	"version": "0.0.1-next.10",
 	"description": "Synchronised storage contract implementation and REST endpoint definitions",
 	"repository": {
 		"type": "git",
@@ -43,7 +43,7 @@
 		"@twin.org/logging-models": "next",
 		"@twin.org/nameof": "next",
 		"@twin.org/standards-w3c-did": "next",
-		"@twin.org/synchronised-storage-models": "0.0.1-next.9",
+		"@twin.org/synchronised-storage-models": "0.0.1-next.10",
 		"@twin.org/verifiable-storage-models": "next",
 		"@twin.org/web": "next"
 	},
