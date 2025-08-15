@@ -36,7 +36,7 @@ import {
 	type ISyncRegisterStorageKey,
 	SynchronisedStorageTopics
 } from "@twin.org/synchronised-storage-models";
-import { type IVaultConnector, VaultConnectorFactory } from "@twin.org/vault-models";
+import { type IVaultConnector, VaultConnectorFactory, VaultKeyType } from "@twin.org/vault-models";
 import {
 	type IVerifiableStorageConnector,
 	VerifiableStorageConnectorFactory
@@ -369,10 +369,19 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 				proof
 			);
 
-			// We don't have the private key so instead we store the key as a secret in the vault
-			await this._vaultConnector.setSecret<string>(
+			// If the key exists remove it and get a new one, in case the key has been rotated
+			const existingKey = await this._vaultConnector.getKey(
+				this._config.blobStorageEncryptionKeyId
+			);
+
+			if (!Is.empty(existingKey)) {
+				await this._vaultConnector.removeKey(this._config.blobStorageEncryptionKeyId);
+			}
+
+			await this._vaultConnector.addKey(
 				this._config.blobStorageEncryptionKeyId,
-				decryptionKey
+				VaultKeyType.ChaCha20Poly1305,
+				Converter.base64ToBytes(decryptionKey)
 			);
 		}
 
@@ -429,11 +438,11 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 		// using rights-management
 		const key = await this._vaultConnector.getKey(this._config.blobStorageEncryptionKeyId);
 
-		if (Is.undefined(key.publicKey)) {
+		if (Is.undefined(key.privateKey)) {
 			throw new UnauthorizedError(this.CLASS_NAME, "decryptionKeyNotFound");
 		}
 
-		return Converter.bytesToBase64(key.publicKey);
+		return Converter.bytesToBase64(key.privateKey);
 	}
 
 	/**

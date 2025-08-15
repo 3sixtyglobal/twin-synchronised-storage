@@ -5,12 +5,10 @@ import {
 	BaseError,
 	Compression,
 	CompressionType,
-	Converter,
 	GeneralError,
 	Is,
 	ObjectHelper
 } from "@twin.org/core";
-import { RSA } from "@twin.org/crypto";
 import type { ILoggingComponent } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
 import { type IVaultConnector, VaultEncryptionType } from "@twin.org/vault-models";
@@ -95,23 +93,11 @@ export class BlobStorageHelper {
 			const encryptedBlob = await this._blobStorageConnector.get(blobId);
 
 			if (Is.uint8Array(encryptedBlob)) {
-				let compressedBlob;
-
-				// If this is a trusted node, we can decrypt the blob using the vault
-				if (this._isTrustedNode) {
-					compressedBlob = await this._vaultConnector.decrypt(
-						this._blobStorageEncryptionKeyId,
-						VaultEncryptionType.Rsa2048,
-						encryptedBlob
-					);
-				} else {
-					// Otherwise we need the public key stored as a secret in the vault
-					const key = await this._vaultConnector.getSecret<string>(
-						this._blobStorageEncryptionKeyId
-					);
-					const rsa = new RSA(Converter.base64ToBytes(key));
-					compressedBlob = await rsa.publicDecrypt(encryptedBlob);
-				}
+				const compressedBlob = await this._vaultConnector.decrypt(
+					this._blobStorageEncryptionKeyId,
+					VaultEncryptionType.ChaCha20Poly1305,
+					encryptedBlob
+				);
 
 				const decompressedBlob = await Compression.decompress(compressedBlob, CompressionType.Gzip);
 				await this._loggingComponent?.log({
@@ -170,7 +156,7 @@ export class BlobStorageHelper {
 
 		const encryptedBlob = await this._vaultConnector.encrypt(
 			this._blobStorageEncryptionKeyId,
-			VaultEncryptionType.Rsa2048,
+			VaultEncryptionType.ChaCha20Poly1305,
 			compressedBlob
 		);
 

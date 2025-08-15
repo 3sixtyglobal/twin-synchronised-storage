@@ -10,9 +10,10 @@ import {
 	CompressionType,
 	Converter,
 	ObjectHelper,
-	RandomHelper
+	RandomHelper,
+	Uint8ArrayHelper
 } from "@twin.org/core";
-import { Bip39, RSA } from "@twin.org/crypto";
+import { Bip39, ChaCha20Poly1305 } from "@twin.org/crypto";
 import { EntitySchemaFactory, EntitySchemaHelper, entity, property } from "@twin.org/entity";
 import { MemoryEntityStorageConnector } from "@twin.org/entity-storage-connector-memory";
 import { EntityStorageConnectorFactory } from "@twin.org/entity-storage-models";
@@ -52,7 +53,7 @@ import {
 	type VaultSecret,
 	initSchema as initSchemaVault
 } from "@twin.org/vault-connector-entity-storage";
-import { VaultConnectorFactory, VaultEncryptionType, VaultKeyType } from "@twin.org/vault-models";
+import { VaultConnectorFactory, VaultKeyType } from "@twin.org/vault-models";
 import {
 	EntityStorageVerifiableStorageConnector,
 	type VerifiableItem,
@@ -64,15 +65,6 @@ import type { ISyncPointerStore } from "../src/models/ISyncPointerStore";
 import type { ISyncState } from "../src/models/ISyncState";
 import { initSchema } from "../src/schema";
 import { SynchronisedStorageService } from "../src/synchronisedStorageService";
-
-// Mock RSA class
-vi.mock("@twin.org/crypto", async () => {
-	const actual = await vi.importActual("@twin.org/crypto");
-	return {
-		...actual,
-		RSA: vi.fn()
-	};
-});
 
 /**
  * Test Type Definition.
@@ -111,12 +103,7 @@ let loggingUntrustedMemoryEntityStorage: MemoryEntityStorageConnector<LogEntry>;
 let testNodeIdentity: string;
 let testNodeIdentityUntrusted: string;
 
-const mockPrivateRsaKey = Converter.base64ToBytes(
-	"MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDgUQ5bM0VTxi3wXJHnHeUmfaYw4bCuHKsscfQls2zlrmx6Axf7K8WLKPElYqOC6HcRSXEvOlqJZggHBmYOXoZnOzujRiL6UuInRxDC9BfI/hK4sauL3BrrM7ateIXNtG/UXle605QQP4I2z79lDRacnhCpr7vzF5jBWW0kIZQ98HV3RE1tSuIUGNO23B4RofWe7TCrVnTCxSY02fDLYxkwfUpZ0UdH2MgukdROm32L9/bAdf7fPM7K71RqevmpDF9eZTCVizWuFXKYRwlzpkNIJJ0ewqph+/JQMNFL7IEHYY5bM6GUEHSG+n+rCp+JkO5/icIBVXVrXJq6+tdEEoftAgMBAAECggEADObsnfdFeguQkd4pMDNqfjvE5tPcXy9b8xr80XxP+6f8KkpqQzKh0p7AvAc/42QukQp53Z8MHRIGzSyjixkJvv9Lr1j14xMIWfz+7E+w3Iksl330oX8/9x5K2BByFcJWmk7w2diYkBSvDysE1bGahtiamb/3XgSR7zEPE4Bw79z8umFsh01gzEa+MPwYDiRuO0b0QUpi28/i+pL8OLQfC/QI/4JRePaDcF2uq06/OfTTf7W3bLBVoTBkaMj9gpviSjerTkkigWdZX6AVfdZsrrfdetxD+JhLmZj9/UPzqUsQiqN4kuUNfBgN182vKvm2XyRONXrWz6TXsn6BFGAiEQKBgQD0GJ+XehU/dSyov6ResSD5DG9fjW2GH8xEvKfAESUbVOXY/NfRKUkZL5afUk/fUEFFrwJq4wpF48VYPAFzI1dWJd8Z9SkG/5ZXaNb9bUlKjxKe8m8hakC0m8XZfw66D2dOvgj72HKIDuR4x/j35PbBqZ/s2poQlLXj3fSZl+lmlQKBgQDrQX+Ixa4KAjWVpHId1CCo7DFPYqmpHRkWANcqiNiDB/et+RYN4xHqFsbX4HTfjWBGVvJC+IMxxLJH5KAl8UoUP/aNNOFmB02ldX5NBf7O4OX4sNfGKtF4L4E82c7OqQNCHOk7dRSCRr6GTWtwP6gs+zhIakTMEXQyi4O0xFt9+QKBgQCJw4vu9hwf4IYAB4lBWD7/0KDbEPsLg87JzJ/wqryCnHvM54b2qZJ0AIPGD7K8mpL8PTXkFZeqsk6i6dr3nK6iFGXCRLePF5lGZAlSpueCiRU9WB6YgVtbk78qbadmI2Nu8ZooaZTabW1NLa+6WSNbUdzM1OO3D/dIT/DI7w/vsQKBgQCvtPe/+4UFTKkg3vWseab7A43AsPvupyD5Yh9SUWsEUosWkRd7v8C9ic1xpt8jqL/jSUUf5+R042gUchl6vUCK50sKJBjEz2ea0KpIdNXfRfH9UHeYNprEnRZ1kGf5yhn44wb/tW5f7t6WCHTaHXFKR0e+LkC7+b1DkxgHhzCeYQKBgQCGdQUsjBlQWghft7EK6fu9CQm8T4m+VsNSCd4JEG+Q5Gxa7K2uTv8I2OlMBOKUELtAV36y65B0+kRn6g9/8sU4uKXRXQYQfCcGHksBI2NbbvnoH4ynTg6r8nbNvF4B+J7Hl4SarwVJ8k8oqKrEnfiMVwVOPgRGdWTPK7hbBhvasA=="
-);
-const mockPublicRsaKey = Converter.base64ToBytes(
-	"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4FEOWzNFU8Yt8FyR5x3lJn2mMOGwrhyrLHH0JbNs5a5segMX+yvFiyjxJWKjguh3EUlxLzpaiWYIBwZmDl6GZzs7o0Yi+lLiJ0cQwvQXyP4SuLGri9wa6zO2rXiFzbRv1F5XutOUED+CNs+/ZQ0WnJ4Qqa+78xeYwVltJCGUPfB1d0RNbUriFBjTttweEaH1nu0wq1Z0wsUmNNnwy2MZMH1KWdFHR9jILpHUTpt9i/f2wHX+3zzOyu9Uanr5qQxfXmUwlYs1rhVymEcJc6ZDSCSdHsKqYfvyUDDRS+yBB2GOWzOhlBB0hvp/qwqfiZDuf4nCAVV1a1yauvrXRBKH7QIDAQAB"
-);
+const mockChaCha20Poly1305Key = new Uint8Array(32).fill(0x01);
 
 /**
  * Decompress a compressed string into an object.
@@ -124,13 +111,31 @@ const mockPublicRsaKey = Converter.base64ToBytes(
  * @returns The decompressed object.
  */
 async function expandObject<T>(compacted: string): Promise<T> {
-	// Otherwise we need the public key stored as a secret in the vault
-	const rsa = new RSA(mockPublicRsaKey);
-	const compressedBlob = await rsa.privateDecrypt(Converter.base64ToBytes(compacted));
+	const bytes = Converter.base64ToBytes(compacted);
+	const nonce = bytes.slice(0, 12);
+	const encrypted = bytes.slice(12);
+
+	const chaCha = new ChaCha20Poly1305(mockChaCha20Poly1305Key, nonce);
+
+	const compressedBlob = chaCha.decrypt(encrypted);
 
 	const decompressedBlob = await Compression.decompress(compressedBlob, CompressionType.Gzip);
 
 	return ObjectHelper.fromBytes<T>(decompressedBlob);
+}
+
+/**
+ * Compress an object into a  string.
+ * @param obj The object to compress.
+ * @returns The compressed string in base64.
+ */
+async function compressObject<T>(obj: T): Promise<Uint8Array> {
+	const json = ObjectHelper.toBytes(obj);
+	const compressedBlob = await Compression.compress(json, CompressionType.Gzip);
+	const nonce = RandomHelper.generate(12);
+	const chaCha = new ChaCha20Poly1305(mockChaCha20Poly1305Key, nonce);
+	const encrypted = chaCha.encrypt(compressedBlob);
+	return Uint8ArrayHelper.concat([nonce, encrypted]);
 }
 
 /**
@@ -211,37 +216,6 @@ describe("synchronisedStorageService", () => {
 
 		const vaultConnector = new EntityStorageVaultConnector();
 
-		// Store original methods
-		const originalEncrypt = vaultConnector.encrypt.bind(vaultConnector);
-		const originalDecrypt = vaultConnector.decrypt.bind(vaultConnector);
-
-		// Mock the vault connector methods to use our mocked RSA
-		vaultConnector.encrypt = vi
-			.fn()
-			.mockImplementation(
-				async (keyName: string, encryptionType: VaultEncryptionType, data: Uint8Array) => {
-					if (encryptionType === VaultEncryptionType.Rsa2048) {
-						const rsa = new RSA(mockPublicRsaKey, mockPrivateRsaKey);
-						return rsa.publicEncrypt(data);
-					}
-					// Fallback to original implementation for other encryption types
-					return originalEncrypt(keyName, encryptionType, data);
-				}
-			);
-
-		vaultConnector.decrypt = vi
-			.fn()
-			.mockImplementation(
-				async (keyName: string, encryptionType: VaultEncryptionType, encryptedData: Uint8Array) => {
-					if (encryptionType === VaultEncryptionType.Rsa2048) {
-						const rsa = new RSA(mockPublicRsaKey, mockPrivateRsaKey);
-						return rsa.privateDecrypt(encryptedData);
-					}
-					// Fallback to original implementation for other encryption types
-					return originalDecrypt(keyName, encryptionType, encryptedData);
-				}
-			);
-
 		VaultConnectorFactory.register("vault", () => vaultConnector);
 
 		const identityConnector = new EntityStorageIdentityConnector();
@@ -307,48 +281,10 @@ describe("synchronisedStorageService", () => {
 					"life first castle choose joke eyebrow middle speak lucky improve awesome common energy oval use scare water cluster update steak endorse sweet festival error"
 			);
 
-		// Mock RSA constructor and instance methods
-		const mockRSAInstance = {
-			publicEncrypt: vi.fn().mockImplementation((data: Uint8Array) => {
-				// Return mock encrypted data (just add prefix for testing)
-				const mockEncrypted = new Uint8Array(data.length + 8);
-				mockEncrypted.set([0xee, 0xee, 0xee, 0xee, 0xee, 0xee, 0xee, 0xee], 0); // Mock prefix
-				mockEncrypted.set(data, 8);
-				return mockEncrypted;
-			}),
-			privateDecrypt: vi.fn().mockImplementation((encryptedData: Uint8Array) => {
-				// Return mock decrypted data (remove prefix for testing)
-				if (encryptedData.length > 8 && encryptedData[0] === 0xee && encryptedData[1] === 0xee) {
-					return encryptedData.slice(8);
-				}
-				return encryptedData;
-			}),
-			privateEncrypt: vi.fn().mockImplementation((data: Uint8Array) => {
-				// Return mock encrypted data (just add prefix for testing)
-				const mockEncrypted = new Uint8Array(data.length + 8);
-				mockEncrypted.set([0xdd, 0xdd, 0xdd, 0xdd, 0xdd, 0xdd, 0xdd, 0xdd], 0); // Mock prefix
-				mockEncrypted.set(data, 8);
-				return mockEncrypted;
-			}),
-			publicDecrypt: vi.fn().mockImplementation((encryptedData: Uint8Array) => {
-				// Return mock decrypted data (remove prefix for testing)
-				if (encryptedData.length > 8 && encryptedData[0] === 0xdd && encryptedData[1] === 0xdd) {
-					return encryptedData.slice(8);
-				}
-				return encryptedData;
-			}),
-			generateKeyPair: vi.fn().mockImplementation(() => ({
-				privateKey: mockPrivateRsaKey,
-				publicKey: mockPublicRsaKey
-			}))
-		};
-
-		// Mock the RSA constructor
-		vi.mocked(RSA).mockImplementation(() => mockRSAInstance);
-
-		await vaultConnector.createKey(
+		await vaultConnector.addKey(
 			"synchronised-storage-blob-encryption-key",
-			VaultKeyType.Rsa2048
+			VaultKeyType.ChaCha20Poly1305,
+			mockChaCha20Poly1305Key
 		);
 
 		const didDocument = await identityConnector.createDocument("test-node-identity");
@@ -713,7 +649,7 @@ describe("synchronisedStorageService", () => {
 						storageKey: "test-type",
 						syncPointers: {
 							"test-type":
-								"blob:memory:ad378fe48ccbc2e341996c9427773f8f2d6721b8c14c8005b95edcac80d38345"
+								"blob:memory:4dbfe5ca7634e82c0a79014522932f1f863c2e53e31dc1620d2de601bed14e97"
 						}
 					})
 				),
@@ -727,7 +663,7 @@ describe("synchronisedStorageService", () => {
 			version: "1",
 			storageKey: "test-type",
 			syncPointers: {
-				"test-type": "blob:memory:ad378fe48ccbc2e341996c9427773f8f2d6721b8c14c8005b95edcac80d38345"
+				"test-type": "blob:memory:4dbfe5ca7634e82c0a79014522932f1f863c2e53e31dc1620d2de601bed14e97"
 			}
 		});
 
@@ -740,14 +676,14 @@ describe("synchronisedStorageService", () => {
 			blobs[blobKey] = Converter.bytesToBase64(blobStorageStore[blobKey]);
 		}
 		expect(blobs).toEqual({
-			fdf51549a05883e7b868d84f7cfb23e5f2c4fb0cb9e6dd5b64f9d9c2c3f8235e:
-				"7u7u7u7u7u4fiwgAAAAAAAADtVFdTxsxEPwvy+s55zhHIH4iUBUoRErV0PChPrjnvTunxDb2huOI8t+rOw6ekFoJoX2yZjwzO7sFo0FCoT42kIBWhCcBFWErKLjYZ3yficmCDyXnkvMB5/y2J86cNoX5FzOSC6rEC2xAAmEkRo1HSCCvlC0xgrzbgvMYFBlnQUJEguRlo45uNBtCAmjJUANy+773kPHhojN+897tfiVgncZz/foZtNHy5cH6YJI/af6xgQR8cK5owx3lzhI+EUioiHyUaVrX9aAeDVwoUxvTPGAXR93H9FFAAl0dEr4oUueWsAyGmnknl0AeGk8ubgy1FNQ6KrbKIxNciA7+j1M9YjCFybt6Z0iV05/Vw15sbF4FZ01E/arLVIwYutv2Nc03wbvYLvQG9bl6wk91v2nh56vpBOssu1T2bP07PODBphDZ9Wg5PfQHk2pclWY9vcTixv/B5en1WF9Novq+/mqK8egk+1ad3j7czEWmf2TzTD0vR7OVWxz64xXsdn8BDyXZhzMDAAA=",
-			ad378fe48ccbc2e341996c9427773f8f2d6721b8c14c8005b95edcac80d38345:
-				"7u7u7u7u7u4fiwgAAAAAAAADpY+xasMwFEX/5c12eZYsR9KaKZRO6dSSQdJ7igWOZSxRMCH/Xkw6delQ7njvPXDu8MVrSXkGCx00UGpe3ZVfeQMLlUtt67bwXsxuKWOuBezn/dcpEVhA+b9AA+QqH1d2lXegQKFaVK0w79hZRIv4gogfP8O3TCmmv5apHPNc8pToSY1uKtwALzmMYLsGwujmK5+5np/mJ9oNwU/Z2xvf8rrZSFF1qjcOldaSD14PmnQfDyF6IVlFEfroMXjDA5HyQx8NmSCCjFpIxXB5XB7f1T6XdGkBAAA="
+			ce62d9834f93aaefb1a19e0c5e4ea0a4e12dd20fd89cf121823abbfc17244bfe:
+				"/v7+/v7+/v7+/v7+9mNPp35Q8FVkdm68+MFxpwAimYFeQ8d4TaM+bVkyE6rLs6oKpDobX0tU/T5BihU60Mx6EuiVXDSihJCHFXGDEUyzfM0CTDzGMY0qQ32QrblXTcOZ7SR2NQODPxUY3omB4o5VDwlH/roHS1jZcW5HuIfOTQmn2hxNu1NYItgGPYPGhg2myIoDnYIsLxfEffHDiPMdIb6cNtEs8HK2d39fS/NlVqV4ia7xAAcRw/mVZnSsNNkAbcKD1u4p7DkVBf9wa0Kh4BWetBt1YzFV6boudoSnwQuH+7/NxejBcihDGWWHFhur0NEUuERtHXiciStpXJPHwMJ2Gma5MSXsQn/DHBrlkdnTU8qEWRfgC+zD2IkL5MmXDMS0bOSmqnrFWFtNmzbd+sNcfngz5Mz67ZTNVB3m6zMSVH0BHeUcJjDMA0Iu/+0yMQ/Vdc5IvVZaIdYJ5w1TAwlztECb8qN9swVx9n/T6SQGC3nlcV9oJEGQateduzwcKctcgbwyn7GiAMG5Foliyt6IHn13h3EBwd73iTaDhjuyl2uwoM1RrWfB1A==",
+			"4dbfe5ca7634e82c0a79014522932f1f863c2e53e31dc1620d2de601bed14e97":
+				"BwcHBwcHBwcHBwcHs9u/x23PhZc1yftA4U3VAAqp9RjWlH1ff6OcaJ07xzYG8ERGkkQOgggrrNSKF/mU+WIFxPMe57bh+zuLyCKwh1V66Yc6t6qXywrosWdP4f8Z/RKTMw4Di+Tahb8aAy9gItUVVoXqDAlv8zKWWFdTLIFZAJ+OvWUTsWFQO8LHs1gNzmVlQY2pRjKrYHm6zg9myFtXsl2kmXiWBcQrqXjTMUTUkx/0wetlsjS3BSG8lh9vSl5jEiq+93wqxxL+qlg1vSxL5TqSE/w9YToAasVWhBWNAJalMHYO2rChvWvXMJLOzrFd01aDXvI8Q+ZyKtbS"
 		});
 
 		expect(
-			await expandObject(blobs.fdf51549a05883e7b868d84f7cfb23e5f2c4fb0cb9e6dd5b64f9d9c2c3f8235e)
+			await expandObject(blobs.ce62d9834f93aaefb1a19e0c5e4ea0a4e12dd20fd89cf121823abbfc17244bfe)
 		).toEqual({
 			id: "fafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafa",
 			dateCreated: "2025-05-29T01:00:00.000Z",
@@ -776,20 +712,20 @@ describe("synchronisedStorageService", () => {
 		});
 
 		expect(
-			await expandObject(blobs.ad378fe48ccbc2e341996c9427773f8f2d6721b8c14c8005b95edcac80d38345)
+			await expandObject(blobs["4dbfe5ca7634e82c0a79014522932f1f863c2e53e31dc1620d2de601bed14e97"])
 		).toEqual({
 			version: "1",
 			storageKey: "test-type",
 			snapshots: [
 				{
 					version: "1",
-					id: "0303030303030303030303030303030303030303030303030303030303030303",
+					id: "0404040404040404040404040404040404040404040404040404040404040404",
 					dateCreated: "2025-05-29T01:00:00.000Z",
 					dateModified: "2025-05-29T01:00:00.000Z",
 					isConsolidated: false,
 					epoch: 1,
 					changeSetStorageIds: [
-						"blob:memory:fdf51549a05883e7b868d84f7cfb23e5f2c4fb0cb9e6dd5b64f9d9c2c3f8235e"
+						"blob:memory:ce62d9834f93aaefb1a19e0c5e4ea0a4e12dd20fd89cf121823abbfc17244bfe"
 					]
 				}
 			]
@@ -842,9 +778,7 @@ describe("synchronisedStorageService", () => {
 			}
 		};
 
-		const blobChangeSetId = await blobStorageConnector.set(
-			await Compression.compress(ObjectHelper.toBytes(changeSet), "gzip")
-		);
+		const blobChangeSetId = await blobStorageConnector.set(await compressObject(changeSet));
 
 		const syncState: ISyncState = {
 			version: "1",
@@ -862,9 +796,7 @@ describe("synchronisedStorageService", () => {
 			]
 		};
 
-		const blobSnapshotId = await blobStorageConnector.set(
-			await Compression.compress(ObjectHelper.toBytes(syncState), "gzip")
-		);
+		const blobSnapshotId = await blobStorageConnector.set(await compressObject(syncState));
 
 		const verifiableSyncPointerStore: ISyncPointerStore = {
 			version: "1",
@@ -944,7 +876,7 @@ describe("synchronisedStorageService", () => {
 				isConsolidated: true,
 				epoch: 0,
 				changeSetStorageIds: [
-					"blob:memory:88a32fb95e67da4ef8b28091ce85c127e465873717dc4727839391707e704ed8"
+					"blob:memory:ca0591854151611024aa390466b272452c44948507c4d8359b196a5f17549d60"
 				]
 			}
 		]);
@@ -1071,7 +1003,7 @@ describe("synchronisedStorageService", () => {
 						storageKey: "test-type",
 						syncPointers: {
 							"test-type":
-								"blob:memory:96d8f39e59ee0502fefd25a22aad9739d63b26fd2ec8633944b2cc2b2e64efe8"
+								"blob:memory:ffac2a5f0d6bdda5b2182ff4cb45d7270e391f6088ee584c64f6455fd75e5318"
 						}
 					})
 				),
@@ -1086,34 +1018,34 @@ describe("synchronisedStorageService", () => {
 			blobs[blobKey] = Converter.bytesToBase64(blobStorageStore[blobKey]);
 		}
 		expect(blobs).toEqual({
-			"2f6b5996f09977f01c30a8c601cf6f86078d0491a9a65d5aafbb1b3055a23497":
-				"7u7u7u7u7u4fiwgAAAAAAAADpVHBbtpAEP2X6dXG6yWJwp6qlkZNUhAlAVyqHlbeMWwTdt2dAeMg/r2y4+TUKJXQnEbvzbw3bw5gDSgQg9MKIjCa8XNAzdgslEKex+I8loN7kSohlBA9IcSyI468sYV9j0nsg17hLdaggJE45rpEiCBfa7dCAvXzAL7EoNl6BwoIGaLni1q6NXEKEaBjyzWow7+101ik963wq/bx+CsC5w1em5dhMNao5ybujCmxN/K0ggjK4H3RmPuYe8e4Z1CwZi5JJUlVVb2q3/NhlThK8oCtHf1Iya4ZbeNQMNSsrx3jKliuJ+26CPJQl+xpa7mhoDGk4985xVJI2cL/8aodBlvYvI13hLz25s0cxGn1gWqXr4N3ltC87I01EYb2t11Mk20oPTUHvUKdr44w14/bBn7qj2fZcF4V6Vdfh/1iO9t9L24GdHY12+tLeTX+dnYjzXg+X2TZp4flYuLuON+MlsvL0XR8sflCt87+uRjeTbNMT6n/I2Qbb574geF4/AtctcMcNAMAAA==",
-			"96d8f39e59ee0502fefd25a22aad9739d63b26fd2ec8633944b2cc2b2e64efe8":
-				"7u7u7u7u7u4fiwgAAAAAAAADpY8xa8MwFIT/y5vt8GRbsqU1Uyid0qklw5P0FAscy1giYEL+ezHp1KVDueXgvju4B9x5zTHNYEBABbmkla78xhsYKJxLXbaF92CmJY+pZDBfj1+l6HfT/U9QgafCx5Wp8D7YYCNrlHWjP1AYRIN4QMTPH/A9+RjiX2TMxzTnNEX/Wg00Za6Al+RGMKICN9J85TOX8+v5ye8PwU7Jmhvf0rqZJigrtVYBte77gMK1SINTKFxQYVDYDx47LUiTkl4SBWuFbVFKatpO93B5Xp7fdkTYzmkBAAA="
+			"2b2232268fe48124fa204fde67d12fb6aa14f1156b4a2c87061baf4a9d3bd87c":
+				"DQ0NDQ0NDQ0NDQ0NZNW3j657i3SGqsnanRLARNsPnef9Od1U+0JCLL7tRtzWbOnsrbYXYCE+ckoWpxKiHIF/VzdYNPmFlrU0cQOLZbBkwyNNWHqmOVdkUsSWbykBdaLgWXVc86aSvk5lhvmSvKZ+Ar2n3GdrQAr+k1wrNEoG3MbURPYBRVI/AlEhV3kfQELapuYHVSHLIMYzYG8KkcOxQEb8gmDoiNKKArPhrRUDppRECYI4g+XSy8ZObYrRtutpXjvXJ1RjkOTtGMviqQjdO8GShwpvdt0pP+XiBGfDYlWlJ5W0n6nKWALZ/29QgGWH8IkG/wtKPSYNitck++HHmUeWGma1K18e3KmFVc/XzERzxIX+aQ9KO7mgmdPfDEWM00+/ltWYnRVJFc7GZAip/VvDLiIUXR8JEwdfJya5UKtOX3HJn9j+L5MhKlYH/LbaQ526iE8xb5RF4Pta4WToV4YbCklYktWF+XNlj2FuIoRujk7eKd3hshubSkioimjW/zfKcEiKwZMExd8y9lzo9ynavIvjktTipd1ImV3LZNKnZbdZSa3aulmpuBrn",
+			ffac2a5f0d6bdda5b2182ff4cb45d7270e391f6088ee584c64f6455fd75e5318:
+				"GBgYGBgYGBgYGBgYmbOclr/omAqPKGRFf4DpIHK6uMttduyCXv/SQ64w1edvNKc+Q05wN/BTwGOSJDt0S+5dDvtl3YAl3U/dIb5zQkwUt+IWQq4lWoZ+6Q1AUJ+c49au8TSMIEMzG9uO7W4fMszNxL43lSMg5iT9fqVmvbl5tupgaIZ2MsFuukQD07jwPt4yC9vEFvMp5Do+39RWqAMn2p7nkquEhoCTjQPO+QZSySs+8MZbozUOucNTxBb1lEa5hbaKJHhgcEbcRMBSKDFLfvCuw6uW1RM2Tpr7dMWeCk6eqWby2q3X4isqcMv1R+5efzrSSxLi0tvOcrgGtg=="
 		});
 
 		expect(
-			await expandObject(blobs["96d8f39e59ee0502fefd25a22aad9739d63b26fd2ec8633944b2cc2b2e64efe8"])
+			await expandObject(blobs.ffac2a5f0d6bdda5b2182ff4cb45d7270e391f6088ee584c64f6455fd75e5318)
 		).toEqual({
 			version: "1",
 			storageKey: "test-type",
 			snapshots: [
 				{
 					version: "1",
-					id: "1414141414141414141414141414141414141414141414141414141414141414",
+					id: "1515151515151515151515151515151515151515151515151515151515151515",
 					dateCreated: "2025-05-29T01:00:00.000Z",
 					dateModified: "2025-05-29T01:00:00.000Z",
 					isConsolidated: false,
 					epoch: 1,
 					changeSetStorageIds: [
-						"blob:memory:2f6b5996f09977f01c30a8c601cf6f86078d0491a9a65d5aafbb1b3055a23497"
+						"blob:memory:2b2232268fe48124fa204fde67d12fb6aa14f1156b4a2c87061baf4a9d3bd87c"
 					]
 				}
 			]
 		});
 
 		expect(
-			await expandObject(blobs["2f6b5996f09977f01c30a8c601cf6f86078d0491a9a65d5aafbb1b3055a23497"])
+			await expandObject(blobs["2b2232268fe48124fa204fde67d12fb6aa14f1156b4a2c87061baf4a9d3bd87c"])
 		).toEqual({
 			changes: [
 				{
@@ -1230,15 +1162,9 @@ describe("synchronisedStorageService", () => {
 			};
 
 			// Store changesets
-			const blobChangeSetId1 = await blobStorageConnector.set(
-				await Compression.compress(ObjectHelper.toBytes(changeSet1), "gzip")
-			);
-			const blobChangeSetId2 = await blobStorageConnector.set(
-				await Compression.compress(ObjectHelper.toBytes(changeSet2), "gzip")
-			);
-			const blobChangeSetId3 = await blobStorageConnector.set(
-				await Compression.compress(ObjectHelper.toBytes(changeSet3), "gzip")
-			);
+			const blobChangeSetId1 = await blobStorageConnector.set(await compressObject(changeSet1));
+			const blobChangeSetId2 = await blobStorageConnector.set(await compressObject(changeSet2));
+			const blobChangeSetId3 = await blobStorageConnector.set(await compressObject(changeSet3));
 
 			// Create sync state with consolidation in the middle
 			const syncState: ISyncState = {
@@ -1278,9 +1204,7 @@ describe("synchronisedStorageService", () => {
 				]
 			};
 
-			const blobSnapshotId = await blobStorageConnector.set(
-				await Compression.compress(ObjectHelper.toBytes(syncState), "gzip")
-			);
+			const blobSnapshotId = await blobStorageConnector.set(await compressObject(syncState));
 
 			const verifiableSyncPointerStore: ISyncPointerStore = {
 				version: "1",
@@ -1362,9 +1286,7 @@ describe("synchronisedStorageService", () => {
 				}
 			};
 
-			const blobChangeSetId = await blobStorageConnector.set(
-				await Compression.compress(ObjectHelper.toBytes(changeSet), "gzip")
-			);
+			const blobChangeSetId = await blobStorageConnector.set(await compressObject(changeSet));
 
 			// Create sync state with NO consolidation
 			const syncState: ISyncState = {
@@ -1383,9 +1305,7 @@ describe("synchronisedStorageService", () => {
 				]
 			};
 
-			const blobSnapshotId = await blobStorageConnector.set(
-				await Compression.compress(ObjectHelper.toBytes(syncState), "gzip")
-			);
+			const blobSnapshotId = await blobStorageConnector.set(await compressObject(syncState));
 
 			const verifiableSyncPointerStore: ISyncPointerStore = {
 				version: "1",
@@ -1474,9 +1394,7 @@ describe("synchronisedStorageService", () => {
 				}
 			};
 
-			const blobChangeSetId = await blobStorageConnector.set(
-				await Compression.compress(ObjectHelper.toBytes(changeSet), "gzip")
-			);
+			const blobChangeSetId = await blobStorageConnector.set(await compressObject(changeSet));
 
 			// Sync state with incremental change (no gap from existing consolidation)
 			const syncState: ISyncState = {
@@ -1506,9 +1424,7 @@ describe("synchronisedStorageService", () => {
 				]
 			};
 
-			const blobSnapshotId = await blobStorageConnector.set(
-				await Compression.compress(ObjectHelper.toBytes(syncState), "gzip")
-			);
+			const blobSnapshotId = await blobStorageConnector.set(await compressObject(syncState));
 
 			const verifiableSyncPointerStore: ISyncPointerStore = {
 				version: "1",
@@ -1603,9 +1519,7 @@ describe("synchronisedStorageService", () => {
 				}
 			};
 
-			const blobChangeSetId = await blobStorageConnector.set(
-				await Compression.compress(ObjectHelper.toBytes(changeSet), "gzip")
-			);
+			const blobChangeSetId = await blobStorageConnector.set(await compressObject(changeSet));
 
 			// Remote sync state starting at epoch 10 (gap from local epoch 5)
 			const syncState: ISyncState = {
@@ -1624,9 +1538,7 @@ describe("synchronisedStorageService", () => {
 				]
 			};
 
-			const blobSnapshotId = await blobStorageConnector.set(
-				await Compression.compress(ObjectHelper.toBytes(syncState), "gzip")
-			);
+			const blobSnapshotId = await blobStorageConnector.set(await compressObject(syncState));
 
 			const verifiableSyncPointerStore: ISyncPointerStore = {
 				version: "1",
