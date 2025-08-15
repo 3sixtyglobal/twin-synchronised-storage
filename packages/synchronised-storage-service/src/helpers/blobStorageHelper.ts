@@ -110,7 +110,7 @@ export class BlobStorageHelper {
 						this._blobStorageEncryptionKeyId
 					);
 					const rsa = new RSA(Converter.base64ToBytes(key));
-					compressedBlob = rsa.decrypt(encryptedBlob);
+					compressedBlob = await rsa.publicDecrypt(encryptedBlob);
 				}
 
 				const decompressedBlob = await Compression.decompress(compressedBlob, CompressionType.Gzip);

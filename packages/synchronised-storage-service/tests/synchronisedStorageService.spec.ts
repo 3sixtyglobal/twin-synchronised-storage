@@ -119,14 +119,14 @@ const mockPublicRsaKey = Converter.base64ToBytes(
 );
 
 /**
- * Decompress a compressed string into an ISyncPointerStore object.
+ * Decompress a compressed string into an object.
  * @param compacted The compressed string to decompress in base64.
  * @returns The decompressed object.
  */
 async function expandObject<T>(compacted: string): Promise<T> {
 	// Otherwise we need the public key stored as a secret in the vault
 	const rsa = new RSA(mockPublicRsaKey);
-	const compressedBlob = rsa.decrypt(Converter.base64ToBytes(compacted));
+	const compressedBlob = await rsa.privateDecrypt(Converter.base64ToBytes(compacted));
 
 	const decompressedBlob = await Compression.decompress(compressedBlob, CompressionType.Gzip);
 
@@ -222,7 +222,7 @@ describe("synchronisedStorageService", () => {
 				async (keyName: string, encryptionType: VaultEncryptionType, data: Uint8Array) => {
 					if (encryptionType === VaultEncryptionType.Rsa2048) {
 						const rsa = new RSA(mockPublicRsaKey, mockPrivateRsaKey);
-						return rsa.encrypt(data);
+						return rsa.publicEncrypt(data);
 					}
 					// Fallback to original implementation for other encryption types
 					return originalEncrypt(keyName, encryptionType, data);
@@ -235,7 +235,7 @@ describe("synchronisedStorageService", () => {
 				async (keyName: string, encryptionType: VaultEncryptionType, encryptedData: Uint8Array) => {
 					if (encryptionType === VaultEncryptionType.Rsa2048) {
 						const rsa = new RSA(mockPublicRsaKey, mockPrivateRsaKey);
-						return rsa.decrypt(encryptedData);
+						return rsa.privateDecrypt(encryptedData);
 					}
 					// Fallback to original implementation for other encryption types
 					return originalDecrypt(keyName, encryptionType, encryptedData);
@@ -309,16 +309,30 @@ describe("synchronisedStorageService", () => {
 
 		// Mock RSA constructor and instance methods
 		const mockRSAInstance = {
-			encrypt: vi.fn().mockImplementation((data: Uint8Array) => {
+			publicEncrypt: vi.fn().mockImplementation((data: Uint8Array) => {
 				// Return mock encrypted data (just add prefix for testing)
 				const mockEncrypted = new Uint8Array(data.length + 8);
 				mockEncrypted.set([0xee, 0xee, 0xee, 0xee, 0xee, 0xee, 0xee, 0xee], 0); // Mock prefix
 				mockEncrypted.set(data, 8);
 				return mockEncrypted;
 			}),
-			decrypt: vi.fn().mockImplementation((encryptedData: Uint8Array) => {
+			privateDecrypt: vi.fn().mockImplementation((encryptedData: Uint8Array) => {
 				// Return mock decrypted data (remove prefix for testing)
 				if (encryptedData.length > 8 && encryptedData[0] === 0xee && encryptedData[1] === 0xee) {
+					return encryptedData.slice(8);
+				}
+				return encryptedData;
+			}),
+			privateEncrypt: vi.fn().mockImplementation((data: Uint8Array) => {
+				// Return mock encrypted data (just add prefix for testing)
+				const mockEncrypted = new Uint8Array(data.length + 8);
+				mockEncrypted.set([0xdd, 0xdd, 0xdd, 0xdd, 0xdd, 0xdd, 0xdd, 0xdd], 0); // Mock prefix
+				mockEncrypted.set(data, 8);
+				return mockEncrypted;
+			}),
+			publicDecrypt: vi.fn().mockImplementation((encryptedData: Uint8Array) => {
+				// Return mock decrypted data (remove prefix for testing)
+				if (encryptedData.length > 8 && encryptedData[0] === 0xdd && encryptedData[1] === 0xdd) {
 					return encryptedData.slice(8);
 				}
 				return encryptedData;
