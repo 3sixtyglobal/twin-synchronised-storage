@@ -16,7 +16,7 @@ runs:
     - name: Write publish-config.json
       shell: bash
       run: |
-        echo '${{ inputs.publish-config-json }}' > packages/synchronised-storage-service/src/scripts/publish-config.json
+        echo '${{ inputs.publish-config-json }}' > packages/synchronised-storage-service/scripts/publish-config.json
 
     - name: Setup sync storage for mainnet
       shell: bash
