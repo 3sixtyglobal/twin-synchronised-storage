@@ -35,4 +35,5 @@ jobs:
       # Run the prerequisites action
       - name: Run the prerequisites
         uses: ./.github/workflows/publish-prerequisites
-        with: publish-config-json ${{ secrets.PUBLISH_CONFIG_JSON }}
+        with:
+          publish-config-json: ${{ secrets.PUBLISH_CONFIG_JSON }}
