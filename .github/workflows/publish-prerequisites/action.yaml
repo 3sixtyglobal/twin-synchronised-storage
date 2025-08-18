@@ -6,11 +6,32 @@ inputs:
     description: 'The package to publish prerequisites for.'
     required: true
     default: 'all'
+  publish-config-json:
+    description: 'The configuration to use when publishing, stored as JSON.'
+    required: true
 
 runs:
   using: 'composite'
   steps:
-    - name: No action
+    - name: Write publish-config.json
       shell: bash
       run: |
-        echo "No prerequisites required for this action. It is a placeholder for the publish prerequisites."
+        echo '${{ inputs.publish-config-json }}' > packages/src/synchronised-storage-service/scripts/publish-config.json
+
+    - name: Setup sync storage for mainnet
+      shell: bash
+      run: |
+        cd packages/synchronised-storage-service
+        node script/setup-sync-storage.mjs ./scripts/publish-config.json mainnet
+
+    - name: Setup sync storage for testnet
+      shell: bash
+      run: |
+        cd packages/synchronised-storage-service
+        node script/setup-sync-storage.mjs ./scripts/publish-config.json testnet
+
+    - name: Setup sync storage for devnet
+      shell: bash
+      run: |
+        cd packages/synchronised-storage-service
+        node script/setup-sync-storage.mjs ./scripts/publish-config.json devnet

@@ -1,0 +1,38 @@
+name: Publish Prerequisites Dry Run
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish-prerequisites:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Clone the repository to the runner
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Setup Node
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Install dependencies with retry
+      - name: Install dependencies
+        run: |
+          for i in {1..3}; do
+            npm ci && break || {
+              if [ $i -eq 3 ]; then
+                echo "npm ci failed after 3 attempts"
+                exit 1
+              fi
+              echo "npm ci failed, retrying in 30 seconds (attempt $i/3)..."
+              sleep 30
+            }
+          done
+
+      # Run the prerequisites action
+      - name: Run the prerequisites
+        uses: ./.github/workflows/publish-prerequisites
+        with: publish-config-json ${{ secrets.PUBLISH_CONFIG_JSON }}
