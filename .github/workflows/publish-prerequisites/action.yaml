@@ -16,22 +16,22 @@ runs:
     - name: Write publish-config.json
       shell: bash
       run: |
-        echo '${{ inputs.publish-config-json }}' > packages/synchronised-storage-service/scripts/publish-config.json
+        echo '${{ inputs.publish-config-json }}' > ./packages/synchronised-storage-service/scripts/publish-config.json
 
     - name: Setup sync storage for mainnet
       shell: bash
       run: |
         cd packages/synchronised-storage-service
-        node script/setup-sync-storage.mjs ./scripts/publish-config.json mainnet
+        node ./scripts/setup-sync-storage.mjs ./scripts/publish-config.json mainnet
 
     - name: Setup sync storage for testnet
       shell: bash
       run: |
         cd packages/synchronised-storage-service
-        node script/setup-sync-storage.mjs ./scripts/publish-config.json testnet
+        node ./scripts/setup-sync-storage.mjs ./scripts/publish-config.json testnet
 
     - name: Setup sync storage for devnet
       shell: bash
       run: |
         cd packages/synchronised-storage-service
-        node script/setup-sync-storage.mjs ./scripts/publish-config.json devnet
+        node ./scripts/setup-sync-storage.mjs ./scripts/publish-config.json devnet
