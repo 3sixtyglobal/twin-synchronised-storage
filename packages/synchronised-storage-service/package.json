@@ -64,6 +64,7 @@
 		"@twin.org/vault-connector-entity-storage": "next",
 		"@twin.org/vault-models": "next",
 		"@twin.org/verifiable-storage-connector-entity-storage": "next",
+		"@twin.org/verifiable-storage-connector-iota": "next",
 		"@types/node": "24.0.14",
 		"@vitest/coverage-v8": "3.2.4",
 		"copyfiles": "2.4.1",
