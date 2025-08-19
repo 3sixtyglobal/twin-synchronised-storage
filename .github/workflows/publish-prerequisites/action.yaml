@@ -14,23 +14,27 @@ runs:
   using: 'composite'
   steps:
     - name: Write publish-config.json
+      if: inputs.package == 'packages/synchronised-storage-service' || inputs.package == 'all'
       shell: bash
       run: |
         echo '${{ inputs.publish-config-json }}' > ./packages/synchronised-storage-service/scripts/publish-config.json
 
     - name: Setup sync storage for mainnet
+      if: inputs.package == 'packages/synchronised-storage-service' || inputs.package == 'all'
       shell: bash
       run: |
         cd packages/synchronised-storage-service
         node ./scripts/setup-sync-storage.mjs ./scripts/publish-config.json mainnet
 
     - name: Setup sync storage for testnet
+      if: inputs.package == 'packages/synchronised-storage-service' || inputs.package == 'all'
       shell: bash
       run: |
         cd packages/synchronised-storage-service
         node ./scripts/setup-sync-storage.mjs ./scripts/publish-config.json testnet
 
     - name: Setup sync storage for devnet
+      if: inputs.package == 'packages/synchronised-storage-service' || inputs.package == 'all'
       shell: bash
       run: |
         cd packages/synchronised-storage-service
