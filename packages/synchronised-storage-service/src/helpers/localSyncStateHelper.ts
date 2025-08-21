@@ -28,7 +28,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	 * The logging component to use for logging.
 	 * @internal
 	 */
-	private readonly _loggingComponent: ILoggingComponent | undefined;
+	private readonly _logging?: ILoggingComponent;
 
 	/**
 	 * The storage connector for the sync snapshot entries.
@@ -44,16 +44,16 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 
 	/**
 	 * Create a new instance of LocalSyncStateHelper.
-	 * @param loggingComponent The logging connector to use for logging.
+	 * @param logging The logging component to use for logging.
 	 * @param snapshotEntryEntityStorage The storage connector for the sync snapshot entries.
 	 * @param changeSetHelper The change set helper to use for applying changesets.
 	 */
 	constructor(
-		loggingComponent: ILoggingComponent | undefined,
+		logging: ILoggingComponent | undefined,
 		snapshotEntryEntityStorage: IEntityStorageConnector<SyncSnapshotEntry<T>>,
 		changeSetHelper: ChangeSetHelper<T>
 	) {
-		this._loggingComponent = loggingComponent;
+		this._logging = logging;
 		this._snapshotEntryEntityStorage = snapshotEntryEntityStorage;
 		this._changeSetHelper = changeSetHelper;
 	}
@@ -70,7 +70,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 		operation: SyncChangeOperation,
 		id: string
 	): Promise<void> {
-		await this._loggingComponent?.log({
+		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "addLocalChange",
@@ -116,7 +116,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	 * @returns The local snapshot entry.
 	 */
 	public async getSnapshots(storageKey: string, isLocal: boolean): Promise<SyncSnapshotEntry<T>[]> {
-		await this._loggingComponent?.log({
+		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "getSnapshots",
@@ -141,7 +141,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 		});
 
 		if (queryResult.entities.length > 0) {
-			await this._loggingComponent?.log({
+			await this._logging?.log({
 				level: "info",
 				source: this.CLASS_NAME,
 				message: "getSnapshotsExists",
@@ -152,7 +152,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 			return queryResult.entities as SyncSnapshotEntry<T>[];
 		}
 
-		await this._loggingComponent?.log({
+		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "getSnapshotsDoesNotExist",
@@ -182,7 +182,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	 * @returns Nothing.
 	 */
 	public async setLocalChangeSnapshot(localChangeSnapshot: SyncSnapshotEntry<T>): Promise<void> {
-		await this._loggingComponent?.log({
+		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "setLocalChangeSnapshot",
@@ -199,7 +199,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	 * @returns Nothing.
 	 */
 	public async removeLocalChangeSnapshot(localChangeSnapshot: SyncSnapshotEntry<T>): Promise<void> {
-		await this._loggingComponent?.log({
+		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "removeLocalChangeSnapshot",
@@ -217,7 +217,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	 * @returns Nothing.
 	 */
 	public async applySyncState(storageKey: string, syncState: ISyncState): Promise<void> {
-		await this._loggingComponent?.log({
+		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "applySyncState",
@@ -253,7 +253,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 		// If we have an epoch gap or no existing snapshots then we need to apply
 		// a full sync from a consolidation
 		if (!existingSnapshots.some(s => s.isConsolidated) || hasEpochGap) {
-			await this._loggingComponent?.log({
+			await this._logging?.log({
 				level: "info",
 				source: this.CLASS_NAME,
 				message: "applySnapshotNoExisting",
@@ -266,7 +266,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 			);
 			if (mostRecentConsolidation !== -1) {
 				// We found the most recent consolidated snapshot, we can use it
-				await this._loggingComponent?.log({
+				await this._logging?.log({
 					level: "info",
 					source: this.CLASS_NAME,
 					message: "applySnapshotFoundConsolidated",
@@ -295,7 +295,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 					]);
 				}
 			} else {
-				await this._loggingComponent?.log({
+				await this._logging?.log({
 					level: "info",
 					source: this.CLASS_NAME,
 					message: "applySnapshotNoConsolidated",
@@ -325,7 +325,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 
 			let completedProcessing = false;
 			for (const snapshot of syncStateSnapshots) {
-				await this._loggingComponent?.log({
+				await this._logging?.log({
 					level: "info",
 					source: this.CLASS_NAME,
 					message: "applySnapshot",
@@ -396,7 +396,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 		}[]
 	): Promise<void> {
 		for (const modifiedSnapshot of modifiedSnapshots) {
-			await this._loggingComponent?.log({
+			await this._logging?.log({
 				level: "info",
 				source: this.CLASS_NAME,
 				message: "processModifiedSnapshot",
@@ -436,7 +436,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	 */
 	private async processNewSnapshots(newSnapshots: SyncSnapshotEntry<T>[]): Promise<void> {
 		for (const newSnapshot of newSnapshots) {
-			await this._loggingComponent?.log({
+			await this._logging?.log({
 				level: "info",
 				source: this.CLASS_NAME,
 				message: "processNewSnapshot",

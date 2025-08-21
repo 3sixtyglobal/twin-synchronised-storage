@@ -336,7 +336,7 @@ describe("synchronisedStorageService", () => {
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 
-		await connector.start(testNodeIdentity, "node-logging");
+		await connector.start(testNodeIdentity, "logging");
 
 		await eventBusConnector.publish<ISyncRegisterStorageKey>(
 			SynchronisedStorageTopics.RegisterStorageKey,
@@ -366,7 +366,7 @@ describe("synchronisedStorageService", () => {
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 
-		await connector.start(testNodeIdentity, "node-logging");
+		await connector.start(testNodeIdentity, "logging");
 
 		await eventBusConnector.publish<ISyncRegisterStorageKey>(
 			SynchronisedStorageTopics.RegisterStorageKey,
@@ -395,7 +395,7 @@ describe("synchronisedStorageService", () => {
 			config: { verifiableStorageKeyId, consolidationIntervalMinutes: 0 }
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
-		await connector.start(testNodeIdentity, "node-logging");
+		await connector.start(testNodeIdentity, "logging");
 
 		await eventBusConnector.publish<ISyncRegisterStorageKey>(
 			SynchronisedStorageTopics.RegisterStorageKey,
@@ -459,7 +459,7 @@ describe("synchronisedStorageService", () => {
 			}
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
-		await connector.start(testNodeIdentity, "node-logging");
+		await connector.start(testNodeIdentity, "logging");
 
 		await eventBusConnector.publish<ISyncRegisterStorageKey>(
 			SynchronisedStorageTopics.RegisterStorageKey,
@@ -534,7 +534,7 @@ describe("synchronisedStorageService", () => {
 			}
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
-		await connector.start(testNodeIdentity, "node-logging");
+		await connector.start(testNodeIdentity, "logging");
 
 		await verifiableStorage.set({
 			id: verifiableStorageKeyId.split(":")[2],
@@ -593,10 +593,7 @@ describe("synchronisedStorageService", () => {
 				changes: [
 					{
 						operation: "set",
-						id: "test-id-1",
-						entity: {
-							dateModified: "2025-01-01T00:00:00.000Z"
-						}
+						id: "test-id-1"
 					}
 				]
 			}
@@ -740,7 +737,7 @@ describe("synchronisedStorageService", () => {
 			}
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
-		await connector.start(testNodeIdentity, "node-logging");
+		await connector.start(testNodeIdentity, "logging");
 
 		let remoteData;
 
@@ -899,8 +896,8 @@ describe("synchronisedStorageService", () => {
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 
-		await connector.start(testNodeIdentityUntrusted, "node-logging");
-		await connectorTrusted.start(testNodeIdentity, "node-logging");
+		await connector.start(testNodeIdentityUntrusted, "logging");
+		await connectorTrusted.start(testNodeIdentity, "logging");
 
 		await verifiableStorage.set({
 			id: verifiableStorageKeyId.split(":")[2],
@@ -1083,7 +1080,7 @@ describe("synchronisedStorageService", () => {
 					consolidationIntervalMinutes: 0
 				}
 			});
-			await connector.start(testNodeIdentity, "node-logging");
+			await connector.start(testNodeIdentity, "logging");
 
 			// Create multiple changesets - some before consolidation, some after
 			const changeSet1: ISyncChangeSet = {
@@ -1259,7 +1256,7 @@ describe("synchronisedStorageService", () => {
 					consolidationIntervalMinutes: 0
 				}
 			});
-			await connector.start(testNodeIdentity, "node-logging");
+			await connector.start(testNodeIdentity, "logging");
 
 			const changeSet: ISyncChangeSet = {
 				id: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -1352,7 +1349,7 @@ describe("synchronisedStorageService", () => {
 					consolidationIntervalMinutes: 0
 				}
 			});
-			await connector.start(testNodeIdentity, "node-logging");
+			await connector.start(testNodeIdentity, "logging");
 
 			// Pre-populate local storage with a consolidated snapshot
 			const existingConsolidation: SyncSnapshotEntry = {
@@ -1478,7 +1475,7 @@ describe("synchronisedStorageService", () => {
 					consolidationIntervalMinutes: 0
 				}
 			});
-			await connector.start(testNodeIdentity, "node-logging");
+			await connector.start(testNodeIdentity, "logging");
 
 			// Simulate existing local state at epoch 5
 			const existingSnapshot: SyncSnapshotEntry = {

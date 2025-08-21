@@ -43,7 +43,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 * The logging component to use for logging.
 	 * @internal
 	 */
-	private readonly _loggingComponent: ILoggingComponent | undefined;
+	private readonly _logging?: ILoggingComponent;
 
 	/**
 	 * The event bus component.
@@ -131,7 +131,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 		isTrustedNode: boolean,
 		maxConsolidations: number
 	) {
-		this._loggingComponent = loggingComponent;
+		this._logging = loggingComponent;
 		this._eventBusComponent = eventBusComponent;
 		this._verifiableSyncPointerStorageConnector = verifiableSyncPointerStorageConnector;
 		this._changeSetHelper = changeSetHelper;
@@ -185,7 +185,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 		changes: ISyncChange<T>[],
 		completeCallback: (syncChangeSet?: ISyncChangeSet<T>, id?: string) => Promise<void>
 	): Promise<void> {
-		await this._loggingComponent?.log({
+		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "buildingChangeSet",
@@ -213,7 +213,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 			// Once all the requests are handled the callback will be called
 			for (const change of setChanges) {
 				// Create a request for each change to populate the full details
-				await this._loggingComponent?.log({
+				await this._logging?.log({
 					level: "info",
 					source: this.CLASS_NAME,
 					message: "createChangeSetRequestingItem",
@@ -243,7 +243,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 		storageKey: string,
 		completeCallback: (syncChangeSet?: ISyncChangeSet<T>, id?: string) => Promise<void>
 	): Promise<void> {
-		await this._loggingComponent?.log({
+		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "finalisingSyncChanges",
@@ -288,7 +288,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 
 				await completeCallback(syncChangeSet, changeSetStorageId);
 			} catch (err) {
-				await this._loggingComponent?.log({
+				await this._logging?.log({
 					level: "error",
 					source: this.CLASS_NAME,
 					message: "finalisingSyncChangesFailed",
@@ -314,7 +314,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 		storageKey: string,
 		changeSetStorageId: string
 	): Promise<void> {
-		await this._loggingComponent?.log({
+		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "addChangeSetToSyncState",
@@ -382,7 +382,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 * @returns Nothing.
 	 */
 	public async consolidationStart(storageKey: string, batchSize: number): Promise<void> {
-		await this._loggingComponent?.log({
+		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "consolidationStarting"
@@ -402,7 +402,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	public async getVerifiableSyncPointerStore(): Promise<ISyncPointerStore> {
 		if (Is.stringValue(this._synchronisedStorageKey)) {
 			try {
-				await this._loggingComponent?.log({
+				await this._logging?.log({
 					level: "info",
 					source: this.CLASS_NAME,
 					message: "verifiableSyncPointerStoreRetrieving",
@@ -416,7 +416,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 				);
 				if (Is.uint8Array(syncPointerStore.data)) {
 					const syncPointer = ObjectHelper.fromBytes<ISyncPointerStore>(syncPointerStore.data);
-					await this._loggingComponent?.log({
+					await this._logging?.log({
 						level: "info",
 						source: this.CLASS_NAME,
 						message: "verifiableSyncPointerStoreRetrieved",
@@ -432,7 +432,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 				}
 			}
 
-			await this._loggingComponent?.log({
+			await this._logging?.log({
 				level: "info",
 				source: this.CLASS_NAME,
 				message: "verifiableSyncPointerStoreNotFound",
@@ -456,7 +456,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 */
 	public async storeVerifiableSyncPointerStore(syncPointerStore: ISyncPointerStore): Promise<void> {
 		if (Is.stringValue(this._nodeIdentity) && Is.stringValue(this._synchronisedStorageKey)) {
-			await this._loggingComponent?.log({
+			await this._logging?.log({
 				level: "info",
 				source: this.CLASS_NAME,
 				message: "verifiableSyncPointerStoreStoring",
@@ -480,7 +480,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 * @returns The id of the sync state.
 	 */
 	public async storeRemoteSyncState(syncState: ISyncState): Promise<string> {
-		await this._loggingComponent?.log({
+		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "syncStateStoring",
@@ -535,7 +535,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 */
 	public async getSyncState(syncPointerId: string): Promise<ISyncState | undefined> {
 		try {
-			await this._loggingComponent?.log({
+			await this._logging?.log({
 				level: "info",
 				source: this.CLASS_NAME,
 				message: "syncStateRetrieving",
@@ -546,7 +546,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 			const syncState = await this._blobStorageHelper.loadBlob<ISyncState>(syncPointerId);
 
 			if (Is.object(syncState)) {
-				await this._loggingComponent?.log({
+				await this._logging?.log({
 					level: "info",
 					source: this.CLASS_NAME,
 					message: "syncStateRetrieved",
@@ -558,7 +558,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 				return syncState;
 			}
 		} catch (error) {
-			await this._loggingComponent?.log({
+			await this._logging?.log({
 				level: "warn",
 				source: this.CLASS_NAME,
 				message: "getSyncStateError",
@@ -569,7 +569,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 			});
 		}
 
-		await this._loggingComponent?.log({
+		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "syncStateNotFound",
@@ -660,7 +660,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 				// as we have consolidated the changes
 				delete this._batchResponseStorageIds[response.storageKey];
 
-				await this._loggingComponent?.log({
+				await this._logging?.log({
 					level: "info",
 					source: this.CLASS_NAME,
 					message: "consolidationCompleted"
@@ -674,7 +674,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 * @param response The item response to handle.
 	 */
 	private async handleLocalItemResponse(response: ISyncItemResponse<T>): Promise<void> {
-		await this._loggingComponent?.log({
+		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "createChangeSetRespondingItem",
