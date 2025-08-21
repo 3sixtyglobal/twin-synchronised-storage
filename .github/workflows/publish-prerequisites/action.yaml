@@ -33,9 +33,10 @@ runs:
         cd packages/synchronised-storage-service
         node ./scripts/setup-sync-storage.mjs ./scripts/publish-config.json testnet
 
-    - name: Setup sync storage for devnet
-      if: inputs.package == 'packages/synchronised-storage-service' || inputs.package == 'all'
-      shell: bash
-      run: |
-        cd packages/synchronised-storage-service
-        node ./scripts/setup-sync-storage.mjs ./scripts/publish-config.json devnet
+    # Disable until verifiable storage is fixed for devnet
+    # - name: Setup sync storage for devnet
+    #   if: inputs.package == 'packages/synchronised-storage-service' || inputs.package == 'all'
+    #   shell: bash
+    #   run: |
+    #     cd packages/synchronised-storage-service
+    #     node ./scripts/setup-sync-storage.mjs ./scripts/publish-config.json devnet
