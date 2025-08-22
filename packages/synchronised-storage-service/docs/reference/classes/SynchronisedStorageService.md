@@ -48,7 +48,7 @@ Runtime name for the class.
 
 ### start()
 
-> **start**(`nodeIdentity`, `nodeLoggingComponentType`, `componentState?`): `Promise`\<`void`\>
+> **start**(`nodeIdentity`, `nodeLoggingComponentType`): `Promise`\<`void`\>
 
 The component needs to be started when the node is initialized.
 
@@ -66,10 +66,6 @@ The node logging component type.
 
 `undefined` | `string`
 
-##### componentState?
-
-A persistent state which can be modified by the method.
-
 #### Returns
 
 `Promise`\<`void`\>
@@ -84,7 +80,7 @@ Nothing.
 
 ### stop()
 
-> **stop**(`nodeIdentity`, `nodeLoggingComponentType`, `componentState?`): `Promise`\<`void`\>
+> **stop**(`nodeIdentity`, `nodeLoggingComponentType`): `Promise`\<`void`\>
 
 The component needs to be stopped when the node is closed.
 
@@ -101,10 +97,6 @@ The identity of the node stopping the component.
 The node logging component type.
 
 `undefined` | `string`
-
-##### componentState?
-
-A persistent state which can be modified by the method.
 
 #### Returns
 

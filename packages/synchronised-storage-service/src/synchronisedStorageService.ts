@@ -337,15 +337,11 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	 * The component needs to be started when the node is initialized.
 	 * @param nodeIdentity The identity of the node starting the component.
 	 * @param nodeLoggingComponentType The node logging component type.
-	 * @param componentState A persistent state which can be modified by the method.
 	 * @returns Nothing.
 	 */
 	public async start(
 		nodeIdentity: string,
-		nodeLoggingComponentType: string | undefined,
-		componentState?: {
-			[id: string]: unknown;
-		}
+		nodeLoggingComponentType: string | undefined
 	): Promise<void> {
 		this._nodeIdentity = nodeIdentity;
 		this._remoteSyncStateHelper.setNodeIdentity(nodeIdentity);
@@ -393,13 +389,11 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	 * The component needs to be stopped when the node is closed.
 	 * @param nodeIdentity The identity of the node stopping the component.
 	 * @param nodeLoggingComponentType The node logging component type.
-	 * @param componentState A persistent state which can be modified by the method.
 	 * @returns Nothing.
 	 */
 	public async stop(
 		nodeIdentity: string,
-		nodeLoggingComponentType: string | undefined,
-		componentState?: { [id: string]: unknown }
+		nodeLoggingComponentType: string | undefined
 	): Promise<void> {
 		for (const storageKey in this._activeStorageKeys) {
 			this._activeStorageKeys[storageKey] = false;
