@@ -109,7 +109,7 @@ async function run() {
 	);
 
 	const keys = await loadJson(KEY_FILE);
-	const key = keys[network];
+	let key = keys[network];
 
 	if (!Is.stringValue(key)) {
 		throw new Error('There is no existing key for the network');
