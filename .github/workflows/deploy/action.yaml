@@ -1,5 +1,5 @@
 name: 'Deploy'
-description: 'Perform any operations that require some deployment tasks. See deploy=config.json for details on the structure of the input data.'
+description: 'Perform any operations that require some deployment tasks. See deploy-config.json.example for details on the structure of the input data.'
 
 inputs:
   branch:
