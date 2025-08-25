@@ -109,18 +109,18 @@ jobs:
           # Check if there are any changed files
           # if not then we can exit early
           if [ -z "$(git status --porcelain)" ]; then
-            echo "no_changes=true" >> $GITHUB_OUTPUT
+            echo "has_changes=false" >> $GITHUB_OUTPUT
             echo "No changes to commit. Exiting."
             exit 0
           fi
           git add -A
           git commit -S -m "chore: prepare deployments for ${{ steps.set-branch.outputs.branch }}"
           git push origin $BRANCH_NAME
-          echo "no_changes=false" >> $GITHUB_OUTPUT
+          echo "has_changes=true" >> $GITHUB_OUTPUT
 
       # Create a PR with the changes
       - name: Create Update PR
-        if: steps.commit.outputs.no_changes != 'true'
+        if: steps.commit.outputs.has_changes == 'true'
         id: create-pr
         run: |
           BASE_BRANCH="${{ steps.set-branch.outputs.branch }}"
@@ -138,7 +138,7 @@ jobs:
 
       # Automatically approve the PR to speed up the process
       - name: Approve PR
-        if: steps.create-pr.outputs.pr_number != ''
+        if: steps.create-pr.outputs.pr_number != '' && steps.commit.outputs.has_changes == 'true'
         run: |
           gh pr review ${{ steps.create-pr.outputs.pr_number }} --approve
         env:
