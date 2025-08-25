@@ -5,7 +5,7 @@
  * If they already exist it will make sure they are up to date with the current set of trusted identities.
  *
  * Usage:
- * npm run setup-sync-storage
+ * npm run deploy-sync-storage
  *
  * The following env variables are used to configure the process.
  * DEPLOY_MNEMONIC     - 24 word mnemonic e.g. word1 word2...word24
@@ -51,8 +51,8 @@ const KEY_FILE = './src/data/verifiableStorageKeys.json';
  * Execute the process.
  */
 async function run() {
-	process.stdout.write('Setup Synchronised Storage\n');
-	process.stdout.write('==========================\n');
+	process.stdout.write('Deploy Synchronised Storage\n');
+	process.stdout.write('===========================\n');
 	process.stdout.write('\n');
 	process.stdout.write(`Platform: ${process.platform}\n`);
 	process.stdout.write('\n');
