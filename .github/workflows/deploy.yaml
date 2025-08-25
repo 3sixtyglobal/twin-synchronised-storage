@@ -104,6 +104,7 @@ jobs:
 
       # Stage all changes for commit
       - name: Commit Changes
+        id: commit
         run: |
           # Check if there are any changed files
           # if not then we can exit early
