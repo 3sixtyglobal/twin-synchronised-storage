@@ -105,6 +105,12 @@ jobs:
       # Stage all changes for commit
       - name: Commit Changes
         run: |
+          # Check if there are any changed files
+          # if not then we can exit early
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No changes to commit. Exiting."
+            exit 0
+          fi
           git add -A
           git commit -S -m "chore: prepare deployments for ${{ steps.set-branch.outputs.branch }}"
           git push origin $BRANCH_NAME
