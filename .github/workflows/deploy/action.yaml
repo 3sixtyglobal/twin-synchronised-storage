@@ -30,7 +30,7 @@ runs:
         DEPLOY_NETWORK=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.mainnet.network')
         DEPLOY_CONTROLLER=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.mainnet.controller')
         DEPLOY_WALLET_INDEX=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.mainnet.walletIndex')
-        DEPLOY_ALLOW_LIST=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.mainnet.allowList' | join(","))
+        DEPLOY_ALLOW_LIST=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.mainnet.allowList' | join(','))
         node ./scripts/setup-sync-storage.mjs
 
     - name: Setup sync storage for testnet
@@ -42,7 +42,7 @@ runs:
         DEPLOY_NETWORK=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.testnet.network')
         DEPLOY_CONTROLLER=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.testnet.controller')
         DEPLOY_WALLET_INDEX=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.testnet.walletIndex')
-        DEPLOY_ALLOW_LIST=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.testnet.allowList' | join(","))
+        DEPLOY_ALLOW_LIST=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.testnet.allowList' | join(','))
         node ./scripts/setup-sync-storage.mjs
 
     # Disable until verifiable storage is fixed for devnet
@@ -55,5 +55,5 @@ runs:
     #     DEPLOY_NETWORK=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.devnet.network')
     #     DEPLOY_CONTROLLER=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.devnet.controller')
     #     DEPLOY_WALLET_INDEX=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.devnet.walletIndex')
-    #     DEPLOY_ALLOW_LIST=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.devnet.allowList' | join(","))
+    #     DEPLOY_ALLOW_LIST=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.devnet.allowList' | join(','))
     #     node ./scripts/setup-sync-storage.mjs
