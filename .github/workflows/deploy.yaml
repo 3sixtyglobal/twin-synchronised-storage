@@ -116,6 +116,7 @@ jobs:
           git add -A
           git commit -S -m "chore: prepare deployments for ${{ steps.set-branch.outputs.branch }}"
           git push origin $BRANCH_NAME
+          echo "no_changes=false" >> $GITHUB_OUTPUT
 
       # Create a PR with the changes
       - name: Create Update PR
