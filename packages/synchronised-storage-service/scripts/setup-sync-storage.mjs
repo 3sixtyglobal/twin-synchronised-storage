@@ -5,9 +5,17 @@
  * If they already exist it will make sure they are up to date with the current set of trusted identities.
  *
  * Usage:
- * npm run setup-sync-storage <config-file> <network>
+ * npm run setup-sync-storage
  *
- * This script assumes the identities are already created, they can be created with the following scripts.
+ * The following env variables are used to configure the process.
+ * DEPLOY_MNEMONIC     - 24 word mnemonic e.g. word1 word2...word24
+ * DEPLOY_NETWORK      - network the deployment is happening on e.g. mainnet/testnet/devnet
+ * DEPLOY_NODE_URL     - the node to make network requests e.g. https://api.testnet.iota.cafe
+ * DEPLOY_CONTROLLER   - the identity which controls the deployment address e.g. did:iota:aaaa.....bbbbb
+ * DEPLOY_ALLOW_LIST   - comma separated addresses to allow access e.g. 0xcccc...ddddd, 0xeeee...fffff
+ * DEPLOY_WALLET_INDEX - address index of the wallet to use, defaults to 0 e.g. 5
+ *
+ * This script assumes the identities are already created, an identity can be created with the following scripts.
  *
  * // Create a new wallet
  * npx "@twin.org/identity-cli@next" mnemonic --env wallet.env
@@ -49,34 +57,25 @@ async function run() {
 	process.stdout.write(`Platform: ${process.platform}\n`);
 	process.stdout.write('\n');
 
-	if (process.argv.length < 4) {
-		throw new Error('You must provide both the config file and network arguments');
+	const mnemonic = process.env.DEPLOY_MNEMONIC;
+	if (!Is.stringValue(mnemonic)) {
+		throw new Error('Missing env property: DEPLOY_MNEMONIC');
+	}
+	const nodeUrl = process.env.DEPLOY_NODE_URL;
+	if (!Is.stringValue(nodeUrl)) {
+		throw new Error('Missing config property: DEPLOY_NODE_URL');
+	}
+	const network = process.env.DEPLOY_NETWORK;
+	if (!Is.stringValue(network)) {
+		throw new Error('Missing config property: DEPLOY_NETWORK');
+	}
+	const controller = process.env.DEPLOY_CONTROLLER;
+	if (!Is.stringValue(controller)) {
+		throw new Error('Missing config property: DEPLOY_CONTROLLER');
 	}
 
-	const config = await loadJson(process.argv[2]);
-	const networkInput = process.argv[3];
-
-	const networkConfig = config[networkInput];
-
-	if (!Is.object(networkConfig)) {
-		throw new Error(`Missing config for network: ${networkInput}`);
-	}
-
-	if (!Is.stringValue(networkConfig.mnemonic)) {
-		throw new Error('Missing config property: mnemonic');
-	}
-	if (!Is.stringValue(networkConfig.nodeUrl)) {
-		throw new Error('Missing config property: nodeUrl');
-	}
-	if (!Is.stringValue(networkConfig.network)) {
-		throw new Error('Missing config property: network');
-	}
-	if (!Is.stringValue(networkConfig.controller)) {
-		throw new Error('Missing config property: controller');
-	}
-
-	const addressIndex = Coerce.integer(networkConfig.addressIndex) ?? 0;
-	const allowList = networkConfig.allowList ?? [];
+	const addressIndex = Coerce.integer(process.env.DEPLOY_WALLET_INDEX) ?? 0;
+	const allowList = process.env.DEPLOY_ALLOW_LIST?.split(',').map(item => item.trim()) ?? [];
 
 	for (const allow of allowList) {
 		if (!Is.stringHex(allow, true)) {
@@ -84,9 +83,9 @@ async function run() {
 		}
 	}
 
-	process.stdout.write(`Network: ${networkConfig.network}\n`);
-	process.stdout.write(`Node Url: ${networkConfig.nodeUrl}\n`);
-	process.stdout.write(`Controller: ${networkConfig.controller}\n`);
+	process.stdout.write(`Network: ${network}\n`);
+	process.stdout.write(`Node Url: ${nodeUrl}\n`);
+	process.stdout.write(`Controller: ${controller}\n`);
 	process.stdout.write(`Allow List: ${allowList.join(', ')}\n`);
 	process.stdout.write(`Address Index: ${addressIndex}\n`);
 	process.stdout.write('\n');
@@ -96,20 +95,17 @@ async function run() {
 	const vaultMnemonicId = 'mnemonic';
 
 	const vaultConnector = VaultConnectorFactory.get('vault');
-	await vaultConnector.setSecret(
-		`${networkConfig.controller}/${vaultMnemonicId}`,
-		networkConfig.mnemonic
-	);
+	await vaultConnector.setSecret(`${controller}/${vaultMnemonicId}`, mnemonic);
 
 	const verifiableStorageConnector = await setupVerifiableStorageConnector(
-		networkConfig.nodeUrl,
-		networkConfig.network,
+		nodeUrl,
+		network,
 		vaultMnemonicId,
 		addressIndex
 	);
 
 	const keys = await loadJson(KEY_FILE);
-	const key = keys[networkConfig.network];
+	const key = keys[network];
 
 	if (!Is.stringValue(key)) {
 		throw new Error('There is no existing key for the network');
@@ -137,27 +133,18 @@ async function run() {
 		}
 		if (updateAllowList) {
 			process.stdout.write(`Allow list does not match, updating...\n`);
-			await verifiableStorageConnector.update(
-				networkConfig.controller,
-				key,
-				existingData.data,
-				allowList
-			);
+			await verifiableStorageConnector.update(controller, key, existingData.data, allowList);
 		} else {
 			process.stdout.write(`Allow list matches, no update required.\n`);
 		}
 	} else {
 		process.stdout.write(`Storage entry does not exist, creating new one...\n`);
 		const data = ObjectHelper.toBytes({ version: '1', syncPointers: {} });
-		const newKey = await verifiableStorageConnector.create(
-			networkConfig.controller,
-			data,
-			allowList
-		);
+		const newKey = await verifiableStorageConnector.create(controller, data, allowList);
 		process.stdout.write(`Created new storage entry: ${newKey.id}\n`);
 
 		key = newKey.id;
-		keys[networkConfig.network] = key;
+		keys[network] = key;
 		process.stdout.write(`Saving key file\n`);
 		await saveJson(KEY_FILE, keys);
 	}
@@ -165,9 +152,7 @@ async function run() {
 	const idParts = key.split(':');
 
 	process.stdout.write(`\n`);
-	process.stdout.write(
-		`https://explorer.iota.org/object/${idParts[3]}?network=${networkConfig.network}\n`
-	);
+	process.stdout.write(`https://explorer.iota.org/object/${idParts[3]}?network=${network}\n`);
 	process.stdout.write(`\n`);
 
 	process.stdout.write(`Done.\n`);
