@@ -77,19 +77,20 @@ async function run() {
 	const addressIndex = Coerce.integer(process.env.DEPLOY_WALLET_INDEX) ?? 0;
 	const allowListString = (process.env.DEPLOY_ALLOW_LIST ?? '').trim();
 
+	const allowList = [];
 	if (allowListString.length > 0) {
-		const allowList = allowListString.split(',');
-		for (const allow of allowList) {
+		for (const allow of allowListString.split(',')) {
 			if (!Is.stringHex(allow, true)) {
 				throw new Error(`The allow entry should be an address in hex form, it is '${allow}'`);
 			}
+			allowList.push(allow);
 		}
 	}
 
 	process.stdout.write(`Network: ${network}\n`);
 	process.stdout.write(`Node Url: ${nodeUrl}\n`);
 	process.stdout.write(`Controller: ${controller}\n`);
-	process.stdout.write(`Allow List: ${allowList.join(', ')}\n`);
+	process.stdout.write(`Allow List: ${allowListString}\n`);
 	process.stdout.write(`Address Index: ${addressIndex}\n`);
 	process.stdout.write('\n');
 
