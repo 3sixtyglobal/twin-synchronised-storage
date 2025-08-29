@@ -126,7 +126,7 @@ async function run() {
 		process.stdout.write(`Storage entry already exists: ${key}\n`);
 		process.stdout.write(`${JSON.stringify(ObjectHelper.fromBytes(existingData.data), null, 2)}\n`);
 
-		process.stdout.write(`Checking allow list matches...\n`);
+		process.stdout.write('Checking allow list matches...\n');
 		const existingAllowList = existingData.allowList ?? [];
 		let updateAllowList = false;
 		for (const identity of allowList) {
@@ -136,30 +136,30 @@ async function run() {
 			}
 		}
 		if (updateAllowList) {
-			process.stdout.write(`Allow list does not match, updating...\n`);
+			process.stdout.write('Allow list does not match, updating...\n');
 			await verifiableStorageConnector.update(controller, key, existingData.data, allowList);
 		} else {
-			process.stdout.write(`Allow list matches, no update required.\n`);
+			process.stdout.write('Allow list matches, no update required.\n');
 		}
 	} else {
-		process.stdout.write(`Storage entry does not exist, creating new one...\n`);
+		process.stdout.write('Storage entry does not exist, creating new one...\n');
 		const data = ObjectHelper.toBytes({ version: '1', syncPointers: {} });
 		const newKey = await verifiableStorageConnector.create(controller, data, allowList);
 		process.stdout.write(`Created new storage entry: ${newKey.id}\n`);
 
 		key = newKey.id;
 		keys[network] = key;
-		process.stdout.write(`Saving key file\n`);
+		process.stdout.write('Saving key file\n');
 		await saveJson(KEY_FILE, keys);
 	}
 
 	const idParts = key.split(':');
 
-	process.stdout.write(`\n`);
+	process.stdout.write('\n');
 	process.stdout.write(`https://explorer.iota.org/object/${idParts[3]}?network=${network}\n`);
-	process.stdout.write(`\n`);
+	process.stdout.write('\n');
 
-	process.stdout.write(`Done.\n`);
+	process.stdout.write('Done.\n');
 }
 
 /**
