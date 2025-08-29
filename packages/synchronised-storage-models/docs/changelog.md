@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.1-next.13](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-models-v0.0.1-next.12...synchronised-storage-models-v0.0.1-next.13) (2025-08-29)
+
+
+### Features
+
+* eslint migration to flat config ([f601c14](https://github.com/twinfoundation/synchronised-storage/commit/f601c14f6adef3290554dc7df6e6b3528aa0dc2b))
+
 ## [0.0.1-next.12](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-models-v0.0.1-next.11...synchronised-storage-models-v0.0.1-next.12) (2025-08-21)
 
 

@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.0.1-next.13](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.1-next.12...synchronised-storage-service-v0.0.1-next.13) (2025-08-29)
+
+
+### Features
+
+* eslint migration to flat config ([f601c14](https://github.com/twinfoundation/synchronised-storage/commit/f601c14f6adef3290554dc7df6e6b3528aa0dc2b))
+* removed unused properties ([7d4e916](https://github.com/twinfoundation/synchronised-storage/commit/7d4e9169e923142cd767c8830f2c009675484df8))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.1-next.12 to 0.0.1-next.13
+
 ## [0.0.1-next.12](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.1-next.11...synchronised-storage-service-v0.0.1-next.12) (2025-08-21)
 
 
