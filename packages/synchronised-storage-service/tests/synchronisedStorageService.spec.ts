@@ -158,7 +158,6 @@ async function waitForLogEntries(
 		retries++;
 	} while (retries < 100);
 
-	// eslint-disable-next-line no-restricted-syntax
 	throw new Error("Failed while waiting for log entries");
 }
 
