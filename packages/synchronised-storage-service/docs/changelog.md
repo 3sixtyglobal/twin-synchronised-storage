@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.1-next.14](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.1-next.13...synchronised-storage-service-v0.0.1-next.14) (2025-09-22)
+
+
+### Features
+
+* add rights management integration ([d003d33](https://github.com/twinfoundation/synchronised-storage/commit/d003d33d2d2b4a4aa1379071eed71a707ebcb4de))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.1-next.13 to 0.0.1-next.14
+
 ## [0.0.1-next.13](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.1-next.12...synchronised-storage-service-v0.0.1-next.13) (2025-08-29)
 
 
