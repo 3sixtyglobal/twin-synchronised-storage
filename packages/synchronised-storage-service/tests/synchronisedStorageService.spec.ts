@@ -38,6 +38,7 @@ import {
 import { LoggingConnectorFactory } from "@twin.org/logging-models";
 import { LoggingService } from "@twin.org/logging-service";
 import { nameof } from "@twin.org/nameof";
+import type { IPolicyEnforcementPointComponent } from "@twin.org/rights-management-models";
 import {
 	type ISyncChangeSet,
 	type ISyncItemChange,
@@ -265,6 +266,10 @@ describe("synchronisedStorageService", () => {
 			loggingConnectorType: "logging-untrusted"
 		});
 		ComponentFactory.register("logging-untrusted", () => loggingUntrustedService);
+
+		const policyEnforcementPointComponent = {} as IPolicyEnforcementPointComponent;
+		policyEnforcementPointComponent.intercept = vi.fn().mockImplementation(async () => true);
+		ComponentFactory.register("policy-enforcement-point", () => policyEnforcementPointComponent);
 
 		Date.now = vi.fn().mockImplementation(() => 1748480400000);
 
@@ -619,7 +624,6 @@ describe("synchronisedStorageService", () => {
 			"createChangeSetRequestingItem",
 			"createChangeSetRespondingItem",
 			"finalisingSyncChanges",
-			"createdChangeSetProof",
 			"changeSetStoring",
 			"saveBlob",
 			"savedBlob",
@@ -645,7 +649,7 @@ describe("synchronisedStorageService", () => {
 						storageKey: "test-type",
 						syncPointers: {
 							"test-type":
-								"blob:memory:4dbfe5ca7634e82c0a79014522932f1f863c2e53e31dc1620d2de601bed14e97"
+								"blob:memory:a8b3e69ac565ae2bf946bca334d287551a3df9c3d463c5789dd8f48dca33b7be"
 						}
 					})
 				),
@@ -659,7 +663,7 @@ describe("synchronisedStorageService", () => {
 			version: "1",
 			storageKey: "test-type",
 			syncPointers: {
-				"test-type": "blob:memory:4dbfe5ca7634e82c0a79014522932f1f863c2e53e31dc1620d2de601bed14e97"
+				"test-type": "blob:memory:a8b3e69ac565ae2bf946bca334d287551a3df9c3d463c5789dd8f48dca33b7be"
 			}
 		});
 
@@ -672,14 +676,14 @@ describe("synchronisedStorageService", () => {
 			blobs[blobKey] = Converter.bytesToBase64(blobStorageStore[blobKey]);
 		}
 		expect(blobs).toEqual({
-			ce62d9834f93aaefb1a19e0c5e4ea0a4e12dd20fd89cf121823abbfc17244bfe:
-				"/v7+/v7+/v7+/v7+9mNPp35Q8FVkdm68+MFxpwAimYFeQ8d4TaM+bVkyE6rLs6oKpDobX0tU/T5BihU60Mx6EuiVXDSihJCHFXGDEUyzfM0CTDzGMY0qQ32QrblXTcOZ7SR2NQODPxUY3omB4o5VDwlH/roHS1jZcW5HuIfOTQmn2hxNu1NYItgGPYPGhg2myIoDnYIsLxfEffHDiPMdIb6cNtEs8HK2d39fS/NlVqV4ia7xAAcRw/mVZnSsNNkAbcKD1u4p7DkVBf9wa0Kh4BWetBt1YzFV6boudoSnwQuH+7/NxejBcihDGWWHFhur0NEUuERtHXiciStpXJPHwMJ2Gma5MSXsQn/DHBrlkdnTU8qEWRfgC+zD2IkL5MmXDMS0bOSmqnrFWFtNmzbd+sNcfngz5Mz67ZTNVB3m6zMSVH0BHeUcJjDMA0Iu/+0yMQ/Vdc5IvVZaIdYJ5w1TAwlztECb8qN9swVx9n/T6SQGC3nlcV9oJEGQateduzwcKctcgbwyn7GiAMG5Foliyt6IHn13h3EBwd73iTaDhjuyl2uwoM1RrWfB1A==",
-			"4dbfe5ca7634e82c0a79014522932f1f863c2e53e31dc1620d2de601bed14e97":
-				"BwcHBwcHBwcHBwcHs9u/x23PhZc1yftA4U3VAAqp9RjWlH1ff6OcaJ07xzYG8ERGkkQOgggrrNSKF/mU+WIFxPMe57bh+zuLyCKwh1V66Yc6t6qXywrosWdP4f8Z/RKTMw4Di+Tahb8aAy9gItUVVoXqDAlv8zKWWFdTLIFZAJ+OvWUTsWFQO8LHs1gNzmVlQY2pRjKrYHm6zg9myFtXsl2kmXiWBcQrqXjTMUTUkx/0wetlsjS3BSG8lh9vSl5jEiq+93wqxxL+qlg1vSxL5TqSE/w9YToAasVWhBWNAJalMHYO2rChvWvXMJLOzrFd01aDXvI8Q+ZyKtbS"
+			"24c18fa74b897bff3010f1265494f2bc6213d4461284be0a4c364a8354248d1b":
+				"/f39/f39/f39/f39uWjCVJIFMADDLRdUownwv4wB7Dlo/5W/R9ysXE6c0sxavjNXQ6qgvNYHLHuFYenWiYV4aNswyhFiIzSDbjDVVVpx1q07aB50SKt9lZEJcdomRl5wfBknQ+LWpUzFNS5j1f7xPchR0o9ptCO+aObOdE/6ygaaNkdn13JaOV/ShyeJA4aYuDh/3fIOs9Rd4GqLBfKGAg9CP1jVPrqWVXVH4afmY4un+axZ5JCf7JtOGh2g4RL7Gnhj3S1bON9uUmewYQ==",
+			a8b3e69ac565ae2bf946bca334d287551a3df9c3d463c5789dd8f48dca33b7be:
+				"BgYGBgYGBgYGBgYGLJGq0yTxbedRsJj86OTT/oa8GlFBm5GaaCeujPqn4br/MJ3CRyJECxWAxmNYlIbO8IYtSFmtTi1idIW005yh1fsovXzpTtrCa/WP7xpbcJMm+h16ruBFw2Z/Ez7LT/x5daa/O1LgSExlfL9rgZTih39uB0I8Q5NkBb9DVOAhrL6C8QW5EFn2lHuhkt5khzIOC3LEoACnGICcPnXGCvN+r69q1h6yEeGGgWmPOaNohZw6IdcnlIf+t7Yx+Atq6gqc6BpcHoBLAgq01GL8kFpmeM8O+s0SV3b4DcEwGrRymvTss3bSB1uz0JpWJ9a7l14D5+I="
 		});
 
 		expect(
-			await expandObject(blobs.ce62d9834f93aaefb1a19e0c5e4ea0a4e12dd20fd89cf121823abbfc17244bfe)
+			await expandObject(blobs["24c18fa74b897bff3010f1265494f2bc6213d4461284be0a4c364a8354248d1b"])
 		).toEqual({
 			id: "fafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafa",
 			dateCreated: "2025-05-29T01:00:00.000Z",
@@ -694,34 +698,24 @@ describe("synchronisedStorageService", () => {
 					id: "test-id-1",
 					operation: "set"
 				}
-			],
-			proof: {
-				"@context": "https://www.w3.org/ns/credentials/v2",
-				created: "2025-05-29T01:00:00.000Z",
-				cryptosuite: "eddsa-jcs-2022",
-				proofPurpose: "assertionMethod",
-				proofValue:
-					"zUA9ew44LanHmbrqe7uf24X3WA8p79h6hgimALefYpkeWGX6dU9saQmFif63C4JhGZqYP24dS4P4azW3MjoT8pBj",
-				type: "DataIntegrityProof",
-				verificationMethod: `${testNodeIdentity}#synchronised-storage-assertion`
-			}
+			]
 		});
 
 		expect(
-			await expandObject(blobs["4dbfe5ca7634e82c0a79014522932f1f863c2e53e31dc1620d2de601bed14e97"])
+			await expandObject(blobs.a8b3e69ac565ae2bf946bca334d287551a3df9c3d463c5789dd8f48dca33b7be)
 		).toEqual({
 			version: "1",
 			storageKey: "test-type",
 			snapshots: [
 				{
 					version: "1",
-					id: "0404040404040404040404040404040404040404040404040404040404040404",
+					id: "0303030303030303030303030303030303030303030303030303030303030303",
 					dateCreated: "2025-05-29T01:00:00.000Z",
 					dateModified: "2025-05-29T01:00:00.000Z",
 					isConsolidated: false,
 					epoch: 1,
 					changeSetStorageIds: [
-						"blob:memory:ce62d9834f93aaefb1a19e0c5e4ea0a4e12dd20fd89cf121823abbfc17244bfe"
+						"blob:memory:24c18fa74b897bff3010f1265494f2bc6213d4461284be0a4c364a8354248d1b"
 					]
 				}
 			]
@@ -761,17 +755,7 @@ describe("synchronisedStorageService", () => {
 					id: "test-id-1",
 					operation: "set"
 				}
-			],
-			proof: {
-				"@context": "https://www.w3.org/ns/credentials/v2",
-				created: "2025-05-29T01:00:00.000Z",
-				cryptosuite: "eddsa-jcs-2022",
-				proofPurpose: "assertionMethod",
-				proofValue:
-					"z3MzHDwnYUqZqTnYzxbzxkkWgy54oyXn4EpxCV7CtMgn7LMpxccX3im83Yz6isyvo9YpT7jmS9JqNMVZUw58C3cb8",
-				type: "DataIntegrityProof",
-				verificationMethod: `${testNodeIdentityUntrusted}#synchronised-storage-assertion`
-			}
+			]
 		};
 
 		const blobChangeSetId = await blobStorageConnector.set(await compressObject(changeSet));
@@ -838,7 +822,6 @@ describe("synchronisedStorageService", () => {
 			"getChangeSet",
 			"loadBlob",
 			"loadedBlob",
-			"verifyChangeSetProofValid",
 			"changeSetApplyingChange",
 			"updateFromLocalSyncState",
 			"getSnapshots",
@@ -872,7 +855,7 @@ describe("synchronisedStorageService", () => {
 				isConsolidated: true,
 				epoch: 0,
 				changeSetStorageIds: [
-					"blob:memory:ca0591854151611024aa390466b272452c44948507c4d8359b196a5f17549d60"
+					"blob:memory:04c963537b06da8492d555eab4eeddfe0a4385620d33d2e4e683f7d3c1d04182"
 				]
 			}
 		]);
@@ -964,7 +947,6 @@ describe("synchronisedStorageService", () => {
 			"createChangeSetRequestingItem",
 			"createChangeSetRespondingItem",
 			"finalisingSyncChanges",
-			"createdChangeSetProof",
 			"builtStorageChangeSet",
 			"sendingChangeSetToTrustedNode",
 			"removeLocalChangeSnapshot"
@@ -972,10 +954,9 @@ describe("synchronisedStorageService", () => {
 
 		const logStore = loggingMemoryEntityStorage.getStore();
 		expect(logStore.map(e => e.message)).toEqual([
+			"decryptionKeyRequest",
 			"syncChangeSetForRemoteNode",
-			"verifyChangeSetProofValid",
 			"copyChangeSet",
-			"createdChangeSetProof",
 			"changeSetStoring",
 			"saveBlob",
 			"savedBlob",
@@ -999,7 +980,7 @@ describe("synchronisedStorageService", () => {
 						storageKey: "test-type",
 						syncPointers: {
 							"test-type":
-								"blob:memory:ffac2a5f0d6bdda5b2182ff4cb45d7270e391f6088ee584c64f6455fd75e5318"
+								"blob:memory:00a0c0aa0b3b82e45649dc8d4b29078de5c849d92b356c5353a8d28995aefa26"
 						}
 					})
 				),
@@ -1014,34 +995,34 @@ describe("synchronisedStorageService", () => {
 			blobs[blobKey] = Converter.bytesToBase64(blobStorageStore[blobKey]);
 		}
 		expect(blobs).toEqual({
-			"2b2232268fe48124fa204fde67d12fb6aa14f1156b4a2c87061baf4a9d3bd87c":
-				"DQ0NDQ0NDQ0NDQ0NZNW3j657i3SGqsnanRLARNsPnef9Od1U+0JCLL7tRtzWbOnsrbYXYCE+ckoWpxKiHIF/VzdYNPmFlrU0cQOLZbBkwyNNWHqmOVdkUsSWbykBdaLgWXVc86aSvk5lhvmSvKZ+Ar2n3GdrQAr+k1wrNEoG3MbURPYBRVI/AlEhV3kfQELapuYHVSHLIMYzYG8KkcOxQEb8gmDoiNKKArPhrRUDppRECYI4g+XSy8ZObYrRtutpXjvXJ1RjkOTtGMviqQjdO8GShwpvdt0pP+XiBGfDYlWlJ5W0n6nKWALZ/29QgGWH8IkG/wtKPSYNitck++HHmUeWGma1K18e3KmFVc/XzERzxIX+aQ9KO7mgmdPfDEWM00+/ltWYnRVJFc7GZAip/VvDLiIUXR8JEwdfJya5UKtOX3HJn9j+L5MhKlYH/LbaQ526iE8xb5RF4Pta4WToV4YbCklYktWF+XNlj2FuIoRujk7eKd3hshubSkioimjW/zfKcEiKwZMExd8y9lzo9ynavIvjktTipd1ImV3LZNKnZbdZSa3aulmpuBrn",
-			ffac2a5f0d6bdda5b2182ff4cb45d7270e391f6088ee584c64f6455fd75e5318:
-				"GBgYGBgYGBgYGBgYmbOclr/omAqPKGRFf4DpIHK6uMttduyCXv/SQ64w1edvNKc+Q05wN/BTwGOSJDt0S+5dDvtl3YAl3U/dIb5zQkwUt+IWQq4lWoZ+6Q1AUJ+c49au8TSMIEMzG9uO7W4fMszNxL43lSMg5iT9fqVmvbl5tupgaIZ2MsFuukQD07jwPt4yC9vEFvMp5Do+39RWqAMn2p7nkquEhoCTjQPO+QZSySs+8MZbozUOucNTxBb1lEa5hbaKJHhgcEbcRMBSKDFLfvCuw6uW1RM2Tpr7dMWeCk6eqWby2q3X4isqcMv1R+5efzrSSxLi0tvOcrgGtg=="
+			"00a0c0aa0b3b82e45649dc8d4b29078de5c849d92b356c5353a8d28995aefa26":
+				"FhYWFhYWFhYWFhYWO94qTmu3QuM52+UPLiCXOcDcPAu6P3UYkwX5R2odf6U5+RSKXbUD63AQc2X9YB4xv8M9zuwFr6+X9Ege6QFnW/ADheOgat8ZMoa63knaMUFSDkqbvlJEfpcX5VwLshNUnNx7erxz7K9Eut1yf1dTdOjtMSVWFkq94ebqeR1EYvQqNLO/vw0oS1RuN7f0hiTvX/dBmRfTQcYauGMo2LX1qDU3CTQSt0DNgmUhuDh1ohcLfuAGUFPG7bz5EvY6llQRLQ5Gksn88W7jY+DZ8Z5v8bwE7DSywSri75WytG50vuj2G/1XTlmJHiAJlC4Ort78ug==",
+			d0337d36984d1b1fd4b0a586b8f26bb305cb8bbe654a59e353380558b1a15625:
+				"CwsLCwsLCwsLCwsLCcnLtDtqrO6baeZO+nzd3Vg1Sar0TNO3eeipk8pnfsbUG4zQBGeMikh8E7ycjhEqM6HAPVkZexodu2DZaly/+fPQCb7NCEpvhxvzHJm9Tjb4vSln6VgqNVMshRgvdqjiKL/Hdc+Mmrg/P4BSNO+JUFam2X/gMoLr7FSdg6xILpp16mXHvF2QA1sOsrZS/S7Kjr3AEbADGZ/mJUfybJU7Gzi9fCH76ltpkN2M2ArHVKO7ScTSJQjrDd4HLvvtBjztcA=="
 		});
 
 		expect(
-			await expandObject(blobs.ffac2a5f0d6bdda5b2182ff4cb45d7270e391f6088ee584c64f6455fd75e5318)
+			await expandObject(blobs["00a0c0aa0b3b82e45649dc8d4b29078de5c849d92b356c5353a8d28995aefa26"])
 		).toEqual({
 			version: "1",
 			storageKey: "test-type",
 			snapshots: [
 				{
 					version: "1",
-					id: "1515151515151515151515151515151515151515151515151515151515151515",
+					id: "1313131313131313131313131313131313131313131313131313131313131313",
 					dateCreated: "2025-05-29T01:00:00.000Z",
 					dateModified: "2025-05-29T01:00:00.000Z",
 					isConsolidated: false,
 					epoch: 1,
 					changeSetStorageIds: [
-						"blob:memory:2b2232268fe48124fa204fde67d12fb6aa14f1156b4a2c87061baf4a9d3bd87c"
+						"blob:memory:d0337d36984d1b1fd4b0a586b8f26bb305cb8bbe654a59e353380558b1a15625"
 					]
 				}
 			]
 		});
 
 		expect(
-			await expandObject(blobs["2b2232268fe48124fa204fde67d12fb6aa14f1156b4a2c87061baf4a9d3bd87c"])
+			await expandObject(blobs.d0337d36984d1b1fd4b0a586b8f26bb305cb8bbe654a59e353380558b1a15625)
 		).toEqual({
 			changes: [
 				{
@@ -1054,19 +1035,9 @@ describe("synchronisedStorageService", () => {
 			],
 			dateCreated: "2025-05-29T01:00:00.000Z",
 			dateModified: "2025-05-29T01:00:00.000Z",
-			id: "0909090909090909090909090909090909090909090909090909090909090909",
+			id: "0808080808080808080808080808080808080808080808080808080808080808",
 			nodeIdentity:
 				"did:entity-storage:0xd2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2",
-			proof: {
-				"@context": "https://www.w3.org/ns/credentials/v2",
-				created: "2025-05-29T01:00:00.000Z",
-				cryptosuite: "eddsa-jcs-2022",
-				proofPurpose: "assertionMethod",
-				proofValue:
-					"z3NUXDVwf1HoyrxWuUvQfJ9s4FUxa82FNL4J2dNVVWXXBkZWPnStcmMZZ8MRN6mEsKniq6DSRXXaRs3YrXmodztkt",
-				type: "DataIntegrityProof",
-				verificationMethod: `${testNodeIdentity}#synchronised-storage-assertion`
-			},
 			storageKey: "test-type"
 		});
 	});
@@ -1094,17 +1065,7 @@ describe("synchronisedStorageService", () => {
 						id: "test-id-1",
 						operation: "set"
 					}
-				],
-				proof: {
-					"@context": "https://www.w3.org/ns/credentials/v2",
-					created: "2025-05-29T01:00:00.000Z",
-					cryptosuite: "eddsa-jcs-2022",
-					proofPurpose: "assertionMethod",
-					proofValue:
-						"z3MzHDwnYUqZqTnYzxbzxkkWgy54oyXn4EpxCV7CtMgn7LMpxccX3im83Yz6isyvo9YpT7jmS9JqNMVZUw58C3cb8",
-					type: "DataIntegrityProof",
-					verificationMethod: `${testNodeIdentityUntrusted}#synchronised-storage-assertion`
-				}
+				]
 			};
 
 			const changeSet2: ISyncChangeSet = {
@@ -1119,17 +1080,7 @@ describe("synchronisedStorageService", () => {
 						id: "test-id-2",
 						operation: "set"
 					}
-				],
-				proof: {
-					"@context": "https://www.w3.org/ns/credentials/v2",
-					created: "2025-05-29T02:00:00.000Z",
-					cryptosuite: "eddsa-jcs-2022",
-					proofPurpose: "assertionMethod",
-					proofValue:
-						"z3MzHDwnYUqZqTnYzxbzxkkWgy54oyXn4EpxCV7CtMgn7LMpxccX3im83Yz6isyvo9YpT7jmS9JqNMVZUw58C3cb8",
-					type: "DataIntegrityProof",
-					verificationMethod: `${testNodeIdentityUntrusted}#synchronised-storage-assertion`
-				}
+				]
 			};
 
 			const changeSet3: ISyncChangeSet = {
@@ -1144,17 +1095,7 @@ describe("synchronisedStorageService", () => {
 						id: "test-id-3",
 						operation: "set"
 					}
-				],
-				proof: {
-					"@context": "https://www.w3.org/ns/credentials/v2",
-					created: "2025-05-29T04:00:00.000Z",
-					cryptosuite: "eddsa-jcs-2022",
-					proofPurpose: "assertionMethod",
-					proofValue:
-						"z3MzHDwnYUqZqTnYzxbzxkkWgy54oyXn4EpxCV7CtMgn7LMpxccX3im83Yz6isyvo9YpT7jmS9JqNMVZUw58C3cb8",
-					type: "DataIntegrityProof",
-					verificationMethod: `${testNodeIdentityUntrusted}#synchronised-storage-assertion`
-				}
+				]
 			};
 
 			// Store changesets
@@ -1269,17 +1210,7 @@ describe("synchronisedStorageService", () => {
 						id: "test-id-1",
 						operation: "set"
 					}
-				],
-				proof: {
-					"@context": "https://www.w3.org/ns/credentials/v2",
-					created: "2025-05-29T01:00:00.000Z",
-					cryptosuite: "eddsa-jcs-2022",
-					proofPurpose: "assertionMethod",
-					proofValue:
-						"z3MzHDwnYUqZqTnYzxbzxkkWgy54oyXn4EpxCV7CtMgn7LMpxccX3im83Yz6isyvo9YpT7jmS9JqNMVZUw58C3cb8",
-					type: "DataIntegrityProof",
-					verificationMethod: `${testNodeIdentityUntrusted}#synchronised-storage-assertion`
-				}
+				]
 			};
 
 			const blobChangeSetId = await blobStorageConnector.set(await compressObject(changeSet));
@@ -1377,17 +1308,7 @@ describe("synchronisedStorageService", () => {
 						id: "test-id-2",
 						operation: "set"
 					}
-				],
-				proof: {
-					"@context": "https://www.w3.org/ns/credentials/v2",
-					created: "2025-05-29T02:00:00.000Z",
-					cryptosuite: "eddsa-jcs-2022",
-					proofPurpose: "assertionMethod",
-					proofValue:
-						"z3MzHDwnYUqZqTnYzxbzxkkWgy54oyXn4EpxCV7CtMgn7LMpxccX3im83Yz6isyvo9YpT7jmS9JqNMVZUw58C3cb8",
-					type: "DataIntegrityProof",
-					verificationMethod: `${testNodeIdentityUntrusted}#synchronised-storage-assertion`
-				}
+				]
 			};
 
 			const blobChangeSetId = await blobStorageConnector.set(await compressObject(changeSet));
@@ -1502,17 +1423,7 @@ describe("synchronisedStorageService", () => {
 						id: "test-id-gap",
 						operation: "set"
 					}
-				],
-				proof: {
-					"@context": "https://www.w3.org/ns/credentials/v2",
-					created: "2025-05-29T03:00:00.000Z",
-					cryptosuite: "eddsa-jcs-2022",
-					proofPurpose: "assertionMethod",
-					proofValue:
-						"z3MzHDwnYUqZqTnYzxbzxkkWgy54oyXn4EpxCV7CtMgn7LMpxccX3im83Yz6isyvo9YpT7jmS9JqNMVZUw58C3cb8",
-					type: "DataIntegrityProof",
-					verificationMethod: `${testNodeIdentityUntrusted}#synchronised-storage-assertion`
-				}
+				]
 			};
 
 			const blobChangeSetId = await blobStorageConnector.set(await compressObject(changeSet));

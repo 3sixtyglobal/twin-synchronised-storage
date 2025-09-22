@@ -98,6 +98,21 @@ task-scheduler
 
 ***
 
+### policyEnforcementPointComponentType?
+
+> `optional` **policyEnforcementPointComponentType**: `string`
+
+The rights management enforcement component to use for verifying untrusted node access.
+Only required on a trusted node to enforce access control.
+
+#### Default
+
+```ts
+policy-enforcement-point
+```
+
+***
+
 ### trustedSynchronisedStorageComponentType?
 
 > `optional` **trustedSynchronisedStorageComponentType**: `string`

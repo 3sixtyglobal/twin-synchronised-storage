@@ -1,21 +1,19 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { BaseError, Converter, Guards, Is, ObjectHelper, RandomHelper } from "@twin.org/core";
-import type { IJsonLdNodeObject } from "@twin.org/data-json-ld";
+import { BaseError, Converter, Is, ObjectHelper, RandomHelper } from "@twin.org/core";
 import type { IEventBusComponent } from "@twin.org/event-bus-models";
-import { DocumentHelper, type IIdentityConnector } from "@twin.org/identity-models";
+import type { IIdentityConnector } from "@twin.org/identity-models";
 import type { ILoggingComponent } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
-import { type IProof, ProofTypes } from "@twin.org/standards-w3c-did";
 import {
 	type ISyncChangeSet,
 	type ISynchronisedEntity,
 	type ISyncItemRemove,
 	type ISyncItemSet,
 	type ISyncReset,
-	type SyncNodeIdentityMode,
 	SyncChangeOperation,
-	SynchronisedStorageTopics
+	SynchronisedStorageTopics,
+	type SyncNodeIdentityMode
 } from "@twin.org/synchronised-storage-models";
 import type { BlobStorageHelper } from "./blobStorageHelper";
 
@@ -95,13 +93,11 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 	}
 
 	/**
-	 * Get and verify a changeset.
+	 * Get a changeset.
 	 * @param changeSetStorageId The id of the sync changeset to apply.
 	 * @returns The changeset if it was verified.
 	 */
-	public async getAndVerifyChangeset(
-		changeSetStorageId: string
-	): Promise<ISyncChangeSet<T> | undefined> {
+	public async getChangeset(changeSetStorageId: string): Promise<ISyncChangeSet<T> | undefined> {
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
@@ -112,12 +108,10 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 		});
 
 		try {
-			const syncChangeSet = await this._blobStorageHelper.loadBlob(changeSetStorageId);
+			const syncChangeSet =
+				await this._blobStorageHelper.loadBlob<ISyncChangeSet<T>>(changeSetStorageId);
 
-			if (Is.object<ISyncChangeSet<T>>(syncChangeSet)) {
-				const verified = await this.verifyChangesetProof(syncChangeSet);
-				return verified ? syncChangeSet : undefined;
-			}
+			return syncChangeSet;
 		} catch (error) {
 			await this._logging?.log({
 				level: "warn",
@@ -148,7 +142,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 	public async getAndApplyChangeset(
 		changeSetStorageId: string
 	): Promise<ISyncChangeSet<T> | undefined> {
-		const syncChangeset = await this.getAndVerifyChangeset(changeSetStorageId);
+		const syncChangeset = await this.getChangeset(changeSetStorageId);
 
 		// Only apply changesets from other nodes, we don't want to overwrite
 		// any changes we have made to local entity storage
@@ -234,114 +228,6 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 	}
 
 	/**
-	 * Verify the proof of a sync changeset.
-	 * @param syncChangeset The sync changeset to verify.
-	 * @returns True if the proof is valid, false otherwise.
-	 */
-	public async verifyChangesetProof(syncChangeset: ISyncChangeSet): Promise<boolean> {
-		if (Is.empty(syncChangeset.proof)) {
-			await this._logging?.log({
-				level: "info",
-				source: this.CLASS_NAME,
-				message: "verifyChangeSetProofMissing",
-				data: {
-					snapshotId: syncChangeset.id
-				}
-			});
-			return false;
-		}
-
-		// If the proof or verification method is missing, the proof is invalid
-		const verificationMethod = syncChangeset.proof?.verificationMethod;
-		if (!Is.stringValue(verificationMethod)) {
-			await this._logging?.log({
-				level: "error",
-				source: this.CLASS_NAME,
-				message: "verifyChangeSetProofMissing",
-				data: {
-					id: syncChangeset.id
-				}
-			});
-		}
-
-		// Parse the verification method and extract the node identity
-		// this should match the node identity of the changeset
-		// otherwise you could sign a changeset for another node
-		const changeSetNodeIdentity = DocumentHelper.parseId(verificationMethod ?? "");
-		if (changeSetNodeIdentity.id !== syncChangeset.nodeIdentity) {
-			await this._logging?.log({
-				level: "error",
-				source: this.CLASS_NAME,
-				message: "verifyChangeSetProofNodeIdentityMismatch",
-				data: {
-					id: syncChangeset.id
-				}
-			});
-		}
-
-		const changeSetWithoutProof = ObjectHelper.clone(syncChangeset);
-		delete changeSetWithoutProof.proof;
-
-		const isValid = await this._identityConnector.verifyProof(
-			changeSetWithoutProof as unknown as IJsonLdNodeObject,
-			syncChangeset.proof
-		);
-
-		if (!isValid) {
-			await this._logging?.log({
-				level: "error",
-				source: this.CLASS_NAME,
-				message: "verifyChangeSetProofInvalid",
-				data: {
-					id: syncChangeset.id
-				}
-			});
-		} else {
-			await this._logging?.log({
-				level: "error",
-				source: this.CLASS_NAME,
-				message: "verifyChangeSetProofValid",
-				data: {
-					id: syncChangeset.id
-				}
-			});
-		}
-
-		return isValid;
-	}
-
-	/**
-	 * Create the proof of a sync change set.
-	 * @param syncChangeset The sync changeset to create the proof for.
-	 * @returns The proof.
-	 */
-	public async createChangeSetProof(syncChangeset: ISyncChangeSet): Promise<IProof> {
-		Guards.stringValue(this.CLASS_NAME, "nodeIdentity", this._nodeIdentity);
-
-		const changeSetWithoutProof = ObjectHelper.clone(syncChangeset);
-		delete changeSetWithoutProof.proof;
-
-		const proof = await this._identityConnector.createProof(
-			this._nodeIdentity,
-			DocumentHelper.joinId(this._nodeIdentity, this._decentralisedStorageMethodId),
-			ProofTypes.DataIntegrityProof,
-			changeSetWithoutProof as unknown as IJsonLdNodeObject
-		);
-
-		await this._logging?.log({
-			level: "info",
-			source: this.CLASS_NAME,
-			message: "createdChangeSetProof",
-			data: {
-				id: syncChangeset.id,
-				...proof
-			}
-		});
-
-		return proof;
-	}
-
-	/**
 	 * Copy a change set.
 	 * @param syncChangeSet The sync changeset to copy.
 	 * @returns The id of the updated change set.
@@ -354,29 +240,24 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 		| undefined
 	> {
 		if (Is.stringValue(this._nodeIdentity)) {
-			const verified = await this.verifyChangesetProof(syncChangeSet);
+			await this._logging?.log({
+				level: "info",
+				source: this.CLASS_NAME,
+				message: "copyChangeSet",
+				data: {
+					changeSetStorageId: syncChangeSet.id
+				}
+			});
 
-			if (verified) {
-				await this._logging?.log({
-					level: "info",
-					source: this.CLASS_NAME,
-					message: "copyChangeSet",
-					data: {
-						changeSetStorageId: syncChangeSet.id
-					}
-				});
+			// Allocate a new id to the changeset copy
+			const copy = ObjectHelper.clone(syncChangeSet);
+			copy.id = Converter.bytesToHex(RandomHelper.generate(32));
 
-				// Allocate a new id to the changeset copy and re-create a proof using this nodes identity
-				const copy = ObjectHelper.clone(syncChangeSet);
-				copy.id = Converter.bytesToHex(RandomHelper.generate(32));
-				copy.proof = await this.createChangeSetProof(copy);
-
-				// Store the copy
-				return {
-					syncChangeSet: copy,
-					changeSetStorageId: await this.storeChangeSet(copy)
-				};
-			}
+			// Store the copy
+			return {
+				syncChangeSet: copy,
+				changeSetStorageId: await this.storeChangeSet(copy)
+			};
 		}
 	}
 

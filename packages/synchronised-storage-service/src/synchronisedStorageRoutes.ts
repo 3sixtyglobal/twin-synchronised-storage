@@ -1,11 +1,11 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import type {
-	IUnauthorizedResponse,
 	IHttpRequestContext,
 	INoContentResponse,
 	IRestRoute,
-	ITag
+	ITag,
+	IUnauthorizedResponse
 } from "@twin.org/api-models";
 import { ComponentFactory, Guards } from "@twin.org/core";
 import { nameof } from "@twin.org/nameof";
@@ -15,7 +15,7 @@ import type {
 	ISyncDecryptionKeyResponse,
 	ISynchronisedStorageComponent
 } from "@twin.org/synchronised-storage-models";
-import { HttpStatusCode } from "@twin.org/web";
+import { HeaderTypes, HttpStatusCode } from "@twin.org/web";
 
 /**
  * The source used when communicating about these routes.
@@ -56,6 +56,9 @@ export function generateRestRoutesSynchronisedStorage(
 				{
 					id: "synchronisedStorageSyncChangeSetRequestExample",
 					request: {
+						headers: {
+							[HeaderTypes.Authorization]: "z3Vcuh2BP9ShC.z3Vcuh2BP9ShC.z3Vcuh2BP9ShC"
+						},
 						body: {
 							id: "0909090909090909090909090909090909090909090909090909090909090909",
 							dateCreated: "2025-05-29T01:00:00.000Z",
@@ -71,17 +74,6 @@ export function generateRestRoutesSynchronisedStorage(
 									operation: "set"
 								}
 							],
-							proof: {
-								"@context": "https://www.w3.org/ns/credentials/v2",
-								created: "2025-05-29T01:00:00.000Z",
-								cryptosuite: "eddsa-jcs-2022",
-								proofPurpose: "assertionMethod",
-								proofValue:
-									"z5efBErQs3YBLZoH7jgKMQaRc9YjAxA5XSYKmW3FmTBDw9WionT2NS2x1SMvcRyBvw53cSSoaCT1xQH9tkWngGCX3",
-								type: "DataIntegrityProof",
-								verificationMethod:
-									"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0#synchronised-storage-assertion"
-							},
 							storageKey: "test-type"
 						}
 					}
@@ -111,20 +103,8 @@ export function generateRestRoutesSynchronisedStorage(
 				{
 					id: "synchronisedStorageSyncGetDecryptionKeyRequestExample",
 					request: {
-						body: {
-							nodeIdentity:
-								"did:entity-storage:0xd2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2",
-							proof: {
-								"@context": "https://www.w3.org/ns/credentials/v2",
-								created: "2025-05-29T01:00:00.000Z",
-								cryptosuite: "eddsa-jcs-2022",
-								proofPurpose: "assertionMethod",
-								proofValue:
-									"z5efBErQs3YBLZoH7jgKMQaRc9YjAxA5XSYKmW3FmTBDw9WionT2NS2x1SMvcRyBvw53cSSoaCT1xQH9tkWngGCX3",
-								type: "DataIntegrityProof",
-								verificationMethod:
-									"did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0#synchronised-storage-assertion"
-							}
+						headers: {
+							[HeaderTypes.Authorization]: "z3Vcuh2BP9ShC.z3Vcuh2BP9ShC.z3Vcuh2BP9ShC"
 						}
 					}
 				}
@@ -168,10 +148,16 @@ export async function synchronisedStorageSyncChangeSetRequest(
 	componentName: string,
 	request: ISyncChangeSetRequest
 ): Promise<INoContentResponse> {
+	Guards.object<ISyncChangeSetRequest["headers"]>(
+		ROUTES_SOURCE,
+		nameof(request.headers),
+		request.headers
+	);
 	Guards.object<ISyncChangeSetRequest>(ROUTES_SOURCE, nameof(request), request);
 	Guards.object<ISyncChangeSetRequest["body"]>(ROUTES_SOURCE, nameof(request.body), request.body);
+
 	const component = ComponentFactory.get<ISynchronisedStorageComponent>(componentName);
-	await component.syncChangeSet(request.body);
+	await component.syncChangeSet(request.body, request.headers[HeaderTypes.Authorization]);
 	return {
 		statusCode: HttpStatusCode.noContent
 	};
@@ -189,15 +175,15 @@ export async function synchronisedStorageGetDecryptionKeyRequest(
 	componentName: string,
 	request: ISyncDecryptionKeyRequest
 ): Promise<ISyncDecryptionKeyResponse> {
-	Guards.object<ISyncDecryptionKeyRequest>(ROUTES_SOURCE, nameof(request), request);
-	Guards.object<ISyncDecryptionKeyRequest["body"]>(
+	Guards.object<ISyncChangeSetRequest["headers"]>(
 		ROUTES_SOURCE,
-		nameof(request.body),
-		request.body
+		nameof(request.headers),
+		request.headers
 	);
+	Guards.object<ISyncDecryptionKeyRequest>(ROUTES_SOURCE, nameof(request), request);
 
 	const component = ComponentFactory.get<ISynchronisedStorageComponent>(componentName);
-	const key = await component.getDecryptionKey(request.body.nodeIdentity, request.body.proof);
+	const key = await component.getDecryptionKey(request.headers[HeaderTypes.Authorization]);
 	return {
 		body: {
 			decryptionKey: key

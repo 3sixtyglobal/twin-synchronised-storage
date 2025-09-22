@@ -18,6 +18,20 @@ synchronised-storage-assertion
 
 ***
 
+### proofTtlInSeconds?
+
+> `optional` **proofTtlInSeconds**: `number`
+
+The time-to-live (TTL) for proof in seconds.
+
+#### Default
+
+```ts
+300 (5 minutes)
+```
+
+***
+
 ### entityUpdateIntervalMinutes?
 
 > `optional` **entityUpdateIntervalMinutes**: `number`

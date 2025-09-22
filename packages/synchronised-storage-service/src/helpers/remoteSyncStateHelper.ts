@@ -277,9 +277,6 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 			};
 
 			try {
-				// And sign it with the node identity
-				syncChangeSet.proof = await this._changeSetHelper.createChangeSetProof(syncChangeSet);
-
 				// If this is a trusted node, we also store the changeset
 				let changeSetStorageId;
 				if (this._isTrustedNode) {
@@ -599,9 +596,6 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 				storageKey: response.storageKey,
 				nodeIdentity: this._nodeIdentity
 			};
-
-			// And sign it with the node identity
-			syncChangeSet.proof = await this._changeSetHelper.createChangeSetProof(syncChangeSet);
 
 			// Store the changeset in the blob storage
 			const changeSetStorageId = await this._changeSetHelper.storeChangeSet(syncChangeSet);

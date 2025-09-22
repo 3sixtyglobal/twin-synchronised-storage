@@ -7,6 +7,7 @@ import {
 } from "@twin.org/blob-storage-models";
 import {
 	BaseError,
+	Coerce,
 	ComponentFactory,
 	Converter,
 	GeneralError,
@@ -14,7 +15,6 @@ import {
 	Is,
 	UnauthorizedError
 } from "@twin.org/core";
-import type { IJsonLdNodeObject } from "@twin.org/data-json-ld";
 import {
 	EntityStorageConnectorFactory,
 	type IEntityStorageConnector
@@ -27,14 +27,22 @@ import {
 } from "@twin.org/identity-models";
 import type { ILoggingComponent } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
-import { type IProof, ProofTypes } from "@twin.org/standards-w3c-did";
+import {
+	RightsManagementTokenHelper,
+	type IPolicyEnforcementPointComponent
+} from "@twin.org/rights-management-models";
+import { ActionType } from "@twin.org/standards-w3c-odrl";
 import {
 	type ISyncChangeSet,
 	type ISynchronisedEntity,
 	type ISynchronisedStorageComponent,
 	type ISyncItemChange,
 	type ISyncRegisterStorageKey,
-	SynchronisedStorageTopics
+	type ISyncRequest,
+	SynchronisedStorageAssetTypes,
+	SynchronisedStorageContexts,
+	SynchronisedStorageTopics,
+	SynchronisedStorageTypes
 } from "@twin.org/synchronised-storage-models";
 import { type IVaultConnector, VaultConnectorFactory, VaultKeyType } from "@twin.org/vault-models";
 import {
@@ -140,6 +148,12 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	 * @internal
 	 */
 	private readonly _trustedSynchronisedStorageComponent?: ISynchronisedStorageComponent;
+
+	/**
+	 * The policy enforcement point component, used by trusted nodes for incoming requests.
+	 * @internal
+	 */
+	private readonly _policyEnforcementPointComponent?: IPolicyEnforcementPointComponent;
 
 	/**
 	 * The blob storage helper.
@@ -250,11 +264,18 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 				ComponentFactory.get<ISynchronisedStorageComponent>(
 					options.trustedSynchronisedStorageComponentType
 				);
+		} else {
+			// A trusted node must have a policy enforcement point component
+			this._policyEnforcementPointComponent =
+				ComponentFactory.get<IPolicyEnforcementPointComponent>(
+					options?.policyEnforcementPointComponentType ?? "policy-enforcement-point"
+				);
 		}
 
 		this._config = {
 			synchronisedStorageMethodId:
 				options.config.synchronisedStorageMethodId ?? "synchronised-storage-assertion",
+			proofTtlInSeconds: options.config.proofTtlInSeconds ?? 300,
 			entityUpdateIntervalMinutes:
 				options.config.entityUpdateIntervalMinutes ??
 				SynchronisedStorageService._DEFAULT_ENTITY_UPDATE_INTERVAL_MINUTES,
@@ -351,17 +372,21 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 
 		// If this is not a trusted node we need to request the decryption key from a trusted node
 		if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
-			const proof = await this._identityConnector.createProof(
-				this._nodeIdentity,
+			const request: ISyncRequest = {
+				"@context": SynchronisedStorageContexts.ContextRoot,
+				type: SynchronisedStorageTypes.SyncRequest,
+				nodeIdentity: this._nodeIdentity
+			};
+
+			const proofToken = await RightsManagementTokenHelper.createToken(
+				this._identityConnector,
 				DocumentHelper.joinId(this._nodeIdentity, this._config.synchronisedStorageMethodId),
-				ProofTypes.DataIntegrityProof,
-				{ nodeIdentity }
+				request,
+				this._config.proofTtlInSeconds
 			);
 
-			const decryptionKey = await this._trustedSynchronisedStorageComponent.getDecryptionKey(
-				this._nodeIdentity,
-				proof
-			);
+			const decryptionKey =
+				await this._trustedSynchronisedStorageComponent.getDecryptionKey(proofToken);
 
 			// If the key exists remove it and get a new one, in case the key has been rotated
 			const existingKey = await this._vaultConnector.getKey(
@@ -405,31 +430,48 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	/**
 	 * Get the decryption key for the synchronised storage.
 	 * This is used to decrypt the data stored in the synchronised storage.
-	 * @param nodeIdentity The identity of the node requesting the decryption key.
-	 * @param proof The proof of the request so we know the request is from the specified node.
+	 * @param proofToken The proof token to validate the request.
 	 * @returns The decryption key.
 	 */
-	public async getDecryptionKey(nodeIdentity: string, proof: IProof): Promise<string> {
+	public async getDecryptionKey(proofToken: string): Promise<string> {
 		if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
 			throw new GeneralError(this.CLASS_NAME, "notTrustedNode");
 		}
 
-		Guards.stringValue(this.CLASS_NAME, nameof(nodeIdentity), nodeIdentity);
-		Guards.object<IProof>(this.CLASS_NAME, nameof(proof), proof);
+		Guards.stringValue(this.CLASS_NAME, nameof(proofToken), proofToken);
 
-		const isValid = await this._identityConnector.verifyProof(
-			{ nodeIdentity } as unknown as IJsonLdNodeObject,
-			proof
+		const verifiableCredential = await RightsManagementTokenHelper.verifyToken(
+			this._identityConnector,
+			{},
+			proofToken,
+			this._config.proofTtlInSeconds
 		);
 
-		if (!isValid) {
-			throw new UnauthorizedError(this.CLASS_NAME, "invalidProof");
+		const subject = verifiableCredential.credentialSubject;
+		Guards.objectValue<ISyncRequest>(this.CLASS_NAME, nameof(subject), subject);
+
+		const result = await this._policyEnforcementPointComponent?.intercept({
+			assignee: subject.nodeIdentity,
+			assetType: SynchronisedStorageAssetTypes.DecryptionKey,
+			action: ActionType.Read
+		});
+
+		if (!(Coerce.boolean(result) ?? false)) {
+			throw new UnauthorizedError(this.CLASS_NAME, "decryptionKeyNotAllowed", {
+				nodeIdentity: subject.nodeIdentity
+			});
 		}
 
-		// TODO: We need to check if the node has permissions to access the decryption key
-		// using rights-management
-		const key = await this._vaultConnector.getKey(this._config.blobStorageEncryptionKeyId);
+		await this._logging?.log({
+			level: "info",
+			source: this.CLASS_NAME,
+			message: "decryptionKeyRequest",
+			data: {
+				nodeIdentity: subject.nodeIdentity
+			}
+		});
 
+		const key = await this._vaultConnector.getKey(this._config.blobStorageEncryptionKeyId);
 		if (Is.undefined(key.privateKey)) {
 			throw new UnauthorizedError(this.CLASS_NAME, "decryptionKeyNotFound");
 		}
@@ -440,29 +482,49 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	/**
 	 * Synchronise a set of changes from an untrusted node, assumes this is a trusted node.
 	 * @param syncChangeSet The change set to synchronise.
+	 * @param proofToken The proof token to validate the request.
 	 * @returns Nothing.
 	 */
-	public async syncChangeSet(syncChangeSet: ISyncChangeSet<T>): Promise<void> {
+	public async syncChangeSet(syncChangeSet: ISyncChangeSet<T>, proofToken: string): Promise<void> {
 		if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
 			throw new GeneralError(this.CLASS_NAME, "notTrustedNode");
 		}
 
 		Guards.object<ISyncChangeSet>(this.CLASS_NAME, nameof(syncChangeSet), syncChangeSet);
+		Guards.stringValue(this.CLASS_NAME, nameof(proofToken), proofToken);
+
+		const verifiableCredential = await RightsManagementTokenHelper.verifyToken(
+			this._identityConnector,
+			{ nodeIdentity: syncChangeSet.nodeIdentity },
+			proofToken,
+			this._config.proofTtlInSeconds
+		);
+
+		const subject = verifiableCredential.credentialSubject;
+		Guards.objectValue<ISyncRequest>(this.CLASS_NAME, nameof(subject), subject);
+
+		const result = await this._policyEnforcementPointComponent?.intercept({
+			assignee: subject.nodeIdentity,
+			assetType: SynchronisedStorageAssetTypes.ChangeSet,
+			action: ActionType.Read
+		});
+
+		if (!(Coerce.boolean(result) ?? false)) {
+			throw new UnauthorizedError(this.CLASS_NAME, "changeSetNotAllowed", {
+				nodeIdentity: subject.nodeIdentity,
+				changeSetStorageId: syncChangeSet.id
+			});
+		}
 
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
 			message: "syncChangeSetForRemoteNode",
 			data: {
-				changeSetStorageId: syncChangeSet.id
+				changeSetStorageId: syncChangeSet.id,
+				nodeIdentity: subject.nodeIdentity
 			}
 		});
-
-		// TODO: The change set has a proof signed by the originating node identity
-		// The proof is verified that the change set is valid and has not been tampered with.
-		// but we also need to check that the originating node has permissions
-		// to store the change set in the synchronised storage.
-		// This will be performed using rights-management
 
 		const copy = await this._changeSetHelper.copyChangeset(syncChangeSet);
 
@@ -602,7 +664,8 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 								await this._localSyncStateHelper.removeLocalChangeSnapshot(localChangeSnapshot);
 							} else if (
 								!Is.empty(this._trustedSynchronisedStorageComponent) &&
-								Is.object(syncChangeSet)
+								Is.object(syncChangeSet) &&
+								Is.stringValue(this._nodeIdentity)
 							) {
 								// If we are not a trusted node, we need to send the changes to the trusted node
 								// and then remove the local change snapshot
@@ -615,7 +678,28 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 										changeSetStorageId
 									}
 								});
-								await this._trustedSynchronisedStorageComponent.syncChangeSet(syncChangeSet);
+
+								const request: ISyncRequest = {
+									"@context": SynchronisedStorageContexts.ContextRoot,
+									type: SynchronisedStorageTypes.SyncRequest,
+									nodeIdentity: this._nodeIdentity
+								};
+
+								const proofToken = await RightsManagementTokenHelper.createToken(
+									this._identityConnector,
+									DocumentHelper.joinId(
+										this._nodeIdentity,
+										this._config.synchronisedStorageMethodId
+									),
+									request,
+									this._config.proofTtlInSeconds
+								);
+
+								await this._trustedSynchronisedStorageComponent.syncChangeSet(
+									syncChangeSet,
+									proofToken
+								);
+
 								await this._localSyncStateHelper.removeLocalChangeSnapshot(localChangeSnapshot);
 							}
 						}

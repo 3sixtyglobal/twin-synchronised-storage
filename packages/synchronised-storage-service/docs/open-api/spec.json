@@ -28,6 +28,18 @@
 				"tags": [
 					"Synchronised Storage"
 				],
+				"parameters": [
+					{
+						"name": "authorization",
+						"in": "header",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple",
+						"example": "z3Vcuh2BP9ShC.z3Vcuh2BP9ShC.z3Vcuh2BP9ShC"
+					}
+				],
 				"requestBody": {
 					"description": "Request a trusted node to perform a sync request for a changeset.",
 					"required": true,
@@ -52,15 +64,6 @@
 												"operation": "set"
 											}
 										],
-										"proof": {
-											"@context": "https://www.w3.org/ns/credentials/v2",
-											"created": "2025-05-29T01:00:00.000Z",
-											"cryptosuite": "eddsa-jcs-2022",
-											"proofPurpose": "assertionMethod",
-											"proofValue": "z5efBErQs3YBLZoH7jgKMQaRc9YjAxA5XSYKmW3FmTBDw9WionT2NS2x1SMvcRyBvw53cSSoaCT1xQH9tkWngGCX3",
-											"type": "DataIntegrityProof",
-											"verificationMethod": "did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0#synchronised-storage-assertion"
-										},
 										"storageKey": "test-type"
 									}
 								}
@@ -128,22 +131,6 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/SyncChangeSet"
-							},
-							"examples": {
-								"synchronisedStorageSyncGetDecryptionKeyRequestExample": {
-									"value": {
-										"nodeIdentity": "did:entity-storage:0xd2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2",
-										"proof": {
-											"@context": "https://www.w3.org/ns/credentials/v2",
-											"created": "2025-05-29T01:00:00.000Z",
-											"cryptosuite": "eddsa-jcs-2022",
-											"proofPurpose": "assertionMethod",
-											"proofValue": "z5efBErQs3YBLZoH7jgKMQaRc9YjAxA5XSYKmW3FmTBDw9WionT2NS2x1SMvcRyBvw53cSSoaCT1xQH9tkWngGCX3",
-											"type": "DataIntegrityProof",
-											"verificationMethod": "did:entity-storage:0xd0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0#synchronised-storage-assertion"
-										}
-									}
-								}
 							}
 						}
 					}
@@ -319,6 +306,10 @@
 						"type": "string",
 						"description": "The date the change set was last modified."
 					},
+					"nodeIdentity": {
+						"type": "string",
+						"description": "The identity of the node that created the change set."
+					},
 					"changes": {
 						"type": "array",
 						"items": false,
@@ -328,13 +319,6 @@
 								"$ref": "#/components/schemas/SyncChange<SynchronisedEntity>"
 							}
 						]
-					},
-					"nodeIdentity": {
-						"type": "string",
-						"description": "The identity of the node that created the change set."
-					},
-					"proof": {
-						"$ref": "https://schema.twindev.org/w3c-did/Proof"
 					}
 				},
 				"required": [
@@ -342,8 +326,8 @@
 					"storageKey",
 					"dateCreated",
 					"dateModified",
-					"changes",
-					"nodeIdentity"
+					"nodeIdentity",
+					"changes"
 				],
 				"additionalProperties": false,
 				"description": "The object definition for a sync change set."

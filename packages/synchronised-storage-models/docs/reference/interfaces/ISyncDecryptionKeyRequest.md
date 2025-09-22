@@ -4,20 +4,12 @@ Request for the decryption key for the synchronised storage.
 
 ## Properties
 
-### body
+### headers
 
-> **body**: `object`
+> **headers**: `object`
 
-The body of the request.
+The headers which can be used to determine the response data type.
 
-#### nodeIdentity
+#### authorization
 
-> **nodeIdentity**: `string`
-
-The identity of the node making the request.
-
-#### proof
-
-> **proof**: `IProof`
-
-The proof of the request.
+> **authorization**: `string`

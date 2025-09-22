@@ -1,23 +1,15 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { IProof } from "@twin.org/standards-w3c-did";
+import type { HeaderTypes } from "@twin.org/web";
 
 /**
  * Request for the decryption key for the synchronised storage.
  */
 export interface ISyncDecryptionKeyRequest {
 	/**
-	 * The body of the request.
+	 * The headers which can be used to determine the response data type.
 	 */
-	body: {
-		/**
-		 * The identity of the node making the request.
-		 */
-		nodeIdentity: string;
-
-		/**
-		 * The proof of the request.
-		 */
-		proof: IProof;
+	headers: {
+		[HeaderTypes.Authorization]: string;
 	};
 }

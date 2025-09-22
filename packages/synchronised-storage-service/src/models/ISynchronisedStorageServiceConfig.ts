@@ -12,6 +12,12 @@ export interface ISynchronisedStorageServiceConfig {
 	synchronisedStorageMethodId?: string;
 
 	/**
+	 * The time-to-live (TTL) for proof in seconds.
+	 * @default 300 (5 minutes)
+	 */
+	proofTtlInSeconds?: number;
+
+	/**
 	 * How often to check for entity updates in minutes.
 	 * @default 5
 	 */

@@ -3,11 +3,6 @@
 		"changeSetHelper": {
 			"changeSetApplyingChange": "Applying remote sync change with operation id \"{operation}\" for item with id \"{id}\"",
 			"changeSetStoring": "Storing remote sync change set with id \"{id}\"",
-			"verifyChangeSetProofMissing": "Verifying change set with id \"{id}\" failed, missing proof",
-			"verifyChangeSetProofInvalid": "Verifying change set with id \"{id}\" failed, missing proof",
-			"verifyChangeSetProofNodeIdentityMismatch": "Verifying change set with id \"{id}\" failed, the node identity does not match the proof",
-			"verifyChangeSetProofValid": "Verifying change set with id \"{id}\" succeeded",
-			"createdChangeSetProof": "Created change proof for change set with id \"{id}\", proof value is \"{proofValue}\"",
 			"getChangeSet": "Retrieving change set with id \"{changeSetStorageId}\"",
 			"getChangeSetEmpty": "No change set found with id \"{changeSetStorageId}\"",
 			"copyChangeSet": "Copying change set with id \"{changeSetStorageId}\"",
@@ -55,7 +50,8 @@
 			"createChangeSetRequestingItem": "Creating change set for key \"{storageKey}\", requesting item with id \"{id}\"",
 			"createChangeSetRespondingItem": "Responding to change set request for key \"{storageKey}\", item with id \"{id}\"",
 			"sendingChangeSetToTrustedNode": "Sending change set with id \"{changeSetStorageId}\" to trusted node for key \"{storageKey}\"",
-			"syncChangeSetForRemoteNode": "Synchronising change set with id \"{changeSetStorageId}\" for remote node for type \"{storageKey}\""
+			"decryptionKeyRequest": "Decryption key requested by node identity \"{nodeIdentity}\"",
+			"syncChangeSetForRemoteNode": "Synchronising change set with id \"{changeSetStorageId}\" for node identity \"{nodeIdentity}\""
 		},
 		"blobStorageHelper": {
 			"loadBlob": "Loading blob with id \"{blobId}\"",
@@ -77,7 +73,8 @@
 			"notTrustedNode": "This method can only be called on a trusted node",
 			"entitySyncFailed": "Failed to sync synchronised entity storage connector",
 			"consolidationSyncFailed": "Failed to consolidate synchronised entity storage connector",
-			"invalidProof": "Invalid proof provided for synchronised entity storage connector",
+			"decryptionKeyNotAllowed": "The node identity \"{nodeIdentity}\" is not allowed to retrieve the decryption key",
+			"changeSetNotAllowed": "The node identity \"{nodeIdentity}\" is not allowed to sync the change set with id \"{changeSetStorageId}\"",
 			"decryptionKeyNotFound": "Decryption key not found, ensure the synchronised storage component is initialised and the decryption key is set"
 		},
 		"remoteSyncStateHelper": {

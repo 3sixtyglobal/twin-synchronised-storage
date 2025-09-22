@@ -42,14 +42,6 @@ The date the change set was last modified.
 
 ***
 
-### changes
-
-> **changes**: [`ISyncChange`](ISyncChange.md)\<`T`\>[]
-
-The changes to apply after a snapshot.
-
-***
-
 ### nodeIdentity
 
 > **nodeIdentity**: `string`
@@ -58,8 +50,8 @@ The identity of the node that created the change set.
 
 ***
 
-### proof?
+### changes
 
-> `optional` **proof**: `IProof`
+> **changes**: [`ISyncChange`](ISyncChange.md)\<`T`\>[]
 
-The proof for the change set.
+The changes to apply after a snapshot.

@@ -50,24 +50,18 @@ Runtime name for the class.
 
 ### getDecryptionKey()
 
-> **getDecryptionKey**(`nodeIdentity`, `proof`): `Promise`\<`string`\>
+> **getDecryptionKey**(`proofToken`): `Promise`\<`string`\>
 
 Get the decryption key for the synchronised storage.
 This is used to decrypt the data stored in the synchronised storage.
 
 #### Parameters
 
-##### nodeIdentity
+##### proofToken
 
 `string`
 
-The identity of the node requesting the decryption key.
-
-##### proof
-
-`IProof`
-
-The proof of the request so we know the request is from the specified node.
+The proof token to use to validate the proof.
 
 #### Returns
 
@@ -83,7 +77,7 @@ The decryption key.
 
 ### syncChangeSet()
 
-> **syncChangeSet**(`syncChangeSet`): `Promise`\<`void`\>
+> **syncChangeSet**(`syncChangeSet`, `proofToken`): `Promise`\<`void`\>
 
 Synchronise a set of changes from an untrusted node, assumes this is a trusted node.
 
@@ -94,6 +88,12 @@ Synchronise a set of changes from an untrusted node, assumes this is a trusted n
 `ISyncChangeSet`
 
 The change set to synchronise.
+
+##### proofToken
+
+`string`
+
+The proof token to use to verify the request.
 
 #### Returns
 

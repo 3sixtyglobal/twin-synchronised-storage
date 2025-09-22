@@ -43,7 +43,9 @@
 		"@twin.org/identity-models": "next",
 		"@twin.org/logging-models": "next",
 		"@twin.org/nameof": "next",
+		"@twin.org/rights-management-models": "next",
 		"@twin.org/standards-w3c-did": "next",
+		"@twin.org/standards-w3c-odrl": "next",
 		"@twin.org/synchronised-storage-models": "0.0.1-next.13",
 		"@twin.org/verifiable-storage-models": "next",
 		"@twin.org/web": "next"
