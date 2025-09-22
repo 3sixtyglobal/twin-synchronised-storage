@@ -1,12 +1,23 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import type { ISyncChange } from "./ISyncChange";
-import type { ISynchronisedEntity } from "./ISynchronisedEntity";
+import type { SynchronisedStorageContexts } from "./synchronisedStorageContexts";
+import type { SynchronisedStorageTypes } from "./synchronisedStorageTypes";
 
 /**
  * The object definition for a sync change set.
  */
-export interface ISyncChangeSet<T extends ISynchronisedEntity = ISynchronisedEntity> {
+export interface ISyncChangeSet {
+	/**
+	 * The LD Context for the change set.
+	 */
+	"@context": typeof SynchronisedStorageContexts.ContextRoot;
+
+	/**
+	 * The LD Type for the change set.
+	 */
+	type: typeof SynchronisedStorageTypes.ChangeSet;
+
 	/**
 	 * The id of the change set.
 	 */
@@ -35,5 +46,5 @@ export interface ISyncChangeSet<T extends ISynchronisedEntity = ISynchronisedEnt
 	/**
 	 * The changes to apply after a snapshot.
 	 */
-	changes: ISyncChange<T>[];
+	changes: ISyncChange[];
 }

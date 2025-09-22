@@ -28,13 +28,12 @@ import {
 import type { ILoggingComponent } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
 import {
-	RightsManagementTokenHelper,
-	type IPolicyEnforcementPointComponent
+	type IPolicyEnforcementPointComponent,
+	RightsManagementTokenHelper
 } from "@twin.org/rights-management-models";
 import { ActionType } from "@twin.org/standards-w3c-odrl";
 import {
 	type ISyncChangeSet,
-	type ISynchronisedEntity,
 	type ISynchronisedStorageComponent,
 	type ISyncItemChange,
 	type ISyncRegisterStorageKey,
@@ -61,9 +60,7 @@ import type { ISynchronisedStorageServiceConstructorOptions } from "./models/ISy
 /**
  * Class for performing synchronised storage operations.
  */
-export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchronisedEntity>
-	implements ISynchronisedStorageComponent
-{
+export class SynchronisedStorageService implements ISynchronisedStorageComponent {
 	/**
 	 * The default interval to check for entity updates.
 	 * @internal
@@ -115,9 +112,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	 * The storage connector for the sync snapshot entries.
 	 * @internal
 	 */
-	private readonly _localSyncSnapshotEntryEntityStorage: IEntityStorageConnector<
-		SyncSnapshotEntry<T>
-	>;
+	private readonly _localSyncSnapshotEntryEntityStorage: IEntityStorageConnector<SyncSnapshotEntry>;
 
 	/**
 	 * The blob storage connector to use for remote sync states.
@@ -165,19 +160,19 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	 * The change set helper.
 	 * @internal
 	 */
-	private readonly _changeSetHelper: ChangeSetHelper<T>;
+	private readonly _changeSetHelper: ChangeSetHelper;
 
 	/**
 	 * The local sync state helper to use for applying changesets.
 	 * @internal
 	 */
-	private readonly _localSyncStateHelper: LocalSyncStateHelper<T>;
+	private readonly _localSyncStateHelper: LocalSyncStateHelper;
 
 	/**
 	 * The remote sync state helper to use for applying changesets.
 	 * @internal
 	 */
-	private readonly _remoteSyncStateHelper: RemoteSyncStateHelper<T>;
+	private readonly _remoteSyncStateHelper: RemoteSyncStateHelper;
 
 	/**
 	 * The options for the connector.
@@ -235,7 +230,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 		this._vaultConnector = VaultConnectorFactory.get(options.vaultConnectorType ?? "vault");
 
 		this._localSyncSnapshotEntryEntityStorage = EntityStorageConnectorFactory.get<
-			IEntityStorageConnector<SyncSnapshotEntry<T>>
+			IEntityStorageConnector<SyncSnapshotEntry>
 		>(options.syncSnapshotStorageConnectorType ?? "sync-snapshot-entry");
 
 		this._verifiableSyncPointerStorageConnector = VerifiableStorageConnectorFactory.get(
@@ -307,7 +302,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 			isTrustedNode
 		);
 
-		this._changeSetHelper = new ChangeSetHelper<T>(
+		this._changeSetHelper = new ChangeSetHelper(
 			this._logging,
 			this._eventBusComponent,
 			this._identityConnector,
@@ -315,13 +310,13 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 			this._config.synchronisedStorageMethodId
 		);
 
-		this._localSyncStateHelper = new LocalSyncStateHelper<T>(
+		this._localSyncStateHelper = new LocalSyncStateHelper(
 			this._logging,
 			this._localSyncSnapshotEntryEntityStorage,
 			this._changeSetHelper
 		);
 
-		this._remoteSyncStateHelper = new RemoteSyncStateHelper<T>(
+		this._remoteSyncStateHelper = new RemoteSyncStateHelper(
 			this._logging,
 			this._eventBusComponent,
 			this._verifiableSyncPointerStorageConnector,
@@ -485,7 +480,7 @@ export class SynchronisedStorageService<T extends ISynchronisedEntity = ISynchro
 	 * @param proofToken The proof token to validate the request.
 	 * @returns Nothing.
 	 */
-	public async syncChangeSet(syncChangeSet: ISyncChangeSet<T>, proofToken: string): Promise<void> {
+	public async syncChangeSet(syncChangeSet: ISyncChangeSet, proofToken: string): Promise<void> {
 		if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
 			throw new GeneralError(this.CLASS_NAME, "notTrustedNode");
 		}

@@ -6,6 +6,7 @@
 - [ISyncChangeSet](interfaces/ISyncChangeSet.md)
 - [ISyncRequest](interfaces/ISyncRequest.md)
 - [ISynchronisedEntity](interfaces/ISynchronisedEntity.md)
+- [ISynchronisedEntityCore](interfaces/ISynchronisedEntityCore.md)
 - [ISynchronisedStorageComponent](interfaces/ISynchronisedStorageComponent.md)
 - [ISyncChangeSetRequest](interfaces/ISyncChangeSetRequest.md)
 - [ISyncDecryptionKeyRequest](interfaces/ISyncDecryptionKeyRequest.md)

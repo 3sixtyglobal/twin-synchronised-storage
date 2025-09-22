@@ -8,7 +8,7 @@ The object definition for a sync request.
 
 > **@context**: `"https://schema.twindev.org/synchronised-storage"`
 
-The LD Context for the change set.
+The LD Context for the request.
 
 ***
 
@@ -16,7 +16,7 @@ The LD Context for the change set.
 
 > **type**: `"SyncRequest"`
 
-The LD Type for the change set.
+The LD Type for the request.
 
 ***
 
@@ -24,4 +24,4 @@ The LD Type for the change set.
 
 > **nodeIdentity**: `string`
 
-The identity of the node that created the change set.
+The identity of the node that created the request.

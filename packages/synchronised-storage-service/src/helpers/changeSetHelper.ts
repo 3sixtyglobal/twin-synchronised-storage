@@ -7,7 +7,6 @@ import type { ILoggingComponent } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
 import {
 	type ISyncChangeSet,
-	type ISynchronisedEntity,
 	type ISyncItemRemove,
 	type ISyncItemSet,
 	type ISyncReset,
@@ -20,7 +19,7 @@ import type { BlobStorageHelper } from "./blobStorageHelper";
 /**
  * Class for performing change set operations.
  */
-export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity> {
+export class ChangeSetHelper {
 	/**
 	 * Runtime name for the class.
 	 */
@@ -97,7 +96,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 	 * @param changeSetStorageId The id of the sync changeset to apply.
 	 * @returns The changeset if it was verified.
 	 */
-	public async getChangeset(changeSetStorageId: string): Promise<ISyncChangeSet<T> | undefined> {
+	public async getChangeset(changeSetStorageId: string): Promise<ISyncChangeSet | undefined> {
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
@@ -109,7 +108,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 
 		try {
 			const syncChangeSet =
-				await this._blobStorageHelper.loadBlob<ISyncChangeSet<T>>(changeSetStorageId);
+				await this._blobStorageHelper.loadBlob<ISyncChangeSet>(changeSetStorageId);
 
 			return syncChangeSet;
 		} catch (error) {
@@ -141,7 +140,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 	 */
 	public async getAndApplyChangeset(
 		changeSetStorageId: string
-	): Promise<ISyncChangeSet<T> | undefined> {
+	): Promise<ISyncChangeSet | undefined> {
 		const syncChangeset = await this.getChangeset(changeSetStorageId);
 
 		// Only apply changesets from other nodes, we don't want to overwrite
@@ -158,7 +157,7 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 	 * @param syncChangeset The sync changeset to apply.
 	 * @returns Nothing.
 	 */
-	public async applyChangeset(syncChangeset: ISyncChangeSet<T>): Promise<void> {
+	public async applyChangeset(syncChangeset: ISyncChangeSet): Promise<void> {
 		if (Is.arrayValue(syncChangeset.changes)) {
 			for (const change of syncChangeset.changes) {
 				await this._logging?.log({
@@ -232,9 +231,9 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 	 * @param syncChangeSet The sync changeset to copy.
 	 * @returns The id of the updated change set.
 	 */
-	public async copyChangeset(syncChangeSet: ISyncChangeSet<T>): Promise<
+	public async copyChangeset(syncChangeSet: ISyncChangeSet): Promise<
 		| {
-				syncChangeSet: ISyncChangeSet<T>;
+				syncChangeSet: ISyncChangeSet;
 				changeSetStorageId: string;
 		  }
 		| undefined

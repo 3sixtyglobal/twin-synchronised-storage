@@ -11,3 +11,9 @@ The types of Synchronised Storage data.
 > `readonly` **SyncRequest**: `"SyncRequest"` = `"SyncRequest"`
 
 Represents a synchronised storage request.
+
+### ChangeSet
+
+> `readonly` **ChangeSet**: `"ChangeSet"` = `"ChangeSet"`
+
+Represents a synchronised storage change set.

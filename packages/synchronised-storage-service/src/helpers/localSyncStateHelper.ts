@@ -6,7 +6,6 @@ import type { IEntityStorageConnector } from "@twin.org/entity-storage-models";
 import type { ILoggingComponent } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
 import {
-	type ISynchronisedEntity,
 	type SyncChangeOperation,
 	SyncNodeIdentityMode
 } from "@twin.org/synchronised-storage-models";
@@ -18,7 +17,7 @@ import type { ISyncState } from "../models/ISyncState";
 /**
  * Class for performing entity storage operations in decentralised storage.
  */
-export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedEntity> {
+export class LocalSyncStateHelper {
 	/**
 	 * Runtime name for the class.
 	 */
@@ -34,13 +33,13 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	 * The storage connector for the sync snapshot entries.
 	 * @internal
 	 */
-	private readonly _snapshotEntryEntityStorage: IEntityStorageConnector<SyncSnapshotEntry<T>>;
+	private readonly _snapshotEntryEntityStorage: IEntityStorageConnector<SyncSnapshotEntry>;
 
 	/**
 	 * The change set helper to use for applying changesets.
 	 * @internal
 	 */
-	private readonly _changeSetHelper: ChangeSetHelper<T>;
+	private readonly _changeSetHelper: ChangeSetHelper;
 
 	/**
 	 * Create a new instance of LocalSyncStateHelper.
@@ -50,8 +49,8 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	 */
 	constructor(
 		logging: ILoggingComponent | undefined,
-		snapshotEntryEntityStorage: IEntityStorageConnector<SyncSnapshotEntry<T>>,
-		changeSetHelper: ChangeSetHelper<T>
+		snapshotEntryEntityStorage: IEntityStorageConnector<SyncSnapshotEntry>,
+		changeSetHelper: ChangeSetHelper
 	) {
 		this._logging = logging;
 		this._snapshotEntryEntityStorage = snapshotEntryEntityStorage;
@@ -115,7 +114,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	 * @param isLocal Whether to get the local snapshot or not.
 	 * @returns The local snapshot entry.
 	 */
-	public async getSnapshots(storageKey: string, isLocal: boolean): Promise<SyncSnapshotEntry<T>[]> {
+	public async getSnapshots(storageKey: string, isLocal: boolean): Promise<SyncSnapshotEntry[]> {
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
@@ -149,7 +148,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 					storageKey
 				}
 			});
-			return queryResult.entities as SyncSnapshotEntry<T>[];
+			return queryResult.entities as SyncSnapshotEntry[];
 		}
 
 		await this._logging?.log({
@@ -181,7 +180,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	 * @param localChangeSnapshot The local change snapshot to set.
 	 * @returns Nothing.
 	 */
-	public async setLocalChangeSnapshot(localChangeSnapshot: SyncSnapshotEntry<T>): Promise<void> {
+	public async setLocalChangeSnapshot(localChangeSnapshot: SyncSnapshotEntry): Promise<void> {
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
@@ -198,7 +197,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	 * @param localChangeSnapshot The local change snapshot to remove.
 	 * @returns Nothing.
 	 */
-	public async removeLocalChangeSnapshot(localChangeSnapshot: SyncSnapshotEntry<T>): Promise<void> {
+	public async removeLocalChangeSnapshot(localChangeSnapshot: SyncSnapshotEntry): Promise<void> {
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,
@@ -311,15 +310,15 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 			// We don't need to apply any additional consolidated snapshots, just the changesets
 
 			// Create a lookup map for the existing snapshots
-			const existingSnapshotsMap: { [id: string]: SyncSnapshotEntry<T> } = {};
+			const existingSnapshotsMap: { [id: string]: SyncSnapshotEntry } = {};
 			for (const snapshot of existingSnapshots) {
 				existingSnapshotsMap[snapshot.id] = snapshot;
 			}
 
-			const newSnapshots: SyncSnapshotEntry<T>[] = [];
+			const newSnapshots: SyncSnapshotEntry[] = [];
 			const modifiedSnapshots: {
-				currentSnapshot: SyncSnapshotEntry<T>;
-				updatedSnapshot: SyncSnapshotEntry<T>;
+				currentSnapshot: SyncSnapshotEntry;
+				updatedSnapshot: SyncSnapshotEntry;
 			}[] = [];
 			const referencedExistingSnapshots: string[] = Object.keys(existingSnapshotsMap);
 
@@ -347,7 +346,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 
 				// No need to apply consolidated snapshots
 				if (!snapshot.isConsolidated && !completedProcessing) {
-					const updatedSnapshot: SyncSnapshotEntry<T> = {
+					const updatedSnapshot: SyncSnapshotEntry = {
 						...snapshot,
 						storageKey,
 						isLocal: false
@@ -391,8 +390,8 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	 */
 	private async processModifiedSnapshots(
 		modifiedSnapshots: {
-			currentSnapshot: SyncSnapshotEntry<T>;
-			updatedSnapshot: SyncSnapshotEntry<T>;
+			currentSnapshot: SyncSnapshotEntry;
+			updatedSnapshot: SyncSnapshotEntry;
 		}[]
 	): Promise<void> {
 		for (const modifiedSnapshot of modifiedSnapshots) {
@@ -434,7 +433,7 @@ export class LocalSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedE
 	 * @returns Nothing.
 	 * @internal
 	 */
-	private async processNewSnapshots(newSnapshots: SyncSnapshotEntry<T>[]): Promise<void> {
+	private async processNewSnapshots(newSnapshots: SyncSnapshotEntry[]): Promise<void> {
 		for (const newSnapshot of newSnapshots) {
 			await this._logging?.log({
 				level: "info",

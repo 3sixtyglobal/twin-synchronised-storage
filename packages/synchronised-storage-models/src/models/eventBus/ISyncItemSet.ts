@@ -5,7 +5,7 @@ import type { ISynchronisedEntity } from "../ISynchronisedEntity";
 /**
  * The payload for an item set.
  */
-export interface ISyncItemSet<T extends ISynchronisedEntity = ISynchronisedEntity> {
+export interface ISyncItemSet {
 	/**
 	 * The key of the storage being set.
 	 */
@@ -14,5 +14,5 @@ export interface ISyncItemSet<T extends ISynchronisedEntity = ISynchronisedEntit
 	/**
 	 * The entity being set in the item set.
 	 */
-	entity: T;
+	entity: ISynchronisedEntity;
 }

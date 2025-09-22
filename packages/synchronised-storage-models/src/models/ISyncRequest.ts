@@ -8,17 +8,17 @@ import type { SynchronisedStorageTypes } from "./synchronisedStorageTypes";
  */
 export interface ISyncRequest {
 	/**
-	 * The LD Context for the change set.
+	 * The LD Context for the request.
 	 */
 	"@context": typeof SynchronisedStorageContexts.ContextRoot;
 
 	/**
-	 * The LD Type for the change set.
+	 * The LD Type for the request.
 	 */
 	type: typeof SynchronisedStorageTypes.SyncRequest;
 
 	/**
-	 * The identity of the node that created the change set.
+	 * The identity of the node that created the request.
 	 */
 	nodeIdentity: string;
 }

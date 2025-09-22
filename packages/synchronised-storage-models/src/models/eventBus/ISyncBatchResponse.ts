@@ -5,7 +5,7 @@ import type { ISynchronisedEntity } from "../ISynchronisedEntity";
 /**
  * Response for a local batch.
  */
-export interface ISyncBatchResponse<T extends ISynchronisedEntity> {
+export interface ISyncBatchResponse {
 	/**
 	 * The key of the storage for the entities in the batch.
 	 */
@@ -14,7 +14,7 @@ export interface ISyncBatchResponse<T extends ISynchronisedEntity> {
 	/**
 	 * The entities in the batch.
 	 */
-	entities: T[];
+	entities: ISynchronisedEntity[];
 
 	/**
 	 * Is this the last entry in the batch?

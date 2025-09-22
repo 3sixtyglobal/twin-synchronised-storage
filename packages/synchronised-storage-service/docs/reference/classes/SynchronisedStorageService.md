@@ -1,12 +1,6 @@
-# Class: SynchronisedStorageService\<T\>
+# Class: SynchronisedStorageService
 
 Class for performing synchronised storage operations.
-
-## Type Parameters
-
-### T
-
-`T` *extends* `ISynchronisedEntity` = `ISynchronisedEntity`
 
 ## Implements
 
@@ -16,7 +10,7 @@ Class for performing synchronised storage operations.
 
 ### Constructor
 
-> **new SynchronisedStorageService**\<`T`\>(`options`): `SynchronisedStorageService`\<`T`\>
+> **new SynchronisedStorageService**(`options`): `SynchronisedStorageService`
 
 Create a new instance of SynchronisedStorageService.
 
@@ -30,7 +24,7 @@ The options for the service.
 
 #### Returns
 
-`SynchronisedStorageService`\<`T`\>
+`SynchronisedStorageService`
 
 ## Properties
 
@@ -147,7 +141,7 @@ Synchronise a set of changes from an untrusted node, assumes this is a trusted n
 
 ##### syncChangeSet
 
-`ISyncChangeSet`\<`T`\>
+`ISyncChangeSet`
 
 The change set to synchronise.
 

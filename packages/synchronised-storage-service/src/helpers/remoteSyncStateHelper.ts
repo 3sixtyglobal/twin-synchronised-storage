@@ -16,11 +16,13 @@ import {
 	type ISyncBatchResponse,
 	type ISyncChange,
 	type ISyncChangeSet,
-	type ISynchronisedEntity,
 	type ISyncItemResponse,
 	SyncNodeIdentityMode,
 	SyncChangeOperation,
-	SynchronisedStorageTopics
+	SynchronisedStorageTopics,
+	SynchronisedStorageContexts,
+	SynchronisedStorageTypes,
+	type ISynchronisedEntity
 } from "@twin.org/synchronised-storage-models";
 import type { IVerifiableStorageConnector } from "@twin.org/verifiable-storage-models";
 import type { BlobStorageHelper } from "./blobStorageHelper";
@@ -33,7 +35,7 @@ import type { ISyncState } from "../models/ISyncState";
 /**
  * Class for performing entity storage operations in decentralised storage.
  */
-export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronisedEntity> {
+export class RemoteSyncStateHelper {
 	/**
 	 * Runtime name for the class.
 	 */
@@ -67,7 +69,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 * The change set helper to use for applying changesets.
 	 * @internal
 	 */
-	private readonly _changeSetHelper: ChangeSetHelper<T>;
+	private readonly _changeSetHelper: ChangeSetHelper;
 
 	/**
 	 * The storage ids of the batch responses for each storage key.
@@ -81,8 +83,8 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 */
 	private readonly _populateFullChanges: {
 		[storageKey: string]: {
-			changes: ISyncChange<T>[];
-			entities: { [id: string]: T | undefined };
+			changes: ISyncChange[];
+			entities: { [id: string]: ISynchronisedEntity | undefined };
 			requestIds: string[];
 			completeCallback: (id?: string) => Promise<void>;
 		};
@@ -127,7 +129,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 		eventBusComponent: IEventBusComponent,
 		verifiableSyncPointerStorageConnector: IVerifiableStorageConnector,
 		blobStorageHelper: BlobStorageHelper,
-		changeSetHelper: ChangeSetHelper<T>,
+		changeSetHelper: ChangeSetHelper,
 		isTrustedNode: boolean,
 		maxConsolidations: number
 	) {
@@ -142,14 +144,14 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 		this._batchResponseStorageIds = {};
 		this._populateFullChanges = {};
 
-		this._eventBusComponent.subscribe<ISyncBatchResponse<T>>(
+		this._eventBusComponent.subscribe<ISyncBatchResponse>(
 			SynchronisedStorageTopics.BatchResponse,
 			async response => {
 				await this.handleBatchResponse(response.data);
 			}
 		);
 
-		this._eventBusComponent.subscribe<ISyncItemResponse<T>>(
+		this._eventBusComponent.subscribe<ISyncItemResponse>(
 			SynchronisedStorageTopics.LocalItemResponse,
 			async response => {
 				await this.handleLocalItemResponse(response.data);
@@ -182,8 +184,8 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 */
 	public async buildChangeSet(
 		storageKey: string,
-		changes: ISyncChange<T>[],
-		completeCallback: (syncChangeSet?: ISyncChangeSet<T>, id?: string) => Promise<void>
+		changes: ISyncChange[],
+		completeCallback: (syncChangeSet?: ISyncChangeSet, id?: string) => Promise<void>
 	): Promise<void> {
 		await this._logging?.log({
 			level: "info",
@@ -222,7 +224,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 						id: change.id
 					}
 				});
-				this._eventBusComponent.publish<ISyncItemResponse<T>>(
+				this._eventBusComponent.publish<ISyncItemResponse>(
 					SynchronisedStorageTopics.LocalItemRequest,
 					{
 						storageKey,
@@ -241,7 +243,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 */
 	public async finaliseFullChanges(
 		storageKey: string,
-		completeCallback: (syncChangeSet?: ISyncChangeSet<T>, id?: string) => Promise<void>
+		completeCallback: (syncChangeSet?: ISyncChangeSet, id?: string) => Promise<void>
 	): Promise<void> {
 		await this._logging?.log({
 			level: "info",
@@ -267,7 +269,9 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 			}
 
 			const now = new Date(Date.now()).toISOString();
-			const syncChangeSet: ISyncChangeSet<T> = {
+			const syncChangeSet: ISyncChangeSet = {
+				"@context": SynchronisedStorageContexts.ContextRoot,
+				type: SynchronisedStorageTypes.ChangeSet,
 				id: Converter.bytesToHex(RandomHelper.generate(32)),
 				dateCreated: now,
 				dateModified: now,
@@ -580,12 +584,14 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 * Handle the batch response which is triggered from a consolidation request.
 	 * @param response The batch response to handle.
 	 */
-	private async handleBatchResponse(response: ISyncBatchResponse<T>): Promise<void> {
+	private async handleBatchResponse(response: ISyncBatchResponse): Promise<void> {
 		if (Is.stringValue(this._nodeIdentity)) {
 			const now = new Date(Date.now()).toISOString();
 
 			// Create a new snapshot entry for the current batch
-			const syncChangeSet: ISyncChangeSet<T> = {
+			const syncChangeSet: ISyncChangeSet = {
+				"@context": SynchronisedStorageContexts.ContextRoot,
+				type: SynchronisedStorageTypes.ChangeSet,
 				id: Converter.bytesToHex(RandomHelper.generate(32)),
 				dateCreated: now,
 				dateModified: now,
@@ -667,7 +673,7 @@ export class RemoteSyncStateHelper<T extends ISynchronisedEntity = ISynchronised
 	 * Handle the item response.
 	 * @param response The item response to handle.
 	 */
-	private async handleLocalItemResponse(response: ISyncItemResponse<T>): Promise<void> {
+	private async handleLocalItemResponse(response: ISyncItemResponse): Promise<void> {
 		await this._logging?.log({
 			level: "info",
 			source: this.CLASS_NAME,

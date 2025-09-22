@@ -30,6 +30,15 @@
 				],
 				"parameters": [
 					{
+						"name": "accept",
+						"in": "header",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
 						"name": "authorization",
 						"in": "header",
 						"required": true,
@@ -51,6 +60,8 @@
 							"examples": {
 								"synchronisedStorageSyncChangeSetRequestExample": {
 									"value": {
+										"@context": "https://schema.twindev.org/synchronised-storage",
+										"type": "ChangeSet",
 										"id": "0909090909090909090909090909090909090909090909090909090909090909",
 										"dateCreated": "2025-05-29T01:00:00.000Z",
 										"dateModified": "2025-05-29T01:00:00.000Z",
@@ -251,7 +262,7 @@
 				"additionalProperties": false,
 				"description": "Model to describe serialized error."
 			},
-			"SyncChange<SynchronisedEntity>": {
+			"SyncChange": {
 				"type": "object",
 				"properties": {
 					"operation": {
@@ -262,7 +273,7 @@
 						"description": "The item id."
 					},
 					"entity": {
-						"$ref": "#/components/schemas/SynchronisedEntity"
+						"$ref": "#/components/schemas/SynchronisedEntityCore"
 					}
 				},
 				"required": [
@@ -290,6 +301,16 @@
 			"SyncChangeSet": {
 				"type": "object",
 				"properties": {
+					"@context": {
+						"type": "string",
+						"const": "https://schema.twindev.org/synchronised-storage",
+						"description": "The LD Context for the change set."
+					},
+					"type": {
+						"type": "string",
+						"const": "ChangeSet",
+						"description": "The LD Type for the change set."
+					},
 					"id": {
 						"type": "string",
 						"description": "The id of the change set."
@@ -316,12 +337,14 @@
 						"description": "The changes to apply after a snapshot.",
 						"prefixItems": [
 							{
-								"$ref": "#/components/schemas/SyncChange<SynchronisedEntity>"
+								"$ref": "#/components/schemas/SyncChange"
 							}
 						]
 					}
 				},
 				"required": [
+					"@context",
+					"type",
 					"id",
 					"storageKey",
 					"dateCreated",
@@ -346,18 +369,19 @@
 				"additionalProperties": false,
 				"description": "The body of the response."
 			},
-			"SynchronisedEntity": {
+			"SynchronisedEntityCore": {
 				"type": "object",
 				"properties": {
 					"dateModified": {
 						"type": "string",
-						"description": "The date the entry was modified"
+						"description": "The date the entry was modified."
 					}
 				},
 				"required": [
 					"dateModified"
 				],
-				"additionalProperties": false
+				"additionalProperties": false,
+				"description": "The base definition for synchronised entries."
 			}
 		},
 		"securitySchemes": {

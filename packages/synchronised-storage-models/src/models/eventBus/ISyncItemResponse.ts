@@ -5,7 +5,7 @@ import type { ISynchronisedEntity } from "../ISynchronisedEntity";
 /**
  * Response for a sync item request.
  */
-export interface ISyncItemResponse<T extends ISynchronisedEntity> {
+export interface ISyncItemResponse {
 	/**
 	 * The key of the storage for the entities in the batch.
 	 */
@@ -19,5 +19,5 @@ export interface ISyncItemResponse<T extends ISynchronisedEntity> {
 	/**
 	 * The entity in the sync item response, undefined if not found.
 	 */
-	entity?: T;
+	entity?: ISynchronisedEntity;
 }

@@ -9,7 +9,12 @@ export const SynchronisedStorageTypes = {
 	/**
 	 * Represents a synchronised storage request.
 	 */
-	SyncRequest: "SyncRequest"
+	SyncRequest: "SyncRequest",
+
+	/**
+	 * Represents a synchronised storage change set.
+	 */
+	ChangeSet: "ChangeSet"
 } as const;
 
 /**

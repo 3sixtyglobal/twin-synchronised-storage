@@ -1,13 +1,13 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import { entity, property } from "@twin.org/entity";
-import type { ISyncChange, ISynchronisedEntity } from "@twin.org/synchronised-storage-models";
+import type { ISyncChange } from "@twin.org/synchronised-storage-models";
 
 /**
  * Class representing an entry for the sync snapshot.
  */
 @entity()
-export class SyncSnapshotEntry<T extends ISynchronisedEntity = ISynchronisedEntity> {
+export class SyncSnapshotEntry {
 	/**
 	 * The id for the snapshot.
 	 */
@@ -66,5 +66,5 @@ export class SyncSnapshotEntry<T extends ISynchronisedEntity = ISynchronisedEnti
 	 * The changes that were made in this snapshot, if this is a local snapshot.
 	 */
 	@property({ type: "array", itemType: "object", optional: true })
-	public changes?: ISyncChange<T>[];
+	public changes?: ISyncChange[];
 }

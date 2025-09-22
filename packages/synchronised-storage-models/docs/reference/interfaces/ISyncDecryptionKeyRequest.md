@@ -10,6 +10,10 @@ Request for the decryption key for the synchronised storage.
 
 The headers which can be used to determine the response data type.
 
+#### accept?
+
+> `optional` **accept**: `"application/ld+json"` \| `"application/json"`
+
 #### authorization
 
 > **authorization**: `string`

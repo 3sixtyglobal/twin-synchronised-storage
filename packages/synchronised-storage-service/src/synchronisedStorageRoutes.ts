@@ -9,11 +9,13 @@ import type {
 } from "@twin.org/api-models";
 import { ComponentFactory, Guards } from "@twin.org/core";
 import { nameof } from "@twin.org/nameof";
-import type {
-	ISyncChangeSetRequest,
-	ISyncDecryptionKeyRequest,
-	ISyncDecryptionKeyResponse,
-	ISynchronisedStorageComponent
+import {
+	SynchronisedStorageContexts,
+	SynchronisedStorageTypes,
+	type ISyncChangeSetRequest,
+	type ISyncDecryptionKeyRequest,
+	type ISyncDecryptionKeyResponse,
+	type ISynchronisedStorageComponent
 } from "@twin.org/synchronised-storage-models";
 import { HeaderTypes, HttpStatusCode } from "@twin.org/web";
 
@@ -60,6 +62,8 @@ export function generateRestRoutesSynchronisedStorage(
 							[HeaderTypes.Authorization]: "z3Vcuh2BP9ShC.z3Vcuh2BP9ShC.z3Vcuh2BP9ShC"
 						},
 						body: {
+							"@context": SynchronisedStorageContexts.ContextRoot,
+							type: SynchronisedStorageTypes.ChangeSet,
 							id: "0909090909090909090909090909090909090909090909090909090909090909",
 							dateCreated: "2025-05-29T01:00:00.000Z",
 							dateModified: "2025-05-29T01:00:00.000Z",
