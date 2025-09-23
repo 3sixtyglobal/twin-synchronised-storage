@@ -40,12 +40,6 @@ export interface ISynchronisedStorageServiceConstructorOptions {
 	verifiableStorageConnectorType?: string;
 
 	/**
-	 * The identity connector.
-	 * @default identity
-	 */
-	identityConnectorType?: string;
-
-	/**
 	 * The task scheduler component.
 	 * @default task-scheduler
 	 */

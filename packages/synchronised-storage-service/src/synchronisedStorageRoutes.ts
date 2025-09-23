@@ -8,6 +8,11 @@ import type {
 	IUnauthorizedResponse
 } from "@twin.org/api-models";
 import { ComponentFactory, Guards } from "@twin.org/core";
+import {
+	IdentityAuthenticationContexts,
+	IdentityAuthenticationTypes,
+	type IIdentityAuthenticationActionRequest
+} from "@twin.org/identity-authentication";
 import { nameof } from "@twin.org/nameof";
 import {
 	SynchronisedStorageContexts,
@@ -79,6 +84,12 @@ export function generateRestRoutesSynchronisedStorage(
 								}
 							],
 							storageKey: "test-type"
+						},
+						authentication: {
+							"@context": IdentityAuthenticationContexts.ContextRoot,
+							type: IdentityAuthenticationTypes.ActionRequest,
+							requester: "did:node-1",
+							action: "sync-changeset"
 						}
 					}
 				}
@@ -89,8 +100,8 @@ export function generateRestRoutesSynchronisedStorage(
 				type: nameof<INoContentResponse>()
 			}
 		],
-		// Authentication is provided by the proof in the request body.
-		skipAuth: true
+		skipAuth: true,
+		processorFeatures: ["verifiableCredential"]
 	};
 
 	const getDecryptionKeyRoute: IRestRoute<ISyncDecryptionKeyRequest, ISyncDecryptionKeyResponse> = {
@@ -107,8 +118,11 @@ export function generateRestRoutesSynchronisedStorage(
 				{
 					id: "synchronisedStorageSyncGetDecryptionKeyRequestExample",
 					request: {
-						headers: {
-							[HeaderTypes.Authorization]: "z3Vcuh2BP9ShC.z3Vcuh2BP9ShC.z3Vcuh2BP9ShC"
+						authentication: {
+							"@context": IdentityAuthenticationContexts.ContextRoot,
+							type: IdentityAuthenticationTypes.ActionRequest,
+							requester: "did:node-1",
+							action: "get-key"
 						}
 					}
 				}
@@ -133,8 +147,8 @@ export function generateRestRoutesSynchronisedStorage(
 				type: nameof<IUnauthorizedResponse>()
 			}
 		],
-		// Authentication is provided by the proof in the request body.
-		skipAuth: true
+		skipAuth: true,
+		processorFeatures: ["verifiableCredential"]
 	};
 
 	return [syncChangeSetRoute, getDecryptionKeyRoute];
@@ -161,7 +175,11 @@ export async function synchronisedStorageSyncChangeSetRequest(
 	Guards.object<ISyncChangeSetRequest["body"]>(ROUTES_SOURCE, nameof(request.body), request.body);
 
 	const component = ComponentFactory.get<ISynchronisedStorageComponent>(componentName);
-	await component.syncChangeSet(request.body, request.headers[HeaderTypes.Authorization]);
+	await component.syncChangeSet(
+		request.body,
+		httpRequestContext.processorState
+			.verifiableCredentialSubject as IIdentityAuthenticationActionRequest
+	);
 	return {
 		statusCode: HttpStatusCode.noContent
 	};
@@ -187,7 +205,10 @@ export async function synchronisedStorageGetDecryptionKeyRequest(
 	Guards.object<ISyncDecryptionKeyRequest>(ROUTES_SOURCE, nameof(request), request);
 
 	const component = ComponentFactory.get<ISynchronisedStorageComponent>(componentName);
-	const key = await component.getDecryptionKey(request.headers[HeaderTypes.Authorization]);
+	const key = await component.getDecryptionKey(
+		httpRequestContext.processorState
+			.verifiableCredentialSubject as IIdentityAuthenticationActionRequest
+	);
 	return {
 		body: {
 			decryptionKey: key

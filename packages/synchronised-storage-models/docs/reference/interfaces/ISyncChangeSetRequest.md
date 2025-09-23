@@ -4,9 +4,9 @@ Request a trusted node to perform a sync request for a changeset.
 
 ## Properties
 
-### headers
+### headers?
 
-> **headers**: `object`
+> `optional` **headers**: `object`
 
 The headers which can be used to determine the response data type.
 
@@ -14,9 +14,9 @@ The headers which can be used to determine the response data type.
 
 > `optional` **accept**: `"application/ld+json"` \| `"application/json"`
 
-#### authorization
+#### authorization?
 
-> **authorization**: `string`
+> `optional` **authorization**: `string`
 
 ***
 
@@ -25,3 +25,11 @@ The headers which can be used to determine the response data type.
 > **body**: [`ISyncChangeSet`](ISyncChangeSet.md)
 
 The body of the request.
+
+***
+
+### authentication
+
+> **authentication**: `IIdentityAuthenticationActionRequest`
+
+The action request used in the verifiable credential.

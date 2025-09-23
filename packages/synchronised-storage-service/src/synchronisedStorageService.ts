@@ -21,27 +21,21 @@ import {
 } from "@twin.org/entity-storage-models";
 import type { IEventBusComponent } from "@twin.org/event-bus-models";
 import {
-	DocumentHelper,
-	IdentityConnectorFactory,
-	type IIdentityConnector
-} from "@twin.org/identity-models";
+	IdentityAuthenticationContexts,
+	IdentityAuthenticationTypes,
+	type IIdentityAuthenticationActionRequest
+} from "@twin.org/identity-authentication";
 import type { ILoggingComponent } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
-import {
-	type IPolicyEnforcementPointComponent,
-	RightsManagementTokenHelper
-} from "@twin.org/rights-management-models";
+import type { IPolicyEnforcementPointComponent } from "@twin.org/rights-management-models";
 import { ActionType } from "@twin.org/standards-w3c-odrl";
 import {
 	type ISyncChangeSet,
 	type ISynchronisedStorageComponent,
 	type ISyncItemChange,
 	type ISyncRegisterStorageKey,
-	type ISyncRequest,
 	SynchronisedStorageAssetTypes,
-	SynchronisedStorageContexts,
-	SynchronisedStorageTopics,
-	SynchronisedStorageTypes
+	SynchronisedStorageTopics
 } from "@twin.org/synchronised-storage-models";
 import { type IVaultConnector, VaultConnectorFactory, VaultKeyType } from "@twin.org/vault-models";
 import {
@@ -125,12 +119,6 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	 * @internal
 	 */
 	private readonly _verifiableSyncPointerStorageConnector: IVerifiableStorageConnector;
-
-	/**
-	 * The identity connector to use for signing/verifying changesets.
-	 * @internal
-	 */
-	private readonly _identityConnector: IIdentityConnector;
 
 	/**
 	 * The task scheduler component.
@@ -241,10 +229,6 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 			options.blobStorageConnectorType ?? "blob-storage"
 		);
 
-		this._identityConnector = IdentityConnectorFactory.get(
-			options.identityConnectorType ?? "identity"
-		);
-
 		this._taskSchedulerComponent = ComponentFactory.get(
 			options.taskSchedulerComponentType ?? "task-scheduler"
 		);
@@ -268,9 +252,6 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 		}
 
 		this._config = {
-			synchronisedStorageMethodId:
-				options.config.synchronisedStorageMethodId ?? "synchronised-storage-assertion",
-			proofTtlInSeconds: options.config.proofTtlInSeconds ?? 300,
 			entityUpdateIntervalMinutes:
 				options.config.entityUpdateIntervalMinutes ??
 				SynchronisedStorageService._DEFAULT_ENTITY_UPDATE_INTERVAL_MINUTES,
@@ -305,9 +286,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 		this._changeSetHelper = new ChangeSetHelper(
 			this._logging,
 			this._eventBusComponent,
-			this._identityConnector,
-			this._blobStorageHelper,
-			this._config.synchronisedStorageMethodId
+			this._blobStorageHelper
 		);
 
 		this._localSyncStateHelper = new LocalSyncStateHelper(
@@ -367,21 +346,15 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 
 		// If this is not a trusted node we need to request the decryption key from a trusted node
 		if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
-			const request: ISyncRequest = {
-				"@context": SynchronisedStorageContexts.ContextRoot,
-				type: SynchronisedStorageTypes.SyncRequest,
-				nodeIdentity: this._nodeIdentity
+			const actionRequest: IIdentityAuthenticationActionRequest = {
+				"@context": IdentityAuthenticationContexts.ContextRoot,
+				type: IdentityAuthenticationTypes.ActionRequest,
+				action: "get-key",
+				requester: this._nodeIdentity
 			};
 
-			const proofToken = await RightsManagementTokenHelper.createToken(
-				this._identityConnector,
-				DocumentHelper.joinId(this._nodeIdentity, this._config.synchronisedStorageMethodId),
-				request,
-				this._config.proofTtlInSeconds
-			);
-
 			const decryptionKey =
-				await this._trustedSynchronisedStorageComponent.getDecryptionKey(proofToken);
+				await this._trustedSynchronisedStorageComponent.getDecryptionKey(actionRequest);
 
 			// If the key exists remove it and get a new one, in case the key has been rotated
 			const existingKey = await this._vaultConnector.getKey(
@@ -425,35 +398,38 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	/**
 	 * Get the decryption key for the synchronised storage.
 	 * This is used to decrypt the data stored in the synchronised storage.
-	 * @param proofToken The proof token to validate the request.
+	 * @param actionRequest The action request used in the verifiable credential.
 	 * @returns The decryption key.
 	 */
-	public async getDecryptionKey(proofToken: string): Promise<string> {
+	public async getDecryptionKey(
+		actionRequest: IIdentityAuthenticationActionRequest
+	): Promise<string> {
 		if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
 			throw new GeneralError(this.CLASS_NAME, "notTrustedNode");
 		}
 
-		Guards.stringValue(this.CLASS_NAME, nameof(proofToken), proofToken);
-
-		const verifiableCredential = await RightsManagementTokenHelper.verifyToken(
-			this._identityConnector,
-			{},
-			proofToken,
-			this._config.proofTtlInSeconds
+		Guards.objectValue<IIdentityAuthenticationActionRequest>(
+			this.CLASS_NAME,
+			nameof(actionRequest),
+			actionRequest
 		);
 
-		const subject = verifiableCredential.credentialSubject;
-		Guards.objectValue<ISyncRequest>(this.CLASS_NAME, nameof(subject), subject);
+		if (actionRequest.action !== "get-key") {
+			throw new GeneralError(this.CLASS_NAME, "incorrectActionType", {
+				action: actionRequest.action,
+				expecting: "get-key"
+			});
+		}
 
 		const result = await this._policyEnforcementPointComponent?.intercept({
-			assignee: subject.nodeIdentity,
+			assignee: actionRequest.requester,
 			assetType: SynchronisedStorageAssetTypes.DecryptionKey,
 			action: ActionType.Read
 		});
 
 		if (!(Coerce.boolean(result) ?? false)) {
 			throw new UnauthorizedError(this.CLASS_NAME, "decryptionKeyNotAllowed", {
-				nodeIdentity: subject.nodeIdentity
+				nodeIdentity: actionRequest.requester
 			});
 		}
 
@@ -462,7 +438,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 			source: this.CLASS_NAME,
 			message: "decryptionKeyRequest",
 			data: {
-				nodeIdentity: subject.nodeIdentity
+				nodeIdentity: actionRequest.requester
 			}
 		});
 
@@ -477,36 +453,40 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	/**
 	 * Synchronise a set of changes from an untrusted node, assumes this is a trusted node.
 	 * @param syncChangeSet The change set to synchronise.
-	 * @param proofToken The proof token to validate the request.
+	 * @param actionRequest The action request used in the verifiable credential.
 	 * @returns Nothing.
 	 */
-	public async syncChangeSet(syncChangeSet: ISyncChangeSet, proofToken: string): Promise<void> {
+	public async syncChangeSet(
+		syncChangeSet: ISyncChangeSet,
+		actionRequest: IIdentityAuthenticationActionRequest
+	): Promise<void> {
 		if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
 			throw new GeneralError(this.CLASS_NAME, "notTrustedNode");
 		}
 
 		Guards.object<ISyncChangeSet>(this.CLASS_NAME, nameof(syncChangeSet), syncChangeSet);
-		Guards.stringValue(this.CLASS_NAME, nameof(proofToken), proofToken);
-
-		const verifiableCredential = await RightsManagementTokenHelper.verifyToken(
-			this._identityConnector,
-			{ nodeIdentity: syncChangeSet.nodeIdentity },
-			proofToken,
-			this._config.proofTtlInSeconds
+		Guards.objectValue<IIdentityAuthenticationActionRequest>(
+			this.CLASS_NAME,
+			nameof(actionRequest),
+			actionRequest
 		);
 
-		const subject = verifiableCredential.credentialSubject;
-		Guards.objectValue<ISyncRequest>(this.CLASS_NAME, nameof(subject), subject);
+		if (actionRequest.action !== "sync-changeset") {
+			throw new GeneralError(this.CLASS_NAME, "incorrectActionType", {
+				action: actionRequest.action,
+				expecting: "sync-changeset"
+			});
+		}
 
 		const result = await this._policyEnforcementPointComponent?.intercept({
-			assignee: subject.nodeIdentity,
+			assignee: actionRequest.requester,
 			assetType: SynchronisedStorageAssetTypes.ChangeSet,
 			action: ActionType.Read
 		});
 
 		if (!(Coerce.boolean(result) ?? false)) {
 			throw new UnauthorizedError(this.CLASS_NAME, "changeSetNotAllowed", {
-				nodeIdentity: subject.nodeIdentity,
+				nodeIdentity: actionRequest.requester,
 				changeSetStorageId: syncChangeSet.id
 			});
 		}
@@ -517,7 +497,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 			message: "syncChangeSetForRemoteNode",
 			data: {
 				changeSetStorageId: syncChangeSet.id,
-				nodeIdentity: subject.nodeIdentity
+				nodeIdentity: actionRequest.requester
 			}
 		});
 
@@ -674,25 +654,16 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 									}
 								});
 
-								const request: ISyncRequest = {
-									"@context": SynchronisedStorageContexts.ContextRoot,
-									type: SynchronisedStorageTypes.SyncRequest,
-									nodeIdentity: this._nodeIdentity
+								const actionRequest: IIdentityAuthenticationActionRequest = {
+									"@context": IdentityAuthenticationContexts.ContextRoot,
+									type: IdentityAuthenticationTypes.ActionRequest,
+									action: "sync-changeset",
+									requester: this._nodeIdentity
 								};
-
-								const proofToken = await RightsManagementTokenHelper.createToken(
-									this._identityConnector,
-									DocumentHelper.joinId(
-										this._nodeIdentity,
-										this._config.synchronisedStorageMethodId
-									),
-									request,
-									this._config.proofTtlInSeconds
-								);
 
 								await this._trustedSynchronisedStorageComponent.syncChangeSet(
 									syncChangeSet,
-									proofToken
+									actionRequest
 								);
 
 								await this._localSyncStateHelper.removeLocalChangeSnapshot(localChangeSnapshot);

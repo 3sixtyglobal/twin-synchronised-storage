@@ -70,20 +70,6 @@ verifiable-storage
 
 ***
 
-### identityConnectorType?
-
-> `optional` **identityConnectorType**: `string`
-
-The identity connector.
-
-#### Default
-
-```ts
-identity
-```
-
-***
-
 ### taskSchedulerComponentType?
 
 > `optional` **taskSchedulerComponentType**: `string`

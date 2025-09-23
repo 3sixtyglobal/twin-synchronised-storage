@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0.
 import { BaseError, Converter, Is, ObjectHelper, RandomHelper } from "@twin.org/core";
 import type { IEventBusComponent } from "@twin.org/event-bus-models";
-import type { IIdentityConnector } from "@twin.org/identity-models";
 import type { ILoggingComponent } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
 import {
@@ -44,18 +43,6 @@ export class ChangeSetHelper {
 	private readonly _blobStorageHelper: BlobStorageHelper;
 
 	/**
-	 * The identity connector to use for signing/verifying changesets.
-	 * @internal
-	 */
-	private readonly _identityConnector: IIdentityConnector;
-
-	/**
-	 * The id of the identity method to use when signing/verifying changesets.
-	 * @internal
-	 */
-	private readonly _decentralisedStorageMethodId: string;
-
-	/**
 	 * The identity of the node that is performing the update.
 	 * @internal
 	 */
@@ -65,22 +52,16 @@ export class ChangeSetHelper {
 	 * Create a new instance of ChangeSetHelper.
 	 * @param logging The logging component to use for logging.
 	 * @param eventBusComponent The event bus component to use for events.
-	 * @param identityConnector The identity connector to use for signing/verifying changesets.
 	 * @param blobStorageHelper The blob storage component to use for remote sync states.
-	 * @param decentralisedStorageMethodId The id of the identity method to use when signing/verifying changesets.
 	 */
 	constructor(
 		logging: ILoggingComponent | undefined,
 		eventBusComponent: IEventBusComponent,
-		identityConnector: IIdentityConnector,
-		blobStorageHelper: BlobStorageHelper,
-		decentralisedStorageMethodId: string
+		blobStorageHelper: BlobStorageHelper
 	) {
 		this._logging = logging;
 		this._eventBusComponent = eventBusComponent;
-		this._decentralisedStorageMethodId = decentralisedStorageMethodId;
 		this._blobStorageHelper = blobStorageHelper;
-		this._identityConnector = identityConnector;
 	}
 
 	/**

@@ -35,6 +35,7 @@
 		"@twin.org/api-models": "next",
 		"@twin.org/core": "next",
 		"@twin.org/entity": "next",
+		"@twin.org/identity-authentication": "next",
 		"@twin.org/nameof": "next",
 		"@twin.org/standards-w3c-did": "next",
 		"@twin.org/synchronised-storage-models": "0.0.1-next.14",

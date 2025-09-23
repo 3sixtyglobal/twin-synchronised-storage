@@ -3,6 +3,7 @@
 import { BaseRestClient } from "@twin.org/api-core";
 import type { IBaseRestClientConfig, INoContentResponse } from "@twin.org/api-models";
 import { Guards } from "@twin.org/core";
+import type { IIdentityAuthenticationActionRequest } from "@twin.org/identity-authentication";
 import { nameof } from "@twin.org/nameof";
 import type {
 	ISyncChangeSet,
@@ -11,7 +12,6 @@ import type {
 	ISyncDecryptionKeyResponse,
 	ISynchronisedStorageComponent
 } from "@twin.org/synchronised-storage-models";
-import { HeaderHelper, HeaderTypes } from "@twin.org/web";
 
 /**
  * Client for performing synchronised storage through to REST endpoints.
@@ -36,25 +36,36 @@ export class SynchronisedStorageClient
 	 * @param config The configuration for the client.
 	 */
 	constructor(config: IBaseRestClientConfig) {
-		super(SynchronisedStorageClient._CLASS_NAME, config, "synchronised-storage");
+		super(
+			SynchronisedStorageClient._CLASS_NAME,
+			{
+				...config,
+				authenticationGeneratorType: config.authenticationGeneratorType ?? "verifiable-credential"
+			},
+			"synchronised-storage"
+		);
 	}
 
 	/**
 	 * Get the decryption key for the synchronised storage.
 	 * This is used to decrypt the data stored in the synchronised storage.
-	 * @param proofToken The proof token to use to validate the proof.
+	 * @param actionRequest The action request used in the verifiable credential.
 	 * @returns The decryption key.
 	 */
-	public async getDecryptionKey(proofToken: string): Promise<string> {
-		Guards.stringValue(this.CLASS_NAME, nameof(proofToken), proofToken);
+	public async getDecryptionKey(
+		actionRequest: IIdentityAuthenticationActionRequest
+	): Promise<string> {
+		Guards.object<IIdentityAuthenticationActionRequest>(
+			this.CLASS_NAME,
+			nameof(actionRequest),
+			actionRequest
+		);
 
 		const response = await this.fetch<ISyncDecryptionKeyRequest, ISyncDecryptionKeyResponse>(
 			"/decryption-key",
 			"GET",
 			{
-				headers: {
-					[HeaderTypes.Authorization]: HeaderHelper.createBearer(proofToken)
-				}
+				authentication: actionRequest
 			}
 		);
 
@@ -64,17 +75,18 @@ export class SynchronisedStorageClient
 	/**
 	 * Synchronise a set of changes from an untrusted node, assumes this is a trusted node.
 	 * @param syncChangeSet The change set to synchronise.
-	 * @param proofToken The proof token to use to verify the request.
+	 * @param actionRequest The action request used in the verifiable credential.
 	 * @returns Nothing.
 	 */
-	public async syncChangeSet(syncChangeSet: ISyncChangeSet, proofToken: string): Promise<void> {
+	public async syncChangeSet(
+		syncChangeSet: ISyncChangeSet,
+		actionRequest: IIdentityAuthenticationActionRequest
+	): Promise<void> {
 		Guards.object<ISyncChangeSet>(this.CLASS_NAME, nameof(syncChangeSet), syncChangeSet);
 
 		await this.fetch<ISyncChangeSetRequest, INoContentResponse>("/sync-changeset", "POST", {
-			headers: {
-				[HeaderTypes.Authorization]: HeaderHelper.createBearer(proofToken)
-			},
-			body: syncChangeSet
+			body: syncChangeSet,
+			authentication: actionRequest
 		});
 	}
 }

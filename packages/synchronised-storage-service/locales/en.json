@@ -51,7 +51,8 @@
 			"createChangeSetRespondingItem": "Responding to change set request for key \"{storageKey}\", item with id \"{id}\"",
 			"sendingChangeSetToTrustedNode": "Sending change set with id \"{changeSetStorageId}\" to trusted node for key \"{storageKey}\"",
 			"decryptionKeyRequest": "Decryption key requested by node identity \"{nodeIdentity}\"",
-			"syncChangeSetForRemoteNode": "Synchronising change set with id \"{changeSetStorageId}\" for node identity \"{nodeIdentity}\""
+			"syncChangeSetForRemoteNode": "Synchronising change set with id \"{changeSetStorageId}\" for node identity \"{nodeIdentity}\"",
+			"incorrectActionType": "Incorrect action in credential \"{action}\", expecting \"{expecting}\""
 		},
 		"blobStorageHelper": {
 			"loadBlob": "Loading blob with id \"{blobId}\"",

@@ -6,18 +6,6 @@
  */
 export interface ISynchronisedStorageServiceConfig {
 	/**
-	 * The id of the identity method to use when signing/verifying requests and changesets.
-	 * @default synchronised-storage-assertion
-	 */
-	synchronisedStorageMethodId?: string;
-
-	/**
-	 * The time-to-live (TTL) for proof in seconds.
-	 * @default 300 (5 minutes)
-	 */
-	proofTtlInSeconds?: number;
-
-	/**
 	 * How often to check for entity updates in minutes.
 	 * @default 5
 	 */

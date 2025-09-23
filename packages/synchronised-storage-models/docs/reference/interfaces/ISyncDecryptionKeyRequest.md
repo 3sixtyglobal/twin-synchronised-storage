@@ -4,9 +4,9 @@ Request for the decryption key for the synchronised storage.
 
 ## Properties
 
-### headers
+### headers?
 
-> **headers**: `object`
+> `optional` **headers**: `object`
 
 The headers which can be used to determine the response data type.
 
@@ -14,6 +14,14 @@ The headers which can be used to determine the response data type.
 
 > `optional` **accept**: `"application/ld+json"` \| `"application/json"`
 
-#### authorization
+#### authorization?
 
-> **authorization**: `string`
+> `optional` **authorization**: `string`
+
+***
+
+### authentication
+
+> **authentication**: `IIdentityAuthenticationActionRequest`
+
+The action request used in the verifiable credential.
