@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.1-next.15](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-rest-client-v0.0.1-next.14...synchronised-storage-rest-client-v0.0.1-next.15) (2025-09-23)
+
+
+### Features
+
+* update to in built vc auth mechanism ([411a371](https://github.com/twinfoundation/synchronised-storage/commit/411a3716830195ebf54755a1633b05d5c3f96754))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.1-next.14 to 0.0.1-next.15
+
 ## [0.0.1-next.14](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-rest-client-v0.0.1-next.13...synchronised-storage-rest-client-v0.0.1-next.14) (2025-09-22)
 
 

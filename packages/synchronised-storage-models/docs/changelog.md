@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.1-next.15](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-models-v0.0.1-next.14...synchronised-storage-models-v0.0.1-next.15) (2025-09-23)
+
+
+### Features
+
+* add rights management integration ([56fff6b](https://github.com/twinfoundation/synchronised-storage/commit/56fff6b4074f7ffaa40920e0c1e9fc98ca669111))
+* update to in built vc auth mechanism ([411a371](https://github.com/twinfoundation/synchronised-storage/commit/411a3716830195ebf54755a1633b05d5c3f96754))
+
 ## [0.0.1-next.14](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-models-v0.0.1-next.13...synchronised-storage-models-v0.0.1-next.14) (2025-09-22)
 
 
