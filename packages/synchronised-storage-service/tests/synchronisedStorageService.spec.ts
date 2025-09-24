@@ -300,7 +300,7 @@ describe("synchronisedStorageService", () => {
 			"test-node-identity",
 			didDocument.id,
 			"assertionMethod",
-			"synchronised-storage-assertion"
+			"node-authentication-assertion"
 		);
 
 		const didDocumentUntrusted = await identityConnector.createDocument(
@@ -312,7 +312,7 @@ describe("synchronisedStorageService", () => {
 			"test-node-identity-untrusted",
 			didDocumentUntrusted.id,
 			"assertionMethod",
-			"synchronised-storage-assertion"
+			"node-authentication-assertion"
 		);
 	});
 
