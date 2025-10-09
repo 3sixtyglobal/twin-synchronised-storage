@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.1-next.16](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-models-v0.0.1-next.15...synchronised-storage-models-v0.0.1-next.16) (2025-10-09)
+
+
+### Features
+
+* add validate-locales ([e3d7b98](https://github.com/twinfoundation/synchronised-storage/commit/e3d7b98839e9ca624855717c8957d572c4e09abf))
+
 ## [0.0.1-next.15](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-models-v0.0.1-next.14...synchronised-storage-models-v0.0.1-next.15) (2025-09-23)
 
 

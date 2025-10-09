@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.0.1-next.16](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.1-next.15...synchronised-storage-service-v0.0.1-next.16) (2025-10-09)
+
+
+### Features
+
+* add validate-locales ([e3d7b98](https://github.com/twinfoundation/synchronised-storage/commit/e3d7b98839e9ca624855717c8957d572c4e09abf))
+* update assertion method naming ([fb0118c](https://github.com/twinfoundation/synchronised-storage/commit/fb0118c494f0f520e1850a4e77b54e91235ce9a9))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.1-next.15 to 0.0.1-next.16
+
 ## [0.0.1-next.15](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.1-next.14...synchronised-storage-service-v0.0.1-next.15) (2025-09-23)
 
 

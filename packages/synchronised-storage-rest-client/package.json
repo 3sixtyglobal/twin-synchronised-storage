@@ -1,6 +1,6 @@
 {
 	"name": "@twin.org/synchronised-storage-rest-client",
-	"version": "0.0.1-next.15",
+	"version": "0.0.1-next.16",
 	"description": "Synchronised storage contract implementation which can connect to REST endpoints",
 	"repository": {
 		"type": "git",
@@ -38,7 +38,7 @@
 		"@twin.org/identity-authentication": "next",
 		"@twin.org/nameof": "next",
 		"@twin.org/standards-w3c-did": "next",
-		"@twin.org/synchronised-storage-models": "0.0.1-next.15",
+		"@twin.org/synchronised-storage-models": "0.0.1-next.16",
 		"@twin.org/web": "next"
 	},
 	"devDependencies": {
