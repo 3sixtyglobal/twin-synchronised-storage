@@ -22,7 +22,7 @@ export class ChangeSetHelper {
 	/**
 	 * Runtime name for the class.
 	 */
-	public readonly CLASS_NAME: string = nameof<ChangeSetHelper>();
+	public static readonly CLASS_NAME: string = nameof<ChangeSetHelper>();
 
 	/**
 	 * The logging component to use for logging.
@@ -80,7 +80,7 @@ export class ChangeSetHelper {
 	public async getChangeset(changeSetStorageId: string): Promise<ISyncChangeSet | undefined> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: ChangeSetHelper.CLASS_NAME,
 			message: "getChangeSet",
 			data: {
 				changeSetStorageId
@@ -95,7 +95,7 @@ export class ChangeSetHelper {
 		} catch (error) {
 			await this._logging?.log({
 				level: "warn",
-				source: this.CLASS_NAME,
+				source: ChangeSetHelper.CLASS_NAME,
 				message: "getChangeSetError",
 				data: {
 					changeSetStorageId
@@ -106,7 +106,7 @@ export class ChangeSetHelper {
 
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: ChangeSetHelper.CLASS_NAME,
 			message: "getChangeSetEmpty",
 			data: {
 				changeSetStorageId
@@ -143,7 +143,7 @@ export class ChangeSetHelper {
 			for (const change of syncChangeset.changes) {
 				await this._logging?.log({
 					level: "info",
-					source: this.CLASS_NAME,
+					source: ChangeSetHelper.CLASS_NAME,
 					message: "changeSetApplyingChange",
 					data: {
 						operation: change.operation,
@@ -197,7 +197,7 @@ export class ChangeSetHelper {
 	public async storeChangeSet(syncChangeSet: ISyncChangeSet): Promise<string> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: ChangeSetHelper.CLASS_NAME,
 			message: "changeSetStoring",
 			data: {
 				id: syncChangeSet.id
@@ -222,7 +222,7 @@ export class ChangeSetHelper {
 		if (Is.stringValue(this._nodeIdentity)) {
 			await this._logging?.log({
 				level: "info",
-				source: this.CLASS_NAME,
+				source: ChangeSetHelper.CLASS_NAME,
 				message: "copyChangeSet",
 				data: {
 					changeSetStorageId: syncChangeSet.id
@@ -252,7 +252,7 @@ export class ChangeSetHelper {
 		// but keep any entries from the local node, as they might have been updated
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: ChangeSetHelper.CLASS_NAME,
 			message: "storageReset",
 			data: {
 				storageKey

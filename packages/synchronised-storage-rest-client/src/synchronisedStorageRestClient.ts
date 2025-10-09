@@ -16,28 +16,22 @@ import type {
 /**
  * Client for performing synchronised storage through to REST endpoints.
  */
-export class SynchronisedStorageClient
+export class SynchronisedStorageRestClient
 	extends BaseRestClient
 	implements ISynchronisedStorageComponent
 {
 	/**
 	 * Runtime name for the class.
-	 * @internal
 	 */
-	private static readonly _CLASS_NAME: string = nameof<SynchronisedStorageClient>();
+	public static readonly CLASS_NAME: string = nameof<SynchronisedStorageRestClient>();
 
 	/**
-	 * Runtime name for the class.
-	 */
-	public readonly CLASS_NAME: string = SynchronisedStorageClient._CLASS_NAME;
-
-	/**
-	 * Create a new instance of SynchronisedStorageClient.
+	 * Create a new instance of SynchronisedStorageRestClient.
 	 * @param config The configuration for the client.
 	 */
 	constructor(config: IBaseRestClientConfig) {
 		super(
-			SynchronisedStorageClient._CLASS_NAME,
+			SynchronisedStorageRestClient.CLASS_NAME,
 			{
 				...config,
 				authenticationGeneratorType: config.authenticationGeneratorType ?? "verifiable-credential"
@@ -56,7 +50,7 @@ export class SynchronisedStorageClient
 		actionRequest: IIdentityAuthenticationActionRequest
 	): Promise<string> {
 		Guards.object<IIdentityAuthenticationActionRequest>(
-			this.CLASS_NAME,
+			SynchronisedStorageRestClient.CLASS_NAME,
 			nameof(actionRequest),
 			actionRequest
 		);
@@ -82,7 +76,11 @@ export class SynchronisedStorageClient
 		syncChangeSet: ISyncChangeSet,
 		actionRequest: IIdentityAuthenticationActionRequest
 	): Promise<void> {
-		Guards.object<ISyncChangeSet>(this.CLASS_NAME, nameof(syncChangeSet), syncChangeSet);
+		Guards.object<ISyncChangeSet>(
+			SynchronisedStorageRestClient.CLASS_NAME,
+			nameof(syncChangeSet),
+			syncChangeSet
+		);
 
 		await this.fetch<ISyncChangeSetRequest, INoContentResponse>("/sync-changeset", "POST", {
 			body: syncChangeSet,

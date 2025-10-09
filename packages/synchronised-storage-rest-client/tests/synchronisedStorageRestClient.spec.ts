@@ -4,16 +4,16 @@ import {
 	AuthenticationGeneratorFactory,
 	type IAuthenticationGenerator
 } from "@twin.org/api-models";
-import { SynchronisedStorageClient } from "../src/synchronisedStorageClient";
+import { SynchronisedStorageRestClient } from "../src/synchronisedStorageRestClient";
 
-describe("SynchronisedStorageClient", () => {
+describe("SynchronisedStorageRestClient", () => {
 	test("Can create an instance", async () => {
 		AuthenticationGeneratorFactory.register(
 			"verifiable-credential",
 			() => ({}) as IAuthenticationGenerator
 		);
 
-		const client = new SynchronisedStorageClient({ endpoint: "http://localhost:8080" });
+		const client = new SynchronisedStorageRestClient({ endpoint: "http://localhost:8080" });
 		expect(client).toBeDefined();
 	});
 });

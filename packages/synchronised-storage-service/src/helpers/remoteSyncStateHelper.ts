@@ -39,7 +39,7 @@ export class RemoteSyncStateHelper {
 	/**
 	 * Runtime name for the class.
 	 */
-	public readonly CLASS_NAME: string = nameof<RemoteSyncStateHelper>();
+	public static readonly CLASS_NAME: string = nameof<RemoteSyncStateHelper>();
 
 	/**
 	 * The logging component to use for logging.
@@ -115,7 +115,7 @@ export class RemoteSyncStateHelper {
 	private readonly _maxConsolidations: number;
 
 	/**
-	 * Create a new instance of DecentralisedEntityStorageConnector.
+	 * Create a new instance of RemoteSyncStateHelper.
 	 * @param loggingComponent The logging component to use for logging.
 	 * @param eventBusComponent The event bus component to use for events.
 	 * @param verifiableSyncPointerStorageConnector The verifiable storage connector to use for storing sync pointers.
@@ -189,7 +189,7 @@ export class RemoteSyncStateHelper {
 	): Promise<void> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: RemoteSyncStateHelper.CLASS_NAME,
 			message: "buildingChangeSet",
 			data: {
 				storageKey,
@@ -217,7 +217,7 @@ export class RemoteSyncStateHelper {
 				// Create a request for each change to populate the full details
 				await this._logging?.log({
 					level: "info",
-					source: this.CLASS_NAME,
+					source: RemoteSyncStateHelper.CLASS_NAME,
 					message: "createChangeSetRequestingItem",
 					data: {
 						storageKey,
@@ -247,7 +247,7 @@ export class RemoteSyncStateHelper {
 	): Promise<void> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: RemoteSyncStateHelper.CLASS_NAME,
 			message: "finalisingSyncChanges",
 			data: {
 				storageKey
@@ -291,7 +291,7 @@ export class RemoteSyncStateHelper {
 			} catch (err) {
 				await this._logging?.log({
 					level: "error",
-					source: this.CLASS_NAME,
+					source: RemoteSyncStateHelper.CLASS_NAME,
 					message: "finalisingSyncChangesFailed",
 					data: {
 						storageKey
@@ -308,7 +308,7 @@ export class RemoteSyncStateHelper {
 	/**
 	 * Add a new changeset into the sync state.
 	 * @param storageKey The storage key of the change set to add.
-	 * @param changeSetStorageId The id of the change set to add the the current state
+	 * @param changeSetStorageId The id of the change set to add the current state
 	 * @returns Nothing.
 	 */
 	public async addChangeSetToSyncState(
@@ -317,7 +317,7 @@ export class RemoteSyncStateHelper {
 	): Promise<void> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: RemoteSyncStateHelper.CLASS_NAME,
 			message: "addChangeSetToSyncState",
 			data: {
 				storageKey,
@@ -385,7 +385,7 @@ export class RemoteSyncStateHelper {
 	public async consolidationStart(storageKey: string, batchSize: number): Promise<void> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: RemoteSyncStateHelper.CLASS_NAME,
 			message: "consolidationStarting"
 		});
 
@@ -405,7 +405,7 @@ export class RemoteSyncStateHelper {
 			try {
 				await this._logging?.log({
 					level: "info",
-					source: this.CLASS_NAME,
+					source: RemoteSyncStateHelper.CLASS_NAME,
 					message: "verifiableSyncPointerStoreRetrieving",
 					data: {
 						key: this._synchronisedStorageKey
@@ -419,7 +419,7 @@ export class RemoteSyncStateHelper {
 					const syncPointer = ObjectHelper.fromBytes<ISyncPointerStore>(syncPointerStore.data);
 					await this._logging?.log({
 						level: "info",
-						source: this.CLASS_NAME,
+						source: RemoteSyncStateHelper.CLASS_NAME,
 						message: "verifiableSyncPointerStoreRetrieved",
 						data: {
 							key: this._synchronisedStorageKey
@@ -435,7 +435,7 @@ export class RemoteSyncStateHelper {
 
 			await this._logging?.log({
 				level: "info",
-				source: this.CLASS_NAME,
+				source: RemoteSyncStateHelper.CLASS_NAME,
 				message: "verifiableSyncPointerStoreNotFound",
 				data: {
 					key: this._synchronisedStorageKey
@@ -459,7 +459,7 @@ export class RemoteSyncStateHelper {
 		if (Is.stringValue(this._nodeIdentity) && Is.stringValue(this._synchronisedStorageKey)) {
 			await this._logging?.log({
 				level: "info",
-				source: this.CLASS_NAME,
+				source: RemoteSyncStateHelper.CLASS_NAME,
 				message: "verifiableSyncPointerStoreStoring",
 				data: {
 					key: this._synchronisedStorageKey
@@ -483,7 +483,7 @@ export class RemoteSyncStateHelper {
 	public async storeRemoteSyncState(syncState: ISyncState): Promise<string> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: RemoteSyncStateHelper.CLASS_NAME,
 			message: "syncStateStoring",
 			data: {
 				snapshotCount: syncState.snapshots.length
@@ -538,7 +538,7 @@ export class RemoteSyncStateHelper {
 		try {
 			await this._logging?.log({
 				level: "info",
-				source: this.CLASS_NAME,
+				source: RemoteSyncStateHelper.CLASS_NAME,
 				message: "syncStateRetrieving",
 				data: {
 					syncPointerId
@@ -549,7 +549,7 @@ export class RemoteSyncStateHelper {
 			if (Is.object(syncState)) {
 				await this._logging?.log({
 					level: "info",
-					source: this.CLASS_NAME,
+					source: RemoteSyncStateHelper.CLASS_NAME,
 					message: "syncStateRetrieved",
 					data: {
 						syncPointerId,
@@ -561,7 +561,7 @@ export class RemoteSyncStateHelper {
 		} catch (error) {
 			await this._logging?.log({
 				level: "warn",
-				source: this.CLASS_NAME,
+				source: RemoteSyncStateHelper.CLASS_NAME,
 				message: "getSyncStateError",
 				data: {
 					syncPointerId
@@ -572,7 +572,7 @@ export class RemoteSyncStateHelper {
 
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: RemoteSyncStateHelper.CLASS_NAME,
 			message: "syncStateNotFound",
 			data: {
 				syncPointerId
@@ -662,7 +662,7 @@ export class RemoteSyncStateHelper {
 
 				await this._logging?.log({
 					level: "info",
-					source: this.CLASS_NAME,
+					source: RemoteSyncStateHelper.CLASS_NAME,
 					message: "consolidationCompleted"
 				});
 			}
@@ -676,7 +676,7 @@ export class RemoteSyncStateHelper {
 	private async handleLocalItemResponse(response: ISyncItemResponse): Promise<void> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: RemoteSyncStateHelper.CLASS_NAME,
 			message: "createChangeSetRespondingItem",
 			data: {
 				storageKey: response.storageKey,

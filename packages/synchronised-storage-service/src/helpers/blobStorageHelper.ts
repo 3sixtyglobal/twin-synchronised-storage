@@ -20,7 +20,7 @@ export class BlobStorageHelper {
 	/**
 	 * Runtime name for the class.
 	 */
-	public readonly CLASS_NAME: string = nameof<BlobStorageHelper>();
+	public static readonly CLASS_NAME: string = nameof<BlobStorageHelper>();
 
 	/**
 	 * The logging component to use for logging.
@@ -82,7 +82,7 @@ export class BlobStorageHelper {
 	public async loadBlob<T>(blobId: string): Promise<T | undefined> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: BlobStorageHelper.CLASS_NAME,
 			message: "loadBlob",
 			data: {
 				blobId
@@ -102,7 +102,7 @@ export class BlobStorageHelper {
 				const decompressedBlob = await Compression.decompress(compressedBlob, CompressionType.Gzip);
 				await this._logging?.log({
 					level: "info",
-					source: this.CLASS_NAME,
+					source: BlobStorageHelper.CLASS_NAME,
 					message: "loadedBlob",
 					data: {
 						blobId
@@ -114,7 +114,7 @@ export class BlobStorageHelper {
 		} catch (error) {
 			await this._logging?.log({
 				level: "error",
-				source: this.CLASS_NAME,
+				source: BlobStorageHelper.CLASS_NAME,
 				message: "loadBlobFailed",
 				data: {
 					blobId
@@ -125,7 +125,7 @@ export class BlobStorageHelper {
 
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: BlobStorageHelper.CLASS_NAME,
 			message: "loadBlobEmpty",
 			data: {
 				blobId
@@ -141,12 +141,12 @@ export class BlobStorageHelper {
 	public async saveBlob<T>(blob: T): Promise<string> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: BlobStorageHelper.CLASS_NAME,
 			message: "saveBlob"
 		});
 
 		if (!this._isTrustedNode) {
-			throw new GeneralError(this.CLASS_NAME, "notTrustedNode");
+			throw new GeneralError(BlobStorageHelper.CLASS_NAME, "notTrustedNode");
 		}
 
 		const compressedBlob = await Compression.compress(
@@ -165,7 +165,7 @@ export class BlobStorageHelper {
 
 			await this._logging?.log({
 				level: "info",
-				source: this.CLASS_NAME,
+				source: BlobStorageHelper.CLASS_NAME,
 				message: "savedBlob",
 				data: {
 					blobId
@@ -175,7 +175,7 @@ export class BlobStorageHelper {
 		} catch (error) {
 			await this._logging?.log({
 				level: "error",
-				source: this.CLASS_NAME,
+				source: BlobStorageHelper.CLASS_NAME,
 				message: "saveBlobFailed",
 				error: BaseError.fromError(error)
 			});
@@ -191,7 +191,7 @@ export class BlobStorageHelper {
 	public async removeBlob(blobId: string): Promise<void> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: BlobStorageHelper.CLASS_NAME,
 			message: "removeBlob",
 			data: {
 				blobId
@@ -203,7 +203,7 @@ export class BlobStorageHelper {
 
 			await this._logging?.log({
 				level: "info",
-				source: this.CLASS_NAME,
+				source: BlobStorageHelper.CLASS_NAME,
 				message: "removedBlob",
 				data: {
 					blobId
@@ -212,7 +212,7 @@ export class BlobStorageHelper {
 		} catch (error) {
 			await this._logging?.log({
 				level: "error",
-				source: this.CLASS_NAME,
+				source: BlobStorageHelper.CLASS_NAME,
 				message: "removeBlobFailed",
 				data: {
 					blobId
@@ -223,7 +223,7 @@ export class BlobStorageHelper {
 
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: BlobStorageHelper.CLASS_NAME,
 			message: "removeBlobEmpty",
 			data: {
 				blobId

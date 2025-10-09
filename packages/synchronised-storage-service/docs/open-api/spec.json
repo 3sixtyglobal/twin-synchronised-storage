@@ -46,7 +46,7 @@
 							"type": "string"
 						},
 						"style": "simple",
-						"example": "z3Vcuh2BP9ShC.z3Vcuh2BP9ShC.z3Vcuh2BP9ShC"
+						"example": "z3V32BP9ShC...z3V32BP9ShC"
 					}
 				],
 				"requestBody": {
@@ -97,7 +97,7 @@
 									"exampleResponse": {
 										"value": {
 											"name": "GeneralError",
-											"message": "component.error",
+											"message": "errorMessage",
 											"properties": {
 												"foo": "bar"
 											}
@@ -118,7 +118,7 @@
 									"exampleResponse": {
 										"value": {
 											"name": "InternalServerError",
-											"message": "component.error"
+											"message": "errorMessage"
 										}
 									}
 								}
@@ -175,7 +175,7 @@
 									"exampleResponse": {
 										"value": {
 											"name": "GeneralError",
-											"message": "component.error",
+											"message": "errorMessage",
 											"properties": {
 												"foo": "bar"
 											}
@@ -196,7 +196,7 @@
 									"exampleResponse": {
 										"value": {
 											"name": "UnauthorizedError",
-											"message": "component.error"
+											"message": "errorMessage"
 										}
 									}
 								}
@@ -214,7 +214,7 @@
 									"exampleResponse": {
 										"value": {
 											"name": "InternalServerError",
-											"message": "component.error"
+											"message": "errorMessage"
 										}
 									}
 								}

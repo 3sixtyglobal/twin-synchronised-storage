@@ -64,7 +64,7 @@ export function generateRestRoutesSynchronisedStorage(
 					id: "synchronisedStorageSyncChangeSetRequestExample",
 					request: {
 						headers: {
-							[HeaderTypes.Authorization]: "z3Vcuh2BP9ShC.z3Vcuh2BP9ShC.z3Vcuh2BP9ShC"
+							[HeaderTypes.Authorization]: "z3V32BP9ShC...z3V32BP9ShC"
 						},
 						body: {
 							"@context": SynchronisedStorageContexts.ContextRoot,

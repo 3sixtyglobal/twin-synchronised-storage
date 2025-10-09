@@ -1,4 +1,4 @@
-# Class: SynchronisedStorageClient
+# Class: SynchronisedStorageRestClient
 
 Client for performing synchronised storage through to REST endpoints.
 
@@ -14,9 +14,9 @@ Client for performing synchronised storage through to REST endpoints.
 
 ### Constructor
 
-> **new SynchronisedStorageClient**(`config`): `SynchronisedStorageClient`
+> **new SynchronisedStorageRestClient**(`config`): `SynchronisedStorageRestClient`
 
-Create a new instance of SynchronisedStorageClient.
+Create a new instance of SynchronisedStorageRestClient.
 
 #### Parameters
 
@@ -28,7 +28,7 @@ The configuration for the client.
 
 #### Returns
 
-`SynchronisedStorageClient`
+`SynchronisedStorageRestClient`
 
 #### Overrides
 
@@ -38,13 +38,9 @@ The configuration for the client.
 
 ### CLASS\_NAME
 
-> `readonly` **CLASS\_NAME**: `string` = `SynchronisedStorageClient._CLASS_NAME`
+> `readonly` `static` **CLASS\_NAME**: `string`
 
 Runtime name for the class.
-
-#### Implementation of
-
-`ISynchronisedStorageComponent.CLASS_NAME`
 
 ## Methods
 

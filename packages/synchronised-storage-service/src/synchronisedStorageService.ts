@@ -56,6 +56,11 @@ import type { ISynchronisedStorageServiceConstructorOptions } from "./models/ISy
  */
 export class SynchronisedStorageService implements ISynchronisedStorageComponent {
 	/**
+	 * Runtime name for the class.
+	 */
+	public static readonly CLASS_NAME: string = nameof<SynchronisedStorageService>();
+
+	/**
 	 * The default interval to check for entity updates.
 	 * @internal
 	 */
@@ -78,11 +83,6 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	 * @internal
 	 */
 	private static readonly _DEFAULT_MAX_CONSOLIDATIONS: number = 5;
-
-	/**
-	 * Runtime name for the class.
-	 */
-	public readonly CLASS_NAME: string = nameof<SynchronisedStorageService>();
 
 	/**
 	 * The logging component to use for logging.
@@ -198,17 +198,17 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	 */
 	constructor(options: ISynchronisedStorageServiceConstructorOptions) {
 		Guards.object<ISynchronisedStorageServiceConstructorOptions>(
-			this.CLASS_NAME,
+			SynchronisedStorageService.CLASS_NAME,
 			nameof(options),
 			options
 		);
 		Guards.object<ISynchronisedStorageServiceConfig>(
-			this.CLASS_NAME,
+			SynchronisedStorageService.CLASS_NAME,
 			nameof(options.config),
 			options.config
 		);
 		Guards.stringValue(
-			this.CLASS_NAME,
+			SynchronisedStorageService.CLASS_NAME,
 			nameof(options.config.verifiableStorageKeyId),
 			options.config.verifiableStorageKeyId
 		);
@@ -273,7 +273,11 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 				options.config.verifiableStorageKeyId as keyof typeof verifiableStorageKeys
 			] ?? options.config.verifiableStorageKeyId;
 
-		Guards.stringValue(this.CLASS_NAME, "synchronisedStorageKey", this._synchronisedStorageKey);
+		Guards.stringValue(
+			SynchronisedStorageService.CLASS_NAME,
+			"synchronisedStorageKey",
+			this._synchronisedStorageKey
+		);
 
 		this._blobStorageHelper = new BlobStorageHelper(
 			this._logging,
@@ -405,17 +409,17 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 		actionRequest: IIdentityAuthenticationActionRequest
 	): Promise<string> {
 		if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
-			throw new GeneralError(this.CLASS_NAME, "notTrustedNode");
+			throw new GeneralError(SynchronisedStorageService.CLASS_NAME, "notTrustedNode");
 		}
 
 		Guards.objectValue<IIdentityAuthenticationActionRequest>(
-			this.CLASS_NAME,
+			SynchronisedStorageService.CLASS_NAME,
 			nameof(actionRequest),
 			actionRequest
 		);
 
 		if (actionRequest.action !== "get-key") {
-			throw new GeneralError(this.CLASS_NAME, "incorrectActionType", {
+			throw new GeneralError(SynchronisedStorageService.CLASS_NAME, "incorrectActionType", {
 				action: actionRequest.action,
 				expecting: "get-key"
 			});
@@ -428,14 +432,18 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 		});
 
 		if (!(Coerce.boolean(result) ?? false)) {
-			throw new UnauthorizedError(this.CLASS_NAME, "decryptionKeyNotAllowed", {
-				nodeIdentity: actionRequest.requester
-			});
+			throw new UnauthorizedError(
+				SynchronisedStorageService.CLASS_NAME,
+				"decryptionKeyNotAllowed",
+				{
+					nodeIdentity: actionRequest.requester
+				}
+			);
 		}
 
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: SynchronisedStorageService.CLASS_NAME,
 			message: "decryptionKeyRequest",
 			data: {
 				nodeIdentity: actionRequest.requester
@@ -444,7 +452,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 
 		const key = await this._vaultConnector.getKey(this._config.blobStorageEncryptionKeyId);
 		if (Is.undefined(key.privateKey)) {
-			throw new UnauthorizedError(this.CLASS_NAME, "decryptionKeyNotFound");
+			throw new UnauthorizedError(SynchronisedStorageService.CLASS_NAME, "decryptionKeyNotFound");
 		}
 
 		return Converter.bytesToBase64(key.privateKey);
@@ -461,18 +469,22 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 		actionRequest: IIdentityAuthenticationActionRequest
 	): Promise<void> {
 		if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
-			throw new GeneralError(this.CLASS_NAME, "notTrustedNode");
+			throw new GeneralError(SynchronisedStorageService.CLASS_NAME, "notTrustedNode");
 		}
 
-		Guards.object<ISyncChangeSet>(this.CLASS_NAME, nameof(syncChangeSet), syncChangeSet);
+		Guards.object<ISyncChangeSet>(
+			SynchronisedStorageService.CLASS_NAME,
+			nameof(syncChangeSet),
+			syncChangeSet
+		);
 		Guards.objectValue<IIdentityAuthenticationActionRequest>(
-			this.CLASS_NAME,
+			SynchronisedStorageService.CLASS_NAME,
 			nameof(actionRequest),
 			actionRequest
 		);
 
 		if (actionRequest.action !== "sync-changeset") {
-			throw new GeneralError(this.CLASS_NAME, "incorrectActionType", {
+			throw new GeneralError(SynchronisedStorageService.CLASS_NAME, "incorrectActionType", {
 				action: actionRequest.action,
 				expecting: "sync-changeset"
 			});
@@ -485,7 +497,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 		});
 
 		if (!(Coerce.boolean(result) ?? false)) {
-			throw new UnauthorizedError(this.CLASS_NAME, "changeSetNotAllowed", {
+			throw new UnauthorizedError(SynchronisedStorageService.CLASS_NAME, "changeSetNotAllowed", {
 				nodeIdentity: actionRequest.requester,
 				changeSetStorageId: syncChangeSet.id
 			});
@@ -493,7 +505,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: SynchronisedStorageService.CLASS_NAME,
 			message: "syncChangeSetForRemoteNode",
 			data: {
 				changeSetStorageId: syncChangeSet.id,
@@ -525,7 +537,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 		try {
 			await this._logging?.log({
 				level: "info",
-				source: this.CLASS_NAME,
+				source: SynchronisedStorageService.CLASS_NAME,
 				message: "startEntitySync",
 				data: {
 					storageKey
@@ -540,7 +552,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 		} catch (error) {
 			await this._logging?.log({
 				level: "error",
-				source: this.CLASS_NAME,
+				source: SynchronisedStorageService.CLASS_NAME,
 				message: "entitySyncFailed",
 				error: BaseError.fromError(error)
 			});
@@ -556,7 +568,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	private async updateFromRemoteSyncState(storageKey: string): Promise<void> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: SynchronisedStorageService.CLASS_NAME,
 			message: "updateFromRemoteSyncState",
 			data: {
 				storageKey
@@ -589,7 +601,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	private async updateFromLocalSyncState(storageKey: string): Promise<void> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: SynchronisedStorageService.CLASS_NAME,
 			message: "updateFromLocalSyncState",
 			data: {
 				storageKey
@@ -609,7 +621,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 						if (Is.empty(syncChangeSet) && Is.empty(changeSetStorageId)) {
 							await this._logging?.log({
 								level: "info",
-								source: this.CLASS_NAME,
+								source: SynchronisedStorageService.CLASS_NAME,
 								message: "builtStorageChangeSetNone",
 								data: {
 									storageKey
@@ -618,7 +630,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 						} else {
 							await this._logging?.log({
 								level: "info",
-								source: this.CLASS_NAME,
+								source: SynchronisedStorageService.CLASS_NAME,
 								message: "builtStorageChangeSet",
 								data: {
 									storageKey,
@@ -646,7 +658,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 								// and then remove the local change snapshot
 								await this._logging?.log({
 									level: "info",
-									source: this.CLASS_NAME,
+									source: SynchronisedStorageService.CLASS_NAME,
 									message: "sendingChangeSetToTrustedNode",
 									data: {
 										storageKey,
@@ -674,7 +686,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 			} else {
 				await this._logging?.log({
 					level: "info",
-					source: this.CLASS_NAME,
+					source: SynchronisedStorageService.CLASS_NAME,
 					message: "updateFromLocalSyncStateNoChanges",
 					data: {
 						storageKey
@@ -707,7 +719,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 		} catch (error) {
 			await this._logging?.log({
 				level: "error",
-				source: this.CLASS_NAME,
+				source: SynchronisedStorageService.CLASS_NAME,
 				message: "consolidationSyncFailed",
 				error: BaseError.fromError(error)
 			});
@@ -722,7 +734,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	private async registerStorageKey(syncRegisterStorageKey: ISyncRegisterStorageKey): Promise<void> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: SynchronisedStorageService.CLASS_NAME,
 			message: "registerStorageKey",
 			data: {
 				storageKey: syncRegisterStorageKey.storageKey
@@ -747,7 +759,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 		if (!Is.empty(this._activeStorageKeys[storageKey]) && !this._activeStorageKeys[storageKey]) {
 			await this._logging?.log({
 				level: "info",
-				source: this.CLASS_NAME,
+				source: SynchronisedStorageService.CLASS_NAME,
 				message: "activateStorageKey",
 				data: {
 					storageKey

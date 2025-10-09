@@ -21,7 +21,7 @@ export class LocalSyncStateHelper {
 	/**
 	 * Runtime name for the class.
 	 */
-	public readonly CLASS_NAME: string = nameof<LocalSyncStateHelper>();
+	public static readonly CLASS_NAME: string = nameof<LocalSyncStateHelper>();
 
 	/**
 	 * The logging component to use for logging.
@@ -71,7 +71,7 @@ export class LocalSyncStateHelper {
 	): Promise<void> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: LocalSyncStateHelper.CLASS_NAME,
 			message: "addLocalChange",
 			data: {
 				storageKey,
@@ -117,7 +117,7 @@ export class LocalSyncStateHelper {
 	public async getSnapshots(storageKey: string, isLocal: boolean): Promise<SyncSnapshotEntry[]> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: LocalSyncStateHelper.CLASS_NAME,
 			message: "getSnapshots",
 			data: {
 				storageKey
@@ -142,7 +142,7 @@ export class LocalSyncStateHelper {
 		if (queryResult.entities.length > 0) {
 			await this._logging?.log({
 				level: "info",
-				source: this.CLASS_NAME,
+				source: LocalSyncStateHelper.CLASS_NAME,
 				message: "getSnapshotsExists",
 				data: {
 					storageKey
@@ -153,7 +153,7 @@ export class LocalSyncStateHelper {
 
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: LocalSyncStateHelper.CLASS_NAME,
 			message: "getSnapshotsDoesNotExist",
 			data: {
 				storageKey
@@ -183,7 +183,7 @@ export class LocalSyncStateHelper {
 	public async setLocalChangeSnapshot(localChangeSnapshot: SyncSnapshotEntry): Promise<void> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: LocalSyncStateHelper.CLASS_NAME,
 			message: "setLocalChangeSnapshot",
 			data: {
 				storageKey: localChangeSnapshot.storageKey
@@ -200,7 +200,7 @@ export class LocalSyncStateHelper {
 	public async removeLocalChangeSnapshot(localChangeSnapshot: SyncSnapshotEntry): Promise<void> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: LocalSyncStateHelper.CLASS_NAME,
 			message: "removeLocalChangeSnapshot",
 			data: {
 				snapshotId: localChangeSnapshot.id
@@ -218,7 +218,7 @@ export class LocalSyncStateHelper {
 	public async applySyncState(storageKey: string, syncState: ISyncState): Promise<void> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: LocalSyncStateHelper.CLASS_NAME,
 			message: "applySyncState",
 			data: {
 				snapshotCount: syncState.snapshots.length
@@ -254,7 +254,7 @@ export class LocalSyncStateHelper {
 		if (!existingSnapshots.some(s => s.isConsolidated) || hasEpochGap) {
 			await this._logging?.log({
 				level: "info",
-				source: this.CLASS_NAME,
+				source: LocalSyncStateHelper.CLASS_NAME,
 				message: "applySnapshotNoExisting",
 				data: {
 					storageKey
@@ -267,7 +267,7 @@ export class LocalSyncStateHelper {
 				// We found the most recent consolidated snapshot, we can use it
 				await this._logging?.log({
 					level: "info",
-					source: this.CLASS_NAME,
+					source: LocalSyncStateHelper.CLASS_NAME,
 					message: "applySnapshotFoundConsolidated",
 					data: {
 						storageKey,
@@ -296,7 +296,7 @@ export class LocalSyncStateHelper {
 			} else {
 				await this._logging?.log({
 					level: "info",
-					source: this.CLASS_NAME,
+					source: LocalSyncStateHelper.CLASS_NAME,
 					message: "applySnapshotNoConsolidated",
 					data: {
 						storageKey
@@ -326,7 +326,7 @@ export class LocalSyncStateHelper {
 			for (const snapshot of syncStateSnapshots) {
 				await this._logging?.log({
 					level: "info",
-					source: this.CLASS_NAME,
+					source: LocalSyncStateHelper.CLASS_NAME,
 					message: "applySnapshot",
 					data: {
 						snapshotId: snapshot.id,
@@ -397,7 +397,7 @@ export class LocalSyncStateHelper {
 		for (const modifiedSnapshot of modifiedSnapshots) {
 			await this._logging?.log({
 				level: "info",
-				source: this.CLASS_NAME,
+				source: LocalSyncStateHelper.CLASS_NAME,
 				message: "processModifiedSnapshot",
 				data: {
 					snapshotId: modifiedSnapshot.updatedSnapshot.id,
@@ -437,7 +437,7 @@ export class LocalSyncStateHelper {
 		for (const newSnapshot of newSnapshots) {
 			await this._logging?.log({
 				level: "info",
-				source: this.CLASS_NAME,
+				source: LocalSyncStateHelper.CLASS_NAME,
 				message: "processNewSnapshot",
 				data: {
 					snapshotId: newSnapshot.id,
