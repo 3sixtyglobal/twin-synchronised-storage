@@ -4,7 +4,7 @@
 	"description": "Entity Storage connector implementation using synchronised storage",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/twinfoundation/entity-storage.git",
+		"url": "git+https://github.com/twinfoundation/synchronised-storage.git",
 		"directory": "packages/entity-storage-connector-synchronised"
 	},
 	"author": "martyn.janes@iota.org",
@@ -88,7 +88,7 @@
 		"integration"
 	],
 	"bugs": {
-		"url": "git+https://github.com/twinfoundation/entity-storage/issues"
+		"url": "git+https://github.com/twinfoundation/synchronised-storage/issues"
 	},
 	"homepage": "https://twindev.org"
 }
