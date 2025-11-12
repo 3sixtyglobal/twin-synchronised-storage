@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3-next.1](https://github.com/twinfoundation/synchronised-storage/compare/entity-storage-connector-synchronised-v0.0.3-next.0...entity-storage-connector-synchronised-v0.0.3-next.1) (2025-11-12)
+
+
+### Features
+
+* add context id features ([#24](https://github.com/twinfoundation/synchronised-storage/issues/24)) ([5266b18](https://github.com/twinfoundation/synchronised-storage/commit/5266b18088317c7dc274a209a79102a6fc88a8e4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.3-next.0 to 0.0.3-next.1
+
 ## [0.0.2-next.10](https://github.com/twinfoundation/entity-storage/compare/entity-storage-connector-synchronised-v0.0.2-next.9...entity-storage-connector-synchronised-v0.0.2-next.10) (2025-10-09)
 
 

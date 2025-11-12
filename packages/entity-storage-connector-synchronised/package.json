@@ -1,6 +1,6 @@
 {
 	"name": "@twin.org/entity-storage-connector-synchronised",
-	"version": "0.0.3-next.0",
+	"version": "0.0.3-next.1",
 	"description": "Entity Storage connector implementation using synchronised storage",
 	"repository": {
 		"type": "git",
@@ -35,7 +35,7 @@
 		"@twin.org/event-bus-models": "next",
 		"@twin.org/logging-models": "next",
 		"@twin.org/nameof": "next",
-		"@twin.org/synchronised-storage-models": "0.0.3-next.0"
+		"@twin.org/synchronised-storage-models": "0.0.3-next.1"
 	},
 	"devDependencies": {
 		"@twin.org/nameof-transformer": "next",
