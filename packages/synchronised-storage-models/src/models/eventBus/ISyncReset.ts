@@ -1,6 +1,6 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { SyncNodeIdentityMode } from "../syncNodeIdentityMode";
+import type { SyncNodeIdMode } from "../syncNodeIdMode.js";
 
 /**
  * Request to reset the local storage.
@@ -12,7 +12,7 @@ export interface ISyncReset {
 	storageKey: string;
 
 	/**
-	 * Reset mode, this will use the nodeIdentity in the entities to determine which are local/remote.
+	 * Reset mode, this will use the nodeId in the entities to determine which are local/remote.
 	 */
-	resetMode: SyncNodeIdentityMode;
+	resetMode: SyncNodeIdMode;
 }

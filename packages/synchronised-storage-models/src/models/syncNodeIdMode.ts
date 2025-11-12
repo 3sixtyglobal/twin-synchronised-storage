@@ -5,7 +5,7 @@
  * The mode to determine how node identities are matched.
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const SyncNodeIdentityMode = {
+export const SyncNodeIdMode = {
 	/**
 	 * Match the local node identity.
 	 */
@@ -25,4 +25,4 @@ export const SyncNodeIdentityMode = {
 /**
  * The mode to determine how node identities are matched.
  */
-export type SyncNodeIdentityMode = (typeof SyncNodeIdentityMode)[keyof typeof SyncNodeIdentityMode];
+export type SyncNodeIdMode = (typeof SyncNodeIdMode)[keyof typeof SyncNodeIdMode];

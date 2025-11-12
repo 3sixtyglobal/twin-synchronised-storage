@@ -1,6 +1,6 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { ISynchronisedEntity } from "../ISynchronisedEntity";
+import type { ISynchronisedEntity } from "../ISynchronisedEntity.js";
 
 /**
  * Response for a sync item request.

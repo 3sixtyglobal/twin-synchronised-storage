@@ -1,6 +1,6 @@
-# Variable: SyncNodeIdentityMode
+# Variable: SyncNodeIdMode
 
-> `const` **SyncNodeIdentityMode**: `object`
+> `const` **SyncNodeIdMode**: `object`
 
 The mode to determine how node identities are matched.
 

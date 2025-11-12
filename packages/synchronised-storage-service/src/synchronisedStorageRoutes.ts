@@ -7,12 +7,9 @@ import type {
 	ITag,
 	IUnauthorizedResponse
 } from "@twin.org/api-models";
+import { ContextIdKeys } from "@twin.org/context";
 import { ComponentFactory, Guards } from "@twin.org/core";
-import {
-	IdentityAuthenticationContexts,
-	IdentityAuthenticationTypes,
-	type IIdentityAuthenticationActionRequest
-} from "@twin.org/identity-authentication";
+import type { IIdentityAuthenticationActionRequest } from "@twin.org/identity-authentication";
 import { nameof } from "@twin.org/nameof";
 import {
 	SynchronisedStorageContexts,
@@ -72,7 +69,7 @@ export function generateRestRoutesSynchronisedStorage(
 							id: "0909090909090909090909090909090909090909090909090909090909090909",
 							dateCreated: "2025-05-29T01:00:00.000Z",
 							dateModified: "2025-05-29T01:00:00.000Z",
-							nodeIdentity:
+							nodeId:
 								"did:entity-storage:0xd2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2",
 							changes: [
 								{
@@ -84,12 +81,6 @@ export function generateRestRoutesSynchronisedStorage(
 								}
 							],
 							storageKey: "test-type"
-						},
-						authentication: {
-							"@context": IdentityAuthenticationContexts.ContextRoot,
-							type: IdentityAuthenticationTypes.ActionRequest,
-							requester: "did:node-1",
-							action: "sync-changeset"
 						}
 					}
 				}
@@ -101,7 +92,10 @@ export function generateRestRoutesSynchronisedStorage(
 			}
 		],
 		skipAuth: true,
-		processorFeatures: ["verifiableCredential"]
+		processorFeatures: ["verifiableCredential"],
+		processorData: {
+			verifiableCredential: { contextId: ContextIdKeys.Organization }
+		}
 	};
 
 	const getDecryptionKeyRoute: IRestRoute<ISyncDecryptionKeyRequest, ISyncDecryptionKeyResponse> = {
@@ -117,14 +111,7 @@ export function generateRestRoutesSynchronisedStorage(
 			examples: [
 				{
 					id: "synchronisedStorageSyncGetDecryptionKeyRequestExample",
-					request: {
-						authentication: {
-							"@context": IdentityAuthenticationContexts.ContextRoot,
-							type: IdentityAuthenticationTypes.ActionRequest,
-							requester: "did:node-1",
-							action: "get-key"
-						}
-					}
+					request: {}
 				}
 			]
 		},
@@ -148,7 +135,10 @@ export function generateRestRoutesSynchronisedStorage(
 			}
 		],
 		skipAuth: true,
-		processorFeatures: ["verifiableCredential"]
+		processorFeatures: ["verifiableCredential"],
+		processorData: {
+			verifiableCredential: { contextId: ContextIdKeys.Organization }
+		}
 	};
 
 	return [syncChangeSetRoute, getDecryptionKeyRoute];

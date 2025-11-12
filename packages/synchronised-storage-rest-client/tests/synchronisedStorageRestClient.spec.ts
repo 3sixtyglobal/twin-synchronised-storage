@@ -4,7 +4,7 @@ import {
 	AuthenticationGeneratorFactory,
 	type IAuthenticationGenerator
 } from "@twin.org/api-models";
-import { SynchronisedStorageRestClient } from "../src/synchronisedStorageRestClient";
+import { SynchronisedStorageRestClient } from "../src/synchronisedStorageRestClient.js";
 
 describe("SynchronisedStorageRestClient", () => {
 	test("Can create an instance", async () => {

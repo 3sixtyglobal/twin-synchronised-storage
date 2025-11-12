@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0.
 import { BaseRestClient } from "@twin.org/api-core";
 import type { IBaseRestClientConfig, INoContentResponse } from "@twin.org/api-models";
+import { ContextIdKeys } from "@twin.org/context";
 import { Guards } from "@twin.org/core";
 import type { IIdentityAuthenticationActionRequest } from "@twin.org/identity-authentication";
 import { nameof } from "@twin.org/nameof";
@@ -30,14 +31,15 @@ export class SynchronisedStorageRestClient
 	 * @param config The configuration for the client.
 	 */
 	constructor(config: IBaseRestClientConfig) {
-		super(
-			SynchronisedStorageRestClient.CLASS_NAME,
-			{
-				...config,
-				authenticationGeneratorType: config.authenticationGeneratorType ?? "verifiable-credential"
-			},
-			"synchronised-storage"
-		);
+		super(SynchronisedStorageRestClient.CLASS_NAME, config, "synchronised-storage");
+	}
+
+	/**
+	 * Returns the class name of the component.
+	 * @returns The class name of the component.
+	 */
+	public className(): string {
+		return SynchronisedStorageRestClient.CLASS_NAME;
 	}
 
 	/**
@@ -58,8 +60,13 @@ export class SynchronisedStorageRestClient
 		const response = await this.fetch<ISyncDecryptionKeyRequest, ISyncDecryptionKeyResponse>(
 			"/decryption-key",
 			"GET",
+			undefined,
 			{
-				authentication: actionRequest
+				authenticationGeneratorType: "verifiable-credential",
+				authenticationData: {
+					contextId: ContextIdKeys.Organization,
+					subject: actionRequest
+				}
 			}
 		);
 
@@ -82,9 +89,19 @@ export class SynchronisedStorageRestClient
 			syncChangeSet
 		);
 
-		await this.fetch<ISyncChangeSetRequest, INoContentResponse>("/sync-changeset", "POST", {
-			body: syncChangeSet,
-			authentication: actionRequest
-		});
+		await this.fetch<ISyncChangeSetRequest, INoContentResponse>(
+			"/sync-changeset",
+			"POST",
+			{
+				body: syncChangeSet
+			},
+			{
+				authenticationGeneratorType: "verifiable-credential",
+				authenticationData: {
+					contextId: ContextIdKeys.Organization,
+					subject: actionRequest
+				}
+			}
+		);
 	}
 }

@@ -1,6 +1,6 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { ISynchronisedStorageServiceConfig } from "./ISynchronisedStorageServiceConfig";
+import type { ISynchronisedStorageServiceConfig } from "./ISynchronisedStorageServiceConfig.js";
 
 /**
  * Options for the Synchronised Storage Service constructor.

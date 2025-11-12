@@ -17,7 +17,7 @@ import {
 	type ISyncChange,
 	type ISyncChangeSet,
 	type ISyncItemResponse,
-	SyncNodeIdentityMode,
+	SyncNodeIdMode,
 	SyncChangeOperation,
 	SynchronisedStorageTopics,
 	SynchronisedStorageContexts,
@@ -25,12 +25,16 @@ import {
 	type ISynchronisedEntity
 } from "@twin.org/synchronised-storage-models";
 import type { IVerifiableStorageConnector } from "@twin.org/verifiable-storage-models";
-import type { BlobStorageHelper } from "./blobStorageHelper";
-import type { ChangeSetHelper } from "./changeSetHelper";
-import { SYNC_POINTER_STORE_VERSION, SYNC_SNAPSHOT_VERSION, SYNC_STATE_VERSION } from "./versions";
-import type { ISyncPointerStore } from "../models/ISyncPointerStore";
-import type { ISyncSnapshot } from "../models/ISyncSnapshot";
-import type { ISyncState } from "../models/ISyncState";
+import type { BlobStorageHelper } from "./blobStorageHelper.js";
+import type { ChangeSetHelper } from "./changeSetHelper.js";
+import {
+	SYNC_POINTER_STORE_VERSION,
+	SYNC_SNAPSHOT_VERSION,
+	SYNC_STATE_VERSION
+} from "./versions.js";
+import type { ISyncPointerStore } from "../models/ISyncPointerStore.js";
+import type { ISyncSnapshot } from "../models/ISyncSnapshot.js";
+import type { ISyncState } from "../models/ISyncState.js";
 
 /**
  * Class for performing entity storage operations in decentralised storage.
@@ -100,7 +104,7 @@ export class RemoteSyncStateHelper {
 	 * The identity of the node that is performing the update.
 	 * @internal
 	 */
-	private _nodeIdentity?: string;
+	private _nodeId?: string;
 
 	/**
 	 * Whether the node is trusted or not.
@@ -143,28 +147,33 @@ export class RemoteSyncStateHelper {
 
 		this._batchResponseStorageIds = {};
 		this._populateFullChanges = {};
+	}
 
-		this._eventBusComponent.subscribe<ISyncBatchResponse>(
+	/**
+	 * Set the node identity to use for signing changesets.
+	 * @param nodeId The identity of the node that is performing the update.
+	 */
+	public setNodeId(nodeId: string): void {
+		this._nodeId = nodeId;
+	}
+
+	/**
+	 * Start the remote sync state helper.
+	 */
+	public async start(): Promise<void> {
+		await this._eventBusComponent.subscribe<ISyncBatchResponse>(
 			SynchronisedStorageTopics.BatchResponse,
 			async response => {
 				await this.handleBatchResponse(response.data);
 			}
 		);
 
-		this._eventBusComponent.subscribe<ISyncItemResponse>(
+		await this._eventBusComponent.subscribe<ISyncItemResponse>(
 			SynchronisedStorageTopics.LocalItemResponse,
 			async response => {
 				await this.handleLocalItemResponse(response.data);
 			}
 		);
-	}
-
-	/**
-	 * Set the node identity to use for signing changesets.
-	 * @param nodeIdentity The identity of the node that is performing the update.
-	 */
-	public setNodeIdentity(nodeIdentity: string): void {
-		this._nodeIdentity = nodeIdentity;
 	}
 
 	/**
@@ -224,7 +233,7 @@ export class RemoteSyncStateHelper {
 						id: change.id
 					}
 				});
-				this._eventBusComponent.publish<ISyncItemResponse>(
+				await this._eventBusComponent.publish<ISyncItemResponse>(
 					SynchronisedStorageTopics.LocalItemRequest,
 					{
 						storageKey,
@@ -253,7 +262,7 @@ export class RemoteSyncStateHelper {
 				storageKey
 			}
 		});
-		if (Is.stringValue(this._nodeIdentity)) {
+		if (Is.stringValue(this._nodeId)) {
 			const changes = this._populateFullChanges[storageKey].changes;
 			for (const change of changes) {
 				change.entity = this._populateFullChanges[storageKey].entities[change.id] ?? change.entity;
@@ -264,7 +273,7 @@ export class RemoteSyncStateHelper {
 					ObjectHelper.propertyDelete(change.entity, "id");
 					// Remove the node identity as the changeset has this stored at the top level
 					// and we do not want to store it in the change itself to reduce redundancy
-					ObjectHelper.propertyDelete(change.entity, "nodeIdentity");
+					ObjectHelper.propertyDelete(change.entity, "nodeId");
 				}
 			}
 
@@ -277,7 +286,7 @@ export class RemoteSyncStateHelper {
 				dateModified: now,
 				storageKey,
 				changes,
-				nodeIdentity: this._nodeIdentity
+				nodeId: this._nodeId
 			};
 
 			try {
@@ -392,7 +401,7 @@ export class RemoteSyncStateHelper {
 		// Perform a batch request to start the consolidation
 		await this._eventBusComponent.publish<ISyncBatchRequest>(
 			SynchronisedStorageTopics.BatchRequest,
-			{ storageKey, batchSize, requestMode: SyncNodeIdentityMode.All }
+			{ storageKey, batchSize, requestMode: SyncNodeIdMode.All }
 		);
 	}
 
@@ -456,7 +465,7 @@ export class RemoteSyncStateHelper {
 	 * @returns Nothing.
 	 */
 	public async storeVerifiableSyncPointerStore(syncPointerStore: ISyncPointerStore): Promise<void> {
-		if (Is.stringValue(this._nodeIdentity) && Is.stringValue(this._synchronisedStorageKey)) {
+		if (Is.stringValue(this._nodeId) && Is.stringValue(this._synchronisedStorageKey)) {
 			await this._logging?.log({
 				level: "info",
 				source: RemoteSyncStateHelper.CLASS_NAME,
@@ -468,7 +477,7 @@ export class RemoteSyncStateHelper {
 
 			// Store the verifiable sync pointer in the verifiable storage
 			await this._verifiableSyncPointerStorageConnector.update(
-				this._nodeIdentity,
+				this._nodeId,
 				this._synchronisedStorageKey,
 				ObjectHelper.toBytes<ISyncPointerStore>(syncPointerStore)
 			);
@@ -585,7 +594,7 @@ export class RemoteSyncStateHelper {
 	 * @param response The batch response to handle.
 	 */
 	private async handleBatchResponse(response: ISyncBatchResponse): Promise<void> {
-		if (Is.stringValue(this._nodeIdentity)) {
+		if (Is.stringValue(this._nodeId)) {
 			const now = new Date(Date.now()).toISOString();
 
 			// Create a new snapshot entry for the current batch
@@ -600,7 +609,7 @@ export class RemoteSyncStateHelper {
 					id: change.id
 				})),
 				storageKey: response.storageKey,
-				nodeIdentity: this._nodeIdentity
+				nodeId: this._nodeId
 			};
 
 			// Store the changeset in the blob storage

@@ -1,6 +1,6 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { SyncChangeOperation } from "../syncChangeOperation";
+import type { SyncChangeOperation } from "../syncChangeOperation.js";
 
 /**
  * The payload for an item change.
@@ -19,7 +19,7 @@ export interface ISyncItemChange {
 	/**
 	 * The node performing the operation.
 	 */
-	nodeIdentity: string;
+	nodeId: string;
 
 	/**
 	 * The id of the item being changed.

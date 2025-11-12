@@ -11,9 +11,9 @@ import {
 	type ISyncReset,
 	SyncChangeOperation,
 	SynchronisedStorageTopics,
-	type SyncNodeIdentityMode
+	type SyncNodeIdMode
 } from "@twin.org/synchronised-storage-models";
-import type { BlobStorageHelper } from "./blobStorageHelper";
+import type { BlobStorageHelper } from "./blobStorageHelper.js";
 
 /**
  * Class for performing change set operations.
@@ -46,7 +46,7 @@ export class ChangeSetHelper {
 	 * The identity of the node that is performing the update.
 	 * @internal
 	 */
-	private _nodeIdentity?: string;
+	private _nodeId?: string;
 
 	/**
 	 * Create a new instance of ChangeSetHelper.
@@ -66,10 +66,10 @@ export class ChangeSetHelper {
 
 	/**
 	 * Set the node identity to use for signing changesets.
-	 * @param nodeIdentity The identity of the node that is performing the update.
+	 * @param nodeId The identity of the node that is performing the update.
 	 */
-	public setNodeIdentity(nodeIdentity: string): void {
-		this._nodeIdentity = nodeIdentity;
+	public setNodeId(nodeId: string): void {
+		this._nodeId = nodeId;
 	}
 
 	/**
@@ -126,7 +126,7 @@ export class ChangeSetHelper {
 
 		// Only apply changesets from other nodes, we don't want to overwrite
 		// any changes we have made to local entity storage
-		if (!Is.empty(syncChangeset) && syncChangeset.nodeIdentity !== this._nodeIdentity) {
+		if (!Is.empty(syncChangeset) && syncChangeset.nodeId !== this._nodeId) {
 			await this.applyChangeset(syncChangeset);
 		}
 
@@ -166,7 +166,7 @@ export class ChangeSetHelper {
 									entity: {
 										...change.entity,
 										id: change.id,
-										nodeIdentity: syncChangeset.nodeIdentity
+										nodeId: syncChangeset.nodeId
 									}
 								}
 							);
@@ -179,7 +179,7 @@ export class ChangeSetHelper {
 								{
 									storageKey: syncChangeset.storageKey,
 									id: change.id,
-									nodeIdentity: syncChangeset.nodeIdentity
+									nodeId: syncChangeset.nodeId
 								}
 							);
 						}
@@ -219,7 +219,7 @@ export class ChangeSetHelper {
 		  }
 		| undefined
 	> {
-		if (Is.stringValue(this._nodeIdentity)) {
+		if (Is.stringValue(this._nodeId)) {
 			await this._logging?.log({
 				level: "info",
 				source: ChangeSetHelper.CLASS_NAME,
@@ -244,10 +244,10 @@ export class ChangeSetHelper {
 	/**
 	 * Reset the storage for a given storage key.
 	 * @param storageKey The key of the storage to reset.
-	 * @param resetMode The reset mode, this will use the nodeIdentity in the entities to determine which are local/remote.
+	 * @param resetMode The reset mode, this will use the nodeId in the entities to determine which are local/remote.
 	 * @returns Nothing.
 	 */
-	public async reset(storageKey: string, resetMode: SyncNodeIdentityMode): Promise<void> {
+	public async reset(storageKey: string, resetMode: SyncNodeIdMode): Promise<void> {
 		// If we are applying a consolidation we need to reset the local db
 		// but keep any entries from the local node, as they might have been updated
 		await this._logging?.log({

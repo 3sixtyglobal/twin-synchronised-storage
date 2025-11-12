@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0.
 import type { IComponent } from "@twin.org/core";
 import type { IIdentityAuthenticationActionRequest } from "@twin.org/identity-authentication";
-import type { ISyncChangeSet } from "./ISyncChangeSet";
+import type { ISyncChangeSet } from "./ISyncChangeSet.js";
 
 /**
  * Class for performing synchronised storage operations.

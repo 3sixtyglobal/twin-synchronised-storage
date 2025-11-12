@@ -65,7 +65,7 @@
 										"id": "0909090909090909090909090909090909090909090909090909090909090909",
 										"dateCreated": "2025-05-29T01:00:00.000Z",
 										"dateModified": "2025-05-29T01:00:00.000Z",
-										"nodeIdentity": "did:entity-storage:0xd2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2",
+										"nodeId": "did:entity-storage:0xd2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2",
 										"changes": [
 											{
 												"entity": {
@@ -327,19 +327,16 @@
 						"type": "string",
 						"description": "The date the change set was last modified."
 					},
-					"nodeIdentity": {
+					"nodeId": {
 						"type": "string",
 						"description": "The identity of the node that created the change set."
 					},
 					"changes": {
 						"type": "array",
-						"items": false,
-						"description": "The changes to apply after a snapshot.",
-						"prefixItems": [
-							{
-								"$ref": "#/components/schemas/SyncChange"
-							}
-						]
+						"items": {
+							"$ref": "#/components/schemas/SyncChange"
+						},
+						"description": "The changes to apply after a snapshot."
 					}
 				},
 				"required": [
@@ -349,7 +346,7 @@
 					"storageKey",
 					"dateCreated",
 					"dateModified",
-					"nodeIdentity",
+					"nodeId",
 					"changes"
 				],
 				"additionalProperties": false,

@@ -1,0 +1,94 @@
+{
+	"name": "@twin.org/entity-storage-connector-synchronised",
+	"version": "0.0.3-next.0",
+	"description": "Entity Storage connector implementation using synchronised storage",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/twinfoundation/entity-storage.git",
+		"directory": "packages/entity-storage-connector-synchronised"
+	},
+	"author": "martyn.janes@iota.org",
+	"license": "Apache-2.0",
+	"type": "module",
+	"engines": {
+		"node": ">=20.0.0"
+	},
+	"scripts": {
+		"clean": "rimraf dist coverage docs/reference",
+		"build": "tspc",
+		"dev": "nodemon --watch src --ext ts --exec \"npm run build\"",
+		"test": "vitest --run --config ./vitest.config.ts --no-cache",
+		"test:build": "tspc -p ./tests/tsconfig.json --noEmit",
+		"validate-locales": "validate-locales",
+		"test:coverage": "vitest --run --coverage --config ./vitest.config.ts --no-cache",
+		"docs:clean": "rimraf docs/reference",
+		"docs:generate": "typedoc",
+		"docs": "npm run docs:clean && npm run docs:generate",
+		"dist": "npm run clean && npm run build && npm run validate-locales && npm run test:build && npm run test && npm run docs",
+		"dist:no-test": "npm run clean && npm run build && npm run test:build && npm run docs"
+	},
+	"dependencies": {
+		"@twin.org/context": "next",
+		"@twin.org/core": "next",
+		"@twin.org/entity": "next",
+		"@twin.org/entity-storage-models": "next",
+		"@twin.org/event-bus-models": "next",
+		"@twin.org/logging-models": "next",
+		"@twin.org/nameof": "next",
+		"@twin.org/synchronised-storage-models": "0.0.3-next.0"
+	},
+	"devDependencies": {
+		"@twin.org/nameof-transformer": "next",
+		"@twin.org/nameof-vitest-plugin": "next",
+		"@twin.org/validate-locales": "next",
+		"@twin.org/entity-storage-connector-memory": "next",
+		"@twin.org/event-bus-connector-local": "next",
+		"@twin.org/event-bus-service": "next",
+		"@types/node": "24.10.1",
+		"@vitest/coverage-v8": "4.0.8",
+		"copyfiles": "2.4.1",
+		"dotenv": "17.2.3",
+		"rimraf": "6.1.0",
+		"ts-patch": "3.3.0",
+		"nodemon": "3.1.11",
+		"typedoc": "0.28.14",
+		"typedoc-plugin-markdown": "4.9.0",
+		"typescript": "5.9.3",
+		"vitest": "4.0.8"
+	},
+	"main": "./dist/es/index.js",
+	"types": "./dist/types/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/types/index.d.ts",
+			"import": "./dist/es/index.js",
+			"default": "./dist/es/index.js"
+		},
+		"./locales/*.json": "./locales/*.json"
+	},
+	"files": [
+		"dist/es",
+		"dist/types",
+		"locales",
+		"docs"
+	],
+	"keywords": [
+		"twin",
+		"trade",
+		"iota",
+		"framework",
+		"blockchain",
+		"entity-storage",
+		"entity",
+		"storage",
+		"persistence",
+		"database",
+		"connector",
+		"adapter",
+		"integration"
+	],
+	"bugs": {
+		"url": "git+https://github.com/twinfoundation/entity-storage/issues"
+	},
+	"homepage": "https://twindev.org"
+}

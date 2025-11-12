@@ -5,6 +5,7 @@ import {
 	BlobStorageConnectorFactory,
 	type IBlobStorageConnector
 } from "@twin.org/blob-storage-models";
+import { ContextIdHelper, ContextIdKeys, ContextIdStore } from "@twin.org/context";
 import {
 	BaseError,
 	Coerce,
@@ -42,14 +43,14 @@ import {
 	type IVerifiableStorageConnector,
 	VerifiableStorageConnectorFactory
 } from "@twin.org/verifiable-storage-models";
-import verifiableStorageKeys from "./data/verifiableStorageKeys.json";
-import type { SyncSnapshotEntry } from "./entities/syncSnapshotEntry";
-import { BlobStorageHelper } from "./helpers/blobStorageHelper";
-import { ChangeSetHelper } from "./helpers/changeSetHelper";
-import { LocalSyncStateHelper } from "./helpers/localSyncStateHelper";
-import { RemoteSyncStateHelper } from "./helpers/remoteSyncStateHelper";
-import type { ISynchronisedStorageServiceConfig } from "./models/ISynchronisedStorageServiceConfig";
-import type { ISynchronisedStorageServiceConstructorOptions } from "./models/ISynchronisedStorageServiceConstructorOptions";
+import verifiableStorageKeys from "./data/verifiableStorageKeys.json" with { type: "json" };
+import type { SyncSnapshotEntry } from "./entities/syncSnapshotEntry.js";
+import { BlobStorageHelper } from "./helpers/blobStorageHelper.js";
+import { ChangeSetHelper } from "./helpers/changeSetHelper.js";
+import { LocalSyncStateHelper } from "./helpers/localSyncStateHelper.js";
+import { RemoteSyncStateHelper } from "./helpers/remoteSyncStateHelper.js";
+import type { ISynchronisedStorageServiceConfig } from "./models/ISynchronisedStorageServiceConfig.js";
+import type { ISynchronisedStorageServiceConstructorOptions } from "./models/ISynchronisedStorageServiceConstructorOptions.js";
 
 /**
  * Class for performing synchronised storage operations.
@@ -190,7 +191,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	 * The identity of the node this connector is running on.
 	 * @internal
 	 */
-	private _nodeIdentity?: string;
+	private _nodeId?: string;
 
 	/**
 	 * Create a new instance of SynchronisedStorageService.
@@ -245,10 +246,9 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 				);
 		} else {
 			// A trusted node must have a policy enforcement point component
-			this._policyEnforcementPointComponent =
-				ComponentFactory.get<IPolicyEnforcementPointComponent>(
-					options?.policyEnforcementPointComponentType ?? "policy-enforcement-point"
-				);
+			this._policyEnforcementPointComponent = ComponentFactory.get(
+				options?.policyEnforcementPointComponentType ?? "policy-enforcement-point"
+			);
 		}
 
 		this._config = {
@@ -311,40 +311,29 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 
 		this._serviceStarted = false;
 		this._activeStorageKeys = {};
+	}
 
-		this._eventBusComponent.subscribe<ISyncRegisterStorageKey>(
-			SynchronisedStorageTopics.RegisterStorageKey,
-			async event => this.registerStorageKey(event.data)
-		);
-
-		this._eventBusComponent.subscribe<ISyncItemChange>(
-			SynchronisedStorageTopics.LocalItemChange,
-			async event => {
-				// Make sure the change event is from this node
-				if (Is.stringValue(this._nodeIdentity) && this._nodeIdentity === event.data.nodeIdentity) {
-					await this._localSyncStateHelper.addLocalChange(
-						event.data.storageKey,
-						event.data.operation,
-						event.data.id
-					);
-				}
-			}
-		);
+	/**
+	 * Returns the class name of the component.
+	 * @returns The class name of the component.
+	 */
+	public className(): string {
+		return SynchronisedStorageService.CLASS_NAME;
 	}
 
 	/**
 	 * The component needs to be started when the node is initialized.
-	 * @param nodeIdentity The identity of the node starting the component.
 	 * @param nodeLoggingComponentType The node logging component type.
 	 * @returns Nothing.
 	 */
-	public async start(
-		nodeIdentity: string,
-		nodeLoggingComponentType: string | undefined
-	): Promise<void> {
-		this._nodeIdentity = nodeIdentity;
-		this._remoteSyncStateHelper.setNodeIdentity(nodeIdentity);
-		this._changeSetHelper.setNodeIdentity(nodeIdentity);
+	public async start(nodeLoggingComponentType?: string): Promise<void> {
+		const contextIds = await ContextIdStore.getContextIds();
+		ContextIdHelper.guard(contextIds, ContextIdKeys.Node);
+		this._nodeId = contextIds[ContextIdKeys.Node];
+
+		this._remoteSyncStateHelper.setNodeId(this._nodeId);
+		this._changeSetHelper.setNodeId(this._nodeId);
+
 		this._remoteSyncStateHelper.setSynchronisedStorageKey(this._synchronisedStorageKey);
 		this._serviceStarted = true;
 
@@ -354,7 +343,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 				"@context": IdentityAuthenticationContexts.ContextRoot,
 				type: IdentityAuthenticationTypes.ActionRequest,
 				action: "get-key",
-				requester: this._nodeIdentity
+				requester: contextIds[ContextIdKeys.Node]
 			};
 
 			const decryptionKey =
@@ -376,6 +365,27 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 			);
 		}
 
+		await this._eventBusComponent.subscribe<ISyncRegisterStorageKey>(
+			SynchronisedStorageTopics.RegisterStorageKey,
+			async event => this.registerStorageKey(event.data)
+		);
+
+		await this._eventBusComponent.subscribe<ISyncItemChange>(
+			SynchronisedStorageTopics.LocalItemChange,
+			async event => {
+				// Make sure the change event is from this node
+				if (Is.stringValue(this._nodeId) && this._nodeId === event.data.nodeId) {
+					await this._localSyncStateHelper.addLocalChange(
+						event.data.storageKey,
+						event.data.operation,
+						event.data.id
+					);
+				}
+			}
+		);
+
+		await this._remoteSyncStateHelper.start();
+
 		// If there are already storage keys registered, we need to activate them
 		for (const storageKey in this._activeStorageKeys) {
 			await this.activateStorageKey(storageKey);
@@ -384,18 +394,16 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 
 	/**
 	 * The component needs to be stopped when the node is closed.
-	 * @param nodeIdentity The identity of the node stopping the component.
 	 * @param nodeLoggingComponentType The node logging component type.
 	 * @returns Nothing.
 	 */
-	public async stop(
-		nodeIdentity: string,
-		nodeLoggingComponentType: string | undefined
-	): Promise<void> {
+	public async stop(nodeLoggingComponentType?: string): Promise<void> {
 		for (const storageKey in this._activeStorageKeys) {
 			this._activeStorageKeys[storageKey] = false;
-			this._taskSchedulerComponent.removeTask(`synchronised-storage-update-${storageKey}`);
-			this._taskSchedulerComponent.removeTask(`synchronised-storage-consolidation-${storageKey}`);
+			await this._taskSchedulerComponent.removeTask(`synchronised-storage-update-${storageKey}`);
+			await this._taskSchedulerComponent.removeTask(
+				`synchronised-storage-consolidation-${storageKey}`
+			);
 		}
 	}
 
@@ -436,7 +444,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 				SynchronisedStorageService.CLASS_NAME,
 				"decryptionKeyNotAllowed",
 				{
-					nodeIdentity: actionRequest.requester
+					nodeId: actionRequest.requester
 				}
 			);
 		}
@@ -446,7 +454,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 			source: SynchronisedStorageService.CLASS_NAME,
 			message: "decryptionKeyRequest",
 			data: {
-				nodeIdentity: actionRequest.requester
+				nodeId: actionRequest.requester
 			}
 		});
 
@@ -498,7 +506,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 
 		if (!(Coerce.boolean(result) ?? false)) {
 			throw new UnauthorizedError(SynchronisedStorageService.CLASS_NAME, "changeSetNotAllowed", {
-				nodeIdentity: actionRequest.requester,
+				nodeId: actionRequest.requester,
 				changeSetStorageId: syncChangeSet.id
 			});
 		}
@@ -509,7 +517,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 			message: "syncChangeSetForRemoteNode",
 			data: {
 				changeSetStorageId: syncChangeSet.id,
-				nodeIdentity: actionRequest.requester
+				nodeId: actionRequest.requester
 			}
 		});
 
@@ -652,7 +660,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 							} else if (
 								!Is.empty(this._trustedSynchronisedStorageComponent) &&
 								Is.object(syncChangeSet) &&
-								Is.stringValue(this._nodeIdentity)
+								Is.stringValue(this._nodeId)
 							) {
 								// If we are not a trusted node, we need to send the changes to the trusted node
 								// and then remove the local change snapshot
@@ -670,7 +678,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 									"@context": IdentityAuthenticationContexts.ContextRoot,
 									type: IdentityAuthenticationTypes.ActionRequest,
 									action: "sync-changeset",
-									requester: this._nodeIdentity
+									requester: this._nodeId
 								};
 
 								await this._trustedSynchronisedStorageComponent.syncChangeSet(

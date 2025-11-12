@@ -1,8 +1,8 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { ISyncChange } from "./ISyncChange";
-import type { SynchronisedStorageContexts } from "./synchronisedStorageContexts";
-import type { SynchronisedStorageTypes } from "./synchronisedStorageTypes";
+import type { ISyncChange } from "./ISyncChange.js";
+import type { SynchronisedStorageContexts } from "./synchronisedStorageContexts.js";
+import type { SynchronisedStorageTypes } from "./synchronisedStorageTypes.js";
 
 /**
  * The object definition for a sync change set.
@@ -41,7 +41,7 @@ export interface ISyncChangeSet {
 	/**
 	 * The identity of the node that created the change set.
 	 */
-	nodeIdentity: string;
+	nodeId: string;
 
 	/**
 	 * The changes to apply after a snapshot.

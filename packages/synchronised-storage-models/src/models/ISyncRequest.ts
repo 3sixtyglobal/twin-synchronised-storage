@@ -1,7 +1,7 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { SynchronisedStorageContexts } from "./synchronisedStorageContexts";
-import type { SynchronisedStorageTypes } from "./synchronisedStorageTypes";
+import type { SynchronisedStorageContexts } from "./synchronisedStorageContexts.js";
+import type { SynchronisedStorageTypes } from "./synchronisedStorageTypes.js";
 
 /**
  * The object definition for a sync request.
@@ -20,5 +20,5 @@ export interface ISyncRequest {
 	/**
 	 * The identity of the node that created the request.
 	 */
-	nodeIdentity: string;
+	nodeId: string;
 }

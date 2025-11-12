@@ -50,8 +50,8 @@
 			"builtStorageChangeSet": "Built storage change set for key \"{storageKey}\" with id \"{changeSetStorageId}\"",
 			"builtStorageChangeSetNone": "No changes found for key \"{storageKey}\", no storage change set created",
 			"sendingChangeSetToTrustedNode": "Sending change set with id \"{changeSetStorageId}\" to trusted node for key \"{storageKey}\"",
-			"decryptionKeyRequest": "Decryption key requested by node identity \"{nodeIdentity}\"",
-			"syncChangeSetForRemoteNode": "Synchronising change set with id \"{changeSetStorageId}\" for node identity \"{nodeIdentity}\""
+			"decryptionKeyRequest": "Decryption key requested by node identity \"{nodeId}\"",
+			"syncChangeSetForRemoteNode": "Synchronising change set with id \"{changeSetStorageId}\" for node identity \"{nodeId}\""
 		},
 		"blobStorageHelper": {
 			"loadBlob": "Loading blob with id \"{blobId}\"",
@@ -69,8 +69,8 @@
 			"notTrustedNode": "This method can only be called on a trusted node",
 			"entitySyncFailed": "Failed to sync synchronised entity storage connector",
 			"consolidationSyncFailed": "Failed to consolidate synchronised entity storage connector",
-			"decryptionKeyNotAllowed": "The node identity \"{nodeIdentity}\" is not allowed to retrieve the decryption key",
-			"changeSetNotAllowed": "The node identity \"{nodeIdentity}\" is not allowed to sync the change set with id \"{changeSetStorageId}\"",
+			"decryptionKeyNotAllowed": "The node identity \"{nodeId}\" is not allowed to retrieve the decryption key",
+			"changeSetNotAllowed": "The node identity \"{nodeId}\" is not allowed to sync the change set with id \"{changeSetStorageId}\"",
 			"decryptionKeyNotFound": "Decryption key not found, ensure the synchronised storage component is initialised and the decryption key is set",
 			"incorrectActionType": "Incorrect action in credential \"{action}\", expecting \"{expecting}\""
 		},

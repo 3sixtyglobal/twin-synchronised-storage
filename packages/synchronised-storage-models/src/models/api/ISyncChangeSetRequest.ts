@@ -1,8 +1,7 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { IIdentityAuthenticationActionRequest } from "@twin.org/identity-authentication";
 import type { HeaderTypes, MimeTypes } from "@twin.org/web";
-import type { ISyncChangeSet } from "../ISyncChangeSet";
+import type { ISyncChangeSet } from "../ISyncChangeSet.js";
 
 /**
  * Request a trusted node to perform a sync request for a changeset.
@@ -20,9 +19,4 @@ export interface ISyncChangeSetRequest {
 	 * The body of the request.
 	 */
 	body: ISyncChangeSet;
-
-	/**
-	 * The action request used in the verifiable credential.
-	 */
-	authentication: IIdentityAuthenticationActionRequest;
 }

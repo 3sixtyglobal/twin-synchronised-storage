@@ -5,14 +5,11 @@ import { ComparisonOperator } from "@twin.org/entity";
 import type { IEntityStorageConnector } from "@twin.org/entity-storage-models";
 import type { ILoggingComponent } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
-import {
-	type SyncChangeOperation,
-	SyncNodeIdentityMode
-} from "@twin.org/synchronised-storage-models";
-import type { ChangeSetHelper } from "./changeSetHelper";
-import { SYNC_SNAPSHOT_VERSION } from "./versions";
-import type { SyncSnapshotEntry } from "../entities/syncSnapshotEntry";
-import type { ISyncState } from "../models/ISyncState";
+import { type SyncChangeOperation, SyncNodeIdMode } from "@twin.org/synchronised-storage-models";
+import type { ChangeSetHelper } from "./changeSetHelper.js";
+import { SYNC_SNAPSHOT_VERSION } from "./versions.js";
+import type { SyncSnapshotEntry } from "../entities/syncSnapshotEntry.js";
+import type { ISyncState } from "../models/ISyncState.js";
 
 /**
  * Class for performing entity storage operations in decentralised storage.
@@ -279,7 +276,7 @@ export class LocalSyncStateHelper {
 				// so that we use just the ones from the consolidation, since
 				// we don't have any existing there shouldn't be any remote entries
 				// but we reset nonetheless
-				await this._changeSetHelper.reset(storageKey, SyncNodeIdentityMode.Remote);
+				await this._changeSetHelper.reset(storageKey, SyncNodeIdMode.Remote);
 
 				// We need to process the most recent consolidation and all changes
 				// that were made since then, from newest to oldest (so newer changes override older ones)

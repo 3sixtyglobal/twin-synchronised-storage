@@ -1,7 +1,7 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { ISynchronisedEntityCore } from "./ISynchronisedEntityCore";
-import type { SyncChangeOperation } from "./syncChangeOperation";
+import type { ISynchronisedEntityCore } from "./ISynchronisedEntityCore.js";
+import type { SyncChangeOperation } from "./syncChangeOperation.js";
 
 /**
  * The object definition for a sync change.

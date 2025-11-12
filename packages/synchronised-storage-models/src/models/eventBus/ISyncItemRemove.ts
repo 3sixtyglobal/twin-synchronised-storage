@@ -13,7 +13,7 @@ export interface ISyncItemRemove {
 	/**
 	 * The node identity of the entity being removed.
 	 */
-	nodeIdentity: string;
+	nodeId: string;
 
 	/**
 	 * The entity being removed from the item set.
