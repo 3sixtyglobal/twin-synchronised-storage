@@ -41,4 +41,9 @@ export interface ISynchronisedStorageServiceConfig {
 	 * @default local
 	 */
 	verifiableStorageKeyId: "mainnet" | "testnet" | "devnet" | string;
+
+	/**
+	 * Override the default trust generator.
+	 */
+	overrideTrustGeneratorType?: string;
 }

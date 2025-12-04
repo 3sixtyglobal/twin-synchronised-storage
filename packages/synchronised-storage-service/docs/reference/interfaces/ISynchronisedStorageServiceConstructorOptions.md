@@ -99,6 +99,20 @@ policy-enforcement-point
 
 ***
 
+### trustComponentType?
+
+> `optional` **trustComponentType**: `string`
+
+The type of the trust component.
+
+#### Default
+
+```ts
+trust
+```
+
+***
+
 ### trustedSynchronisedStorageComponentType?
 
 > `optional` **trustedSynchronisedStorageComponentType**: `string`

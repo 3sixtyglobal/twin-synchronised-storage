@@ -7,9 +7,7 @@ import type {
 	ITag,
 	IUnauthorizedResponse
 } from "@twin.org/api-models";
-import { ContextIdKeys } from "@twin.org/context";
 import { ComponentFactory, Guards } from "@twin.org/core";
-import type { IIdentityAuthenticationActionRequest } from "@twin.org/identity-authentication";
 import { nameof } from "@twin.org/nameof";
 import {
 	SynchronisedStorageContexts,
@@ -19,7 +17,7 @@ import {
 	type ISyncDecryptionKeyResponse,
 	type ISynchronisedStorageComponent
 } from "@twin.org/synchronised-storage-models";
-import { HeaderTypes, HttpStatusCode } from "@twin.org/web";
+import { HeaderHelper, HeaderTypes, HttpStatusCode } from "@twin.org/web";
 
 /**
  * The source used when communicating about these routes.
@@ -91,11 +89,7 @@ export function generateRestRoutesSynchronisedStorage(
 				type: nameof<INoContentResponse>()
 			}
 		],
-		skipAuth: true,
-		processorFeatures: ["verifiableCredential"],
-		processorData: {
-			verifiableCredential: { contextId: ContextIdKeys.Organization }
-		}
+		skipAuth: true
 	};
 
 	const getDecryptionKeyRoute: IRestRoute<ISyncDecryptionKeyRequest, ISyncDecryptionKeyResponse> = {
@@ -134,11 +128,7 @@ export function generateRestRoutesSynchronisedStorage(
 				type: nameof<IUnauthorizedResponse>()
 			}
 		],
-		skipAuth: true,
-		processorFeatures: ["verifiableCredential"],
-		processorData: {
-			verifiableCredential: { contextId: ContextIdKeys.Organization }
-		}
+		skipAuth: true
 	};
 
 	return [syncChangeSetRoute, getDecryptionKeyRoute];
@@ -167,8 +157,9 @@ export async function synchronisedStorageSyncChangeSetRequest(
 	const component = ComponentFactory.get<ISynchronisedStorageComponent>(componentName);
 	await component.syncChangeSet(
 		request.body,
-		httpRequestContext.processorState
-			.verifiableCredentialSubject as IIdentityAuthenticationActionRequest
+		HeaderHelper.extractBearer(
+			httpRequestContext.serverRequest.headers?.[HeaderTypes.Authorization]
+		)
 	);
 	return {
 		statusCode: HttpStatusCode.noContent
@@ -196,8 +187,9 @@ export async function synchronisedStorageGetDecryptionKeyRequest(
 
 	const component = ComponentFactory.get<ISynchronisedStorageComponent>(componentName);
 	const key = await component.getDecryptionKey(
-		httpRequestContext.processorState
-			.verifiableCredentialSubject as IIdentityAuthenticationActionRequest
+		HeaderHelper.extractBearer(
+			httpRequestContext.serverRequest.headers?.[HeaderTypes.Authorization]
+		)
 	);
 	return {
 		body: {

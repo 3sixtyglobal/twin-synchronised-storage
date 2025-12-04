@@ -21,11 +21,6 @@ import {
 	type IEntityStorageConnector
 } from "@twin.org/entity-storage-models";
 import type { IEventBusComponent } from "@twin.org/event-bus-models";
-import {
-	IdentityAuthenticationContexts,
-	IdentityAuthenticationTypes,
-	type IIdentityAuthenticationActionRequest
-} from "@twin.org/identity-authentication";
 import type { ILoggingComponent } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
 import type { IPolicyEnforcementPointComponent } from "@twin.org/rights-management-models";
@@ -38,6 +33,7 @@ import {
 	SynchronisedStorageAssetTypes,
 	SynchronisedStorageTopics
 } from "@twin.org/synchronised-storage-models";
+import { type ITrustComponent, TrustHelper } from "@twin.org/trust-models";
 import { type IVaultConnector, VaultConnectorFactory, VaultKeyType } from "@twin.org/vault-models";
 import {
 	type IVerifiableStorageConnector,
@@ -146,6 +142,12 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	private readonly _blobStorageHelper: BlobStorageHelper;
 
 	/**
+	 * The trust component.
+	 * @internal
+	 */
+	private readonly _trustComponent: ITrustComponent;
+
+	/**
 	 * The change set helper.
 	 * @internal
 	 */
@@ -234,6 +236,10 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 			options.taskSchedulerComponentType ?? "task-scheduler"
 		);
 
+		this._trustComponent = ComponentFactory.get<ITrustComponent>(
+			options?.trustComponentType ?? "trust"
+		);
+
 		// If this is empty we assume the local node has the rights to write to the verifiable storage.
 		let isTrustedNode = true;
 		if (!Is.empty(options.trustedSynchronisedStorageComponentType)) {
@@ -265,7 +271,8 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 				options.config.maxConsolidations ?? SynchronisedStorageService._DEFAULT_MAX_CONSOLIDATIONS,
 			blobStorageEncryptionKeyId:
 				options.config.blobStorageEncryptionKeyId ?? "synchronised-storage-blob-encryption-key",
-			verifiableStorageKeyId: options.config.verifiableStorageKeyId
+			verifiableStorageKeyId: options.config.verifiableStorageKeyId,
+			overrideTrustGeneratorType: options.config.overrideTrustGeneratorType ?? ""
 		};
 
 		this._synchronisedStorageKey =
@@ -339,15 +346,15 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 
 		// If this is not a trusted node we need to request the decryption key from a trusted node
 		if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
-			const actionRequest: IIdentityAuthenticationActionRequest = {
-				"@context": IdentityAuthenticationContexts.ContextRoot,
-				type: IdentityAuthenticationTypes.ActionRequest,
-				action: "get-key",
-				requester: contextIds[ContextIdKeys.Node]
-			};
+			const trustPayload = await this._trustComponent.generate(
+				this._nodeId,
+				this._config.overrideTrustGeneratorType.length > 0
+					? this._config.overrideTrustGeneratorType
+					: undefined
+			);
 
 			const decryptionKey =
-				await this._trustedSynchronisedStorageComponent.getDecryptionKey(actionRequest);
+				await this._trustedSynchronisedStorageComponent.getDecryptionKey(trustPayload);
 
 			// If the key exists remove it and get a new one, in case the key has been rotated
 			const existingKey = await this._vaultConnector.getKey(
@@ -410,31 +417,22 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	/**
 	 * Get the decryption key for the synchronised storage.
 	 * This is used to decrypt the data stored in the synchronised storage.
-	 * @param actionRequest The action request used in the verifiable credential.
+	 * @param trustPayload Trust payload to verify the requesters identity.
 	 * @returns The decryption key.
 	 */
-	public async getDecryptionKey(
-		actionRequest: IIdentityAuthenticationActionRequest
-	): Promise<string> {
+	public async getDecryptionKey(trustPayload: unknown): Promise<string> {
 		if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
 			throw new GeneralError(SynchronisedStorageService.CLASS_NAME, "notTrustedNode");
 		}
 
-		Guards.objectValue<IIdentityAuthenticationActionRequest>(
-			SynchronisedStorageService.CLASS_NAME,
-			nameof(actionRequest),
-			actionRequest
+		const trustInfo = await TrustHelper.verifyTrust(
+			this._trustComponent,
+			trustPayload,
+			"getDecryptionKey"
 		);
 
-		if (actionRequest.action !== "get-key") {
-			throw new GeneralError(SynchronisedStorageService.CLASS_NAME, "incorrectActionType", {
-				action: actionRequest.action,
-				expecting: "get-key"
-			});
-		}
-
 		const result = await this._policyEnforcementPointComponent?.intercept({
-			assignee: actionRequest.requester,
+			assignee: trustInfo.identity,
 			assetType: SynchronisedStorageAssetTypes.DecryptionKey,
 			action: ActionType.Read
 		});
@@ -444,7 +442,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 				SynchronisedStorageService.CLASS_NAME,
 				"decryptionKeyNotAllowed",
 				{
-					nodeId: actionRequest.requester
+					nodeId: trustInfo.identity
 				}
 			);
 		}
@@ -454,7 +452,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 			source: SynchronisedStorageService.CLASS_NAME,
 			message: "decryptionKeyRequest",
 			data: {
-				nodeId: actionRequest.requester
+				nodeId: trustInfo.identity
 			}
 		});
 
@@ -469,13 +467,10 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	/**
 	 * Synchronise a set of changes from an untrusted node, assumes this is a trusted node.
 	 * @param syncChangeSet The change set to synchronise.
-	 * @param actionRequest The action request used in the verifiable credential.
+	 * @param trustPayload Trust payload to verify the requesters identity.
 	 * @returns Nothing.
 	 */
-	public async syncChangeSet(
-		syncChangeSet: ISyncChangeSet,
-		actionRequest: IIdentityAuthenticationActionRequest
-	): Promise<void> {
+	public async syncChangeSet(syncChangeSet: ISyncChangeSet, trustPayload: unknown): Promise<void> {
 		if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
 			throw new GeneralError(SynchronisedStorageService.CLASS_NAME, "notTrustedNode");
 		}
@@ -485,28 +480,21 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 			nameof(syncChangeSet),
 			syncChangeSet
 		);
-		Guards.objectValue<IIdentityAuthenticationActionRequest>(
-			SynchronisedStorageService.CLASS_NAME,
-			nameof(actionRequest),
-			actionRequest
+		const trustInfo = await TrustHelper.verifyTrust(
+			this._trustComponent,
+			trustPayload,
+			"syncChangeSet"
 		);
 
-		if (actionRequest.action !== "sync-changeset") {
-			throw new GeneralError(SynchronisedStorageService.CLASS_NAME, "incorrectActionType", {
-				action: actionRequest.action,
-				expecting: "sync-changeset"
-			});
-		}
-
 		const result = await this._policyEnforcementPointComponent?.intercept({
-			assignee: actionRequest.requester,
+			assignee: trustInfo.identity,
 			assetType: SynchronisedStorageAssetTypes.ChangeSet,
 			action: ActionType.Read
 		});
 
 		if (!(Coerce.boolean(result) ?? false)) {
 			throw new UnauthorizedError(SynchronisedStorageService.CLASS_NAME, "changeSetNotAllowed", {
-				nodeId: actionRequest.requester,
+				nodeId: trustInfo.identity,
 				changeSetStorageId: syncChangeSet.id
 			});
 		}
@@ -517,7 +505,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 			message: "syncChangeSetForRemoteNode",
 			data: {
 				changeSetStorageId: syncChangeSet.id,
-				nodeId: actionRequest.requester
+				nodeId: trustInfo.identity
 			}
 		});
 
@@ -674,16 +662,16 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 									}
 								});
 
-								const actionRequest: IIdentityAuthenticationActionRequest = {
-									"@context": IdentityAuthenticationContexts.ContextRoot,
-									type: IdentityAuthenticationTypes.ActionRequest,
-									action: "sync-changeset",
-									requester: this._nodeId
-								};
+								const trustPayload = await this._trustComponent.generate(
+									this._nodeId,
+									this._config.overrideTrustGeneratorType.length > 0
+										? this._config.overrideTrustGeneratorType
+										: undefined
+								);
 
 								await this._trustedSynchronisedStorageComponent.syncChangeSet(
 									syncChangeSet,
-									actionRequest
+									trustPayload
 								);
 
 								await this._localSyncStateHelper.removeLocalChangeSnapshot(localChangeSnapshot);

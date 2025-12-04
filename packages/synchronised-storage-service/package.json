@@ -46,6 +46,7 @@
 		"@twin.org/standards-w3c-did": "next",
 		"@twin.org/standards-w3c-odrl": "next",
 		"@twin.org/synchronised-storage-models": "0.0.3-next.1",
+		"@twin.org/trust-models": "next",
 		"@twin.org/verifiable-storage-models": "next",
 		"@twin.org/web": "next"
 	},

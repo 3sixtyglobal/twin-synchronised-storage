@@ -51,6 +51,7 @@ import {
 	SynchronisedStorageTopics,
 	SynchronisedStorageTypes
 } from "@twin.org/synchronised-storage-models";
+import type { ITrustComponent } from "@twin.org/trust-models";
 import {
 	EntityStorageVaultConnector,
 	type VaultKey,
@@ -107,6 +108,7 @@ let loggingUntrustedMemoryEntityStorage: MemoryEntityStorageConnector<LogEntry>;
 let nodeId: string;
 let testNodeId: string;
 let testNodeIdUntrusted: string;
+let mockTrustComponent: ITrustComponent;
 
 const mockChaCha20Poly1305Key = new Uint8Array(32).fill(0x01);
 
@@ -320,6 +322,20 @@ describe("synchronisedStorageService", () => {
 			"assertionMethod",
 			"node-authentication-assertion"
 		);
+
+		mockTrustComponent = {
+			className: () => "MockTrustComponent",
+			generate: vi.fn(
+				async (identity: string, generatorType?: string, info?: { [key: string]: unknown }) =>
+					`token:${identity}`
+			),
+			verify: vi.fn(async (payload: unknown, overrideVerifiers?: string[]) => ({
+				verified: true,
+				info: { identity: (payload as string).slice(6) }
+			}))
+		};
+
+		ComponentFactory.register("trust", () => mockTrustComponent);
 
 		ContextIdStore.getContextIds = vi
 			.fn()

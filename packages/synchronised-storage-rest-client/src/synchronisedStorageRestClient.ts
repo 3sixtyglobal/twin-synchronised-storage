@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0.
 import { BaseRestClient } from "@twin.org/api-core";
 import type { IBaseRestClientConfig, INoContentResponse } from "@twin.org/api-models";
-import { ContextIdKeys } from "@twin.org/context";
 import { Guards } from "@twin.org/core";
-import type { IIdentityAuthenticationActionRequest } from "@twin.org/identity-authentication";
 import { nameof } from "@twin.org/nameof";
 import type {
 	ISyncChangeSet,
@@ -13,6 +11,7 @@ import type {
 	ISyncDecryptionKeyResponse,
 	ISynchronisedStorageComponent
 } from "@twin.org/synchronised-storage-models";
+import { HeaderHelper, HeaderTypes } from "@twin.org/web";
 
 /**
  * Client for performing synchronised storage through to REST endpoints.
@@ -45,27 +44,16 @@ export class SynchronisedStorageRestClient
 	/**
 	 * Get the decryption key for the synchronised storage.
 	 * This is used to decrypt the data stored in the synchronised storage.
-	 * @param actionRequest The action request used in the verifiable credential.
+	 * @param trustPayload Trust payload to verify the requesters identity.
 	 * @returns The decryption key.
 	 */
-	public async getDecryptionKey(
-		actionRequest: IIdentityAuthenticationActionRequest
-	): Promise<string> {
-		Guards.object<IIdentityAuthenticationActionRequest>(
-			SynchronisedStorageRestClient.CLASS_NAME,
-			nameof(actionRequest),
-			actionRequest
-		);
-
+	public async getDecryptionKey(trustPayload: unknown): Promise<string> {
 		const response = await this.fetch<ISyncDecryptionKeyRequest, ISyncDecryptionKeyResponse>(
 			"/decryption-key",
 			"GET",
-			undefined,
 			{
-				authenticationGeneratorType: "verifiable-credential",
-				authenticationData: {
-					contextId: ContextIdKeys.Organization,
-					subject: actionRequest
+				headers: {
+					[HeaderTypes.Authorization]: HeaderHelper.createBearer(trustPayload)
 				}
 			}
 		);
@@ -76,32 +64,21 @@ export class SynchronisedStorageRestClient
 	/**
 	 * Synchronise a set of changes from an untrusted node, assumes this is a trusted node.
 	 * @param syncChangeSet The change set to synchronise.
-	 * @param actionRequest The action request used in the verifiable credential.
+	 * @param trustPayload Trust payload to verify the requesters identity.
 	 * @returns Nothing.
 	 */
-	public async syncChangeSet(
-		syncChangeSet: ISyncChangeSet,
-		actionRequest: IIdentityAuthenticationActionRequest
-	): Promise<void> {
+	public async syncChangeSet(syncChangeSet: ISyncChangeSet, trustPayload: unknown): Promise<void> {
 		Guards.object<ISyncChangeSet>(
 			SynchronisedStorageRestClient.CLASS_NAME,
 			nameof(syncChangeSet),
 			syncChangeSet
 		);
 
-		await this.fetch<ISyncChangeSetRequest, INoContentResponse>(
-			"/sync-changeset",
-			"POST",
-			{
-				body: syncChangeSet
+		await this.fetch<ISyncChangeSetRequest, INoContentResponse>("/sync-changeset", "POST", {
+			headers: {
+				[HeaderTypes.Authorization]: HeaderHelper.createBearer(trustPayload)
 			},
-			{
-				authenticationGeneratorType: "verifiable-credential",
-				authenticationData: {
-					contextId: ContextIdKeys.Organization,
-					subject: actionRequest
-				}
-			}
-		);
+			body: syncChangeSet
+		});
 	}
 }

@@ -86,3 +86,11 @@ if the key is not found in the keys.json it is considered to be a custom verifia
 ```ts
 local
 ```
+
+***
+
+### overrideTrustGeneratorType?
+
+> `optional` **overrideTrustGeneratorType**: `string`
+
+Override the default trust generator.
