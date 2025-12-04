@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.3-next.2](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-models-v0.0.3-next.1...synchronised-storage-models-v0.0.3-next.2) (2025-12-04)
+
+
+### Features
+
+* use trust component ([424f0d6](https://github.com/twinfoundation/synchronised-storage/commit/424f0d6aaacfdc7700c46fe6c2def23b2eacddc9))
+
 ## [0.0.3-next.1](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-models-v0.0.3-next.0...synchronised-storage-models-v0.0.3-next.1) (2025-11-12)
 
 
