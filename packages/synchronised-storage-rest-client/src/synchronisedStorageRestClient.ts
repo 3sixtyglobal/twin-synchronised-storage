@@ -48,6 +48,12 @@ export class SynchronisedStorageRestClient
 	 * @returns The decryption key.
 	 */
 	public async getDecryptionKey(trustPayload: unknown): Promise<string> {
+		Guards.stringValue(
+			SynchronisedStorageRestClient.CLASS_NAME,
+			nameof(trustPayload),
+			trustPayload
+		);
+
 		const response = await this.fetch<ISyncDecryptionKeyRequest, ISyncDecryptionKeyResponse>(
 			"/decryption-key",
 			"GET",
@@ -72,6 +78,12 @@ export class SynchronisedStorageRestClient
 			SynchronisedStorageRestClient.CLASS_NAME,
 			nameof(syncChangeSet),
 			syncChangeSet
+		);
+
+		Guards.stringValue(
+			SynchronisedStorageRestClient.CLASS_NAME,
+			nameof(trustPayload),
+			trustPayload
 		);
 
 		await this.fetch<ISyncChangeSetRequest, INoContentResponse>("/sync-changeset", "POST", {
