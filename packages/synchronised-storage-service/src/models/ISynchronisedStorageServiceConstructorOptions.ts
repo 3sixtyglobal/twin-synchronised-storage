@@ -46,13 +46,6 @@ export interface ISynchronisedStorageServiceConstructorOptions {
 	taskSchedulerComponentType?: string;
 
 	/**
-	 * The rights management enforcement component to use for verifying untrusted node access.
-	 * Only required on a trusted node to enforce access control.
-	 * @default policy-enforcement-point
-	 */
-	policyEnforcementPointComponentType?: string;
-
-	/**
 	 * The type of the trust component.
 	 * @default trust
 	 */

@@ -8,7 +8,6 @@ import {
 import { ContextIdHelper, ContextIdKeys, ContextIdStore } from "@twin.org/context";
 import {
 	BaseError,
-	Coerce,
 	ComponentFactory,
 	Converter,
 	GeneralError,
@@ -23,14 +22,11 @@ import {
 import type { IEventBusComponent } from "@twin.org/event-bus-models";
 import type { ILoggingComponent } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
-import type { IPolicyEnforcementPointComponent } from "@twin.org/rights-management-models";
-import { ActionType } from "@twin.org/standards-w3c-odrl";
 import {
 	type ISyncChangeSet,
 	type ISynchronisedStorageComponent,
 	type ISyncItemChange,
 	type ISyncRegisterStorageKey,
-	SynchronisedStorageAssetTypes,
 	SynchronisedStorageTopics
 } from "@twin.org/synchronised-storage-models";
 import { type ITrustComponent, TrustHelper } from "@twin.org/trust-models";
@@ -128,12 +124,6 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	 * @internal
 	 */
 	private readonly _trustedSynchronisedStorageComponent?: ISynchronisedStorageComponent;
-
-	/**
-	 * The policy enforcement point component, used by trusted nodes for incoming requests.
-	 * @internal
-	 */
-	private readonly _policyEnforcementPointComponent?: IPolicyEnforcementPointComponent;
 
 	/**
 	 * The blob storage helper.
@@ -250,11 +240,6 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 				ComponentFactory.get<ISynchronisedStorageComponent>(
 					options.trustedSynchronisedStorageComponentType
 				);
-		} else {
-			// A trusted node must have a policy enforcement point component
-			this._policyEnforcementPointComponent = ComponentFactory.get(
-				options?.policyEnforcementPointComponentType ?? "policy-enforcement-point"
-			);
 		}
 
 		this._config = {
@@ -431,22 +416,6 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 			"getDecryptionKey"
 		);
 
-		const result = await this._policyEnforcementPointComponent?.intercept({
-			assignee: trustInfo.identity,
-			assetType: SynchronisedStorageAssetTypes.DecryptionKey,
-			action: ActionType.Read
-		});
-
-		if (!(Coerce.boolean(result) ?? false)) {
-			throw new UnauthorizedError(
-				SynchronisedStorageService.CLASS_NAME,
-				"decryptionKeyNotAllowed",
-				{
-					nodeId: trustInfo.identity
-				}
-			);
-		}
-
 		await this._logging?.log({
 			level: "info",
 			source: SynchronisedStorageService.CLASS_NAME,
@@ -485,19 +454,6 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 			trustPayload,
 			"syncChangeSet"
 		);
-
-		const result = await this._policyEnforcementPointComponent?.intercept({
-			assignee: trustInfo.identity,
-			assetType: SynchronisedStorageAssetTypes.ChangeSet,
-			action: ActionType.Read
-		});
-
-		if (!(Coerce.boolean(result) ?? false)) {
-			throw new UnauthorizedError(SynchronisedStorageService.CLASS_NAME, "changeSetNotAllowed", {
-				nodeId: trustInfo.identity,
-				changeSetStorageId: syncChangeSet.id
-			});
-		}
 
 		await this._logging?.log({
 			level: "info",

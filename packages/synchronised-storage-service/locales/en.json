@@ -69,8 +69,6 @@
 			"notTrustedNode": "This method can only be called on a trusted node",
 			"entitySyncFailed": "Failed to sync synchronised entity storage connector",
 			"consolidationSyncFailed": "Failed to consolidate synchronised entity storage connector",
-			"decryptionKeyNotAllowed": "The node identity \"{nodeId}\" is not allowed to retrieve the decryption key",
-			"changeSetNotAllowed": "The node identity \"{nodeId}\" is not allowed to sync the change set with id \"{changeSetStorageId}\"",
 			"decryptionKeyNotFound": "Decryption key not found, ensure the synchronised storage component is initialised and the decryption key is set"
 		},
 		"remoteSyncStateHelper": {

@@ -39,7 +39,6 @@ import {
 import { LoggingConnectorFactory } from "@twin.org/logging-models";
 import { LoggingService } from "@twin.org/logging-service";
 import { nameof } from "@twin.org/nameof";
-import type { IPolicyEnforcementPointComponent } from "@twin.org/rights-management-models";
 import {
 	type ISyncChangeSet,
 	type ISyncItemChange,
@@ -275,10 +274,6 @@ describe("synchronisedStorageService", () => {
 			loggingConnectorType: "logging-untrusted"
 		});
 		ComponentFactory.register("logging-untrusted", () => loggingUntrustedService);
-
-		const policyEnforcementPointComponent = {} as IPolicyEnforcementPointComponent;
-		policyEnforcementPointComponent.intercept = vi.fn().mockImplementation(async () => true);
-		ComponentFactory.register("policy-enforcement-point", () => policyEnforcementPointComponent);
 
 		Date.now = vi.fn().mockImplementation(() => 1748480400000);
 
