@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3-next.3](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.3-next.2...synchronised-storage-service-v0.0.3-next.3) (2026-01-12)
+
+
+### Features
+
+* read headers from pre request data ([#28](https://github.com/twinfoundation/synchronised-storage/issues/28)) ([3360bf5](https://github.com/twinfoundation/synchronised-storage/commit/3360bf5b22fe62f312ba177f8812941de7e8cf2c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.3-next.2 to 0.0.3-next.3
+
 ## [0.0.3-next.2](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.3-next.1...synchronised-storage-service-v0.0.3-next.2) (2025-12-04)
 
 

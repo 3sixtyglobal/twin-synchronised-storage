@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3-next.3](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-rest-client-v0.0.3-next.2...synchronised-storage-rest-client-v0.0.3-next.3) (2026-01-12)
+
+
+### Features
+
+* add trustPayload guards ([cf1622f](https://github.com/twinfoundation/synchronised-storage/commit/cf1622f8b65a4b77032e31ecaa41664499f4c892))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.3-next.2 to 0.0.3-next.3
+
 ## [0.0.3-next.2](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-rest-client-v0.0.3-next.1...synchronised-storage-rest-client-v0.0.3-next.2) (2025-12-04)
 
 
