@@ -157,9 +157,7 @@ export async function synchronisedStorageSyncChangeSetRequest(
 	const component = ComponentFactory.get<ISynchronisedStorageComponent>(componentName);
 	await component.syncChangeSet(
 		request.body,
-		HeaderHelper.extractBearer(
-			httpRequestContext.serverRequest.headers?.[HeaderTypes.Authorization]
-		)
+		HeaderHelper.extractBearer(request.headers?.[HeaderTypes.Authorization])
 	);
 	return {
 		statusCode: HttpStatusCode.noContent
@@ -187,9 +185,7 @@ export async function synchronisedStorageGetDecryptionKeyRequest(
 
 	const component = ComponentFactory.get<ISynchronisedStorageComponent>(componentName);
 	const key = await component.getDecryptionKey(
-		HeaderHelper.extractBearer(
-			httpRequestContext.serverRequest.headers?.[HeaderTypes.Authorization]
-		)
+		HeaderHelper.extractBearer(request.headers?.[HeaderTypes.Authorization])
 	);
 	return {
 		body: {
