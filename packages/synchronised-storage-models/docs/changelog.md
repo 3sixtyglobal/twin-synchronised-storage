@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.3-next.4](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-models-v0.0.3-next.3...synchronised-storage-models-v0.0.3-next.4) (2026-01-15)
+
+
+### Features
+
+* update contexts and namespaces ([#31](https://github.com/twinfoundation/synchronised-storage/issues/31)) ([b31c8fa](https://github.com/twinfoundation/synchronised-storage/commit/b31c8fabb8431a230415aaa2caa47fb021489d3a))
+
 ## [0.0.3-next.3](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-models-v0.0.3-next.2...synchronised-storage-models-v0.0.3-next.3) (2026-01-12)
 
 
