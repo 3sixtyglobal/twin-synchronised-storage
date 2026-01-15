@@ -10,7 +10,7 @@ export interface ISyncRequest {
 	/**
 	 * The LD Context for the request.
 	 */
-	"@context": typeof SynchronisedStorageContexts.ContextRoot;
+	"@context": typeof SynchronisedStorageContexts.Namespace;
 
 	/**
 	 * The LD Type for the request.

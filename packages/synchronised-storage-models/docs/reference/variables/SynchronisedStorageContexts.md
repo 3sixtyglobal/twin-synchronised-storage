@@ -2,12 +2,12 @@
 
 > `const` **SynchronisedStorageContexts**: `object`
 
-The LD Contexts concerning SynchronisedStorage.
+The Contexts concerning SynchronisedStorage.
 
 ## Type Declaration
 
-### ContextRoot
+### Namespace
 
-> `readonly` **ContextRoot**: `"https://schema.twindev.org/synchronised-storage"` = `"https://schema.twindev.org/synchronised-storage"`
+> `readonly` **Namespace**: `"https://schema.twindev.org/synchronised-storage/"` = `"https://schema.twindev.org/synchronised-storage/"`
 
-The SynchronisedStorage LD Context.
+The namespace.

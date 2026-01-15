@@ -279,7 +279,7 @@ export class RemoteSyncStateHelper {
 
 			const now = new Date(Date.now()).toISOString();
 			const syncChangeSet: ISyncChangeSet = {
-				"@context": SynchronisedStorageContexts.ContextRoot,
+				"@context": SynchronisedStorageContexts.Namespace,
 				type: SynchronisedStorageTypes.ChangeSet,
 				id: Converter.bytesToHex(RandomHelper.generate(32)),
 				dateCreated: now,
@@ -599,7 +599,7 @@ export class RemoteSyncStateHelper {
 
 			// Create a new snapshot entry for the current batch
 			const syncChangeSet: ISyncChangeSet = {
-				"@context": SynchronisedStorageContexts.ContextRoot,
+				"@context": SynchronisedStorageContexts.Namespace,
 				type: SynchronisedStorageTypes.ChangeSet,
 				id: Converter.bytesToHex(RandomHelper.generate(32)),
 				dateCreated: now,
