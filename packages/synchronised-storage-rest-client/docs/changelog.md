@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3-next.5](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-rest-client-v0.0.3-next.4...synchronised-storage-rest-client-v0.0.3-next.5) (2026-01-19)
+
+
+### Features
+
+* remove unused dependencies ([518c460](https://github.com/twinfoundation/synchronised-storage/commit/518c460d2e5e2b2c487565acb5162a03ddb85eae))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.3-next.4 to 0.0.3-next.5
+
 ## [0.0.3-next.4](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-rest-client-v0.0.3-next.3...synchronised-storage-rest-client-v0.0.3-next.4) (2026-01-15)
 
 

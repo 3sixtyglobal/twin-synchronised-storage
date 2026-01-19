@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3-next.5](https://github.com/twinfoundation/synchronised-storage/compare/entity-storage-connector-synchronised-v0.0.3-next.4...entity-storage-connector-synchronised-v0.0.3-next.5) (2026-01-19)
+
+
+### Miscellaneous Chores
+
+* **entity-storage-connector-synchronised:** Synchronize repo versions
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.3-next.4 to 0.0.3-next.5
+
 ## [0.0.3-next.4](https://github.com/twinfoundation/synchronised-storage/compare/entity-storage-connector-synchronised-v0.0.3-next.3...entity-storage-connector-synchronised-v0.0.3-next.4) (2026-01-15)
 
 
