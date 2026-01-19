@@ -38,7 +38,6 @@
 		"@twin.org/entity": "next",
 		"@twin.org/entity-storage-models": "next",
 		"@twin.org/event-bus-models": "next",
-		"@twin.org/identity-authentication": "next",
 		"@twin.org/identity-models": "next",
 		"@twin.org/logging-models": "next",
 		"@twin.org/nameof": "next",
