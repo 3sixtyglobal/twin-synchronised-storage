@@ -11,7 +11,7 @@ export interface ISyncChangeSet {
 	/**
 	 * The LD Context for the change set.
 	 */
-	"@context": typeof SynchronisedStorageContexts.Namespace;
+	"@context": typeof SynchronisedStorageContexts.Context;
 
 	/**
 	 * The LD Type for the change set.

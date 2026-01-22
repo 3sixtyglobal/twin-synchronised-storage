@@ -2,18 +2,28 @@
 // SPDX-License-Identifier: Apache-2.0.
 
 /**
- * The Contexts concerning SynchronisedStorage.
+ * The Contexts concerning Synchronised Storage.
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const SynchronisedStorageContexts = {
 	/**
-	 * The namespace.
+	 * The canonical RDF namespace URI for Synchronised Storage.
 	 */
-	Namespace: "https://schema.twindev.org/synchronised-storage/"
+	Namespace: "https://schema.twindev.org/synchronised-storage/",
+
+	/**
+	 * The value to use in context for Synchronised Storage.
+	 */
+	Context: "https://schema.twindev.org/synchronised-storage/",
+
+	/**
+	 * The JSON-LD Context URL for Synchronised Storage.
+	 */
+	JsonLdContext: "https://schema.twindev.org/synchronised-storage/types.jsonld"
 } as const;
 
 /**
- * The Contexts concerning SynchronisedStorage.
+ * The Contexts concerning Synchronised Storage.
  */
 export type SynchronisedStorageContexts =
 	(typeof SynchronisedStorageContexts)[keyof typeof SynchronisedStorageContexts];

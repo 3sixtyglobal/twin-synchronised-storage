@@ -62,7 +62,7 @@ export function generateRestRoutesSynchronisedStorage(
 							[HeaderTypes.Authorization]: "z3V32BP9ShC...z3V32BP9ShC"
 						},
 						body: {
-							"@context": SynchronisedStorageContexts.Namespace,
+							"@context": SynchronisedStorageContexts.Context,
 							type: SynchronisedStorageTypes.ChangeSet,
 							id: "0909090909090909090909090909090909090909090909090909090909090909",
 							dateCreated: "2025-05-29T01:00:00.000Z",

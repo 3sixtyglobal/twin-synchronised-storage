@@ -2,4 +2,4 @@
 
 > **SynchronisedStorageContexts** = *typeof* [`SynchronisedStorageContexts`](../variables/SynchronisedStorageContexts.md)\[keyof *typeof* [`SynchronisedStorageContexts`](../variables/SynchronisedStorageContexts.md)\]
 
-The Contexts concerning SynchronisedStorage.
+The Contexts concerning Synchronised Storage.
