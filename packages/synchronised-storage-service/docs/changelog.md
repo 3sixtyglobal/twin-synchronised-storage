@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3-next.6](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.3-next.5...synchronised-storage-service-v0.0.3-next.6) (2026-01-22)
+
+
+### Features
+
+* update contexts ([#34](https://github.com/twinfoundation/synchronised-storage/issues/34)) ([7be9caf](https://github.com/twinfoundation/synchronised-storage/commit/7be9caf3da63f8afefd625650150bed171a1d045))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.3-next.5 to 0.0.3-next.6
+
 ## [0.0.3-next.5](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.3-next.4...synchronised-storage-service-v0.0.3-next.5) (2026-01-19)
 
 
