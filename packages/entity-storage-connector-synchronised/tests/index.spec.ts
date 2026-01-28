@@ -44,7 +44,7 @@ class TestType {
 	 * Node Identity.
 	 */
 	@property({ type: "string", isSecondary: true })
-	public nodeId!: string;
+	public nodeIdentity!: string;
 
 	/**
 	 * Date Modified.
@@ -140,7 +140,7 @@ describe("synchronisedEntityStorageConnector", () => {
 
 		await connector.set({
 			id: "test-id",
-			nodeId: testNodeId,
+			nodeIdentity: testNodeId,
 			dateModified: new Date().toISOString()
 		});
 
@@ -153,7 +153,7 @@ describe("synchronisedEntityStorageConnector", () => {
 		expect(memoryStorageConnector.getStore()).toEqual([
 			{
 				id: "test-id",
-				nodeId: testNodeId,
+				nodeIdentity: testNodeId,
 				dateModified: expect.any(String)
 			}
 		]);
@@ -181,7 +181,7 @@ describe("synchronisedEntityStorageConnector", () => {
 
 		await connector.set({
 			id: "test-id",
-			nodeId: testNodeId,
+			nodeIdentity: testNodeId,
 			dateModified: new Date().toISOString()
 		});
 
@@ -218,7 +218,7 @@ describe("synchronisedEntityStorageConnector", () => {
 
 		await connector.set({
 			id: "test-id",
-			nodeId: testNodeId,
+			nodeIdentity: testNodeId,
 			dateModified: new Date().toISOString()
 		});
 
@@ -232,7 +232,7 @@ describe("synchronisedEntityStorageConnector", () => {
 		expect(itemResponseData?.data.id).toEqual("test-id");
 		expect(itemResponseData?.data.entity).toEqual({
 			id: "test-id",
-			nodeId: testNodeId,
+			nodeIdentity: testNodeId,
 			dateModified: expect.any(String)
 		});
 	});
@@ -259,7 +259,7 @@ describe("synchronisedEntityStorageConnector", () => {
 
 		await connector.set({
 			id: "test-id",
-			nodeId: testNodeId,
+			nodeIdentity: testNodeId,
 			dateModified: new Date().toISOString()
 		});
 
@@ -302,7 +302,7 @@ describe("synchronisedEntityStorageConnector", () => {
 		for (let i = 0; i < 5; i++) {
 			await connector.set({
 				id: `test-id-${i}`,
-				nodeId: testNodeId,
+				nodeIdentity: testNodeId,
 				dateModified: new Date().toISOString()
 			});
 		}
@@ -339,7 +339,7 @@ describe("synchronisedEntityStorageConnector", () => {
 			storageKey: "test-type-100",
 			entity: {
 				id: "test-id",
-				nodeId: testNodeId2,
+				nodeIdentity: testNodeId2,
 				dateModified: new Date().toISOString()
 			}
 		});
@@ -347,7 +347,7 @@ describe("synchronisedEntityStorageConnector", () => {
 		expect(memoryStorageConnector.getStore()).toEqual([
 			{
 				id: "test-id",
-				nodeId: testNodeId2,
+				nodeIdentity: testNodeId2,
 				dateModified: expect.any(String)
 			}
 		]);
@@ -366,7 +366,7 @@ describe("synchronisedEntityStorageConnector", () => {
 
 		await connector.set({
 			id: "test-id",
-			nodeId: testNodeId2,
+			nodeIdentity: testNodeId2,
 			dateModified: new Date().toISOString()
 		});
 
@@ -392,12 +392,12 @@ describe("synchronisedEntityStorageConnector", () => {
 
 		await memoryStorageConnector.set({
 			id: "test-id-local",
-			nodeId: testNodeId,
+			nodeIdentity: testNodeId,
 			dateModified: new Date().toISOString()
 		});
 		await memoryStorageConnector.set({
 			id: "test-id-remote",
-			nodeId: testNodeId2,
+			nodeIdentity: testNodeId2,
 			dateModified: new Date().toISOString()
 		});
 
@@ -410,7 +410,7 @@ describe("synchronisedEntityStorageConnector", () => {
 			{
 				id: "test-id-remote",
 				dateModified: expect.any(String),
-				nodeId: testNodeId2
+				nodeIdentity: testNodeId2
 			}
 		]);
 	});
@@ -428,12 +428,12 @@ describe("synchronisedEntityStorageConnector", () => {
 
 		await memoryStorageConnector.set({
 			id: "test-id-local",
-			nodeId: testNodeId,
+			nodeIdentity: testNodeId,
 			dateModified: new Date().toISOString()
 		});
 		await memoryStorageConnector.set({
 			id: "test-id-remote",
-			nodeId: testNodeId2,
+			nodeIdentity: testNodeId2,
 			dateModified: new Date().toISOString()
 		});
 
@@ -446,7 +446,7 @@ describe("synchronisedEntityStorageConnector", () => {
 			{
 				id: "test-id-local",
 				dateModified: expect.any(String),
-				nodeId: testNodeId
+				nodeIdentity: testNodeId
 			}
 		]);
 	});
@@ -464,12 +464,12 @@ describe("synchronisedEntityStorageConnector", () => {
 
 		await memoryStorageConnector.set({
 			id: "test-id-local",
-			nodeId: testNodeId,
+			nodeIdentity: testNodeId,
 			dateModified: new Date().toISOString()
 		});
 		await memoryStorageConnector.set({
 			id: "test-id-remote",
-			nodeId: testNodeId2,
+			nodeIdentity: testNodeId2,
 			dateModified: new Date().toISOString()
 		});
 

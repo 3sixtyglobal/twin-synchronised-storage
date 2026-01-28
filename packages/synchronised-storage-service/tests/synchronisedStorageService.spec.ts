@@ -583,7 +583,7 @@ describe("synchronisedStorageService", () => {
 						id: "test-id-1",
 						entity: {
 							id: "test-id-1",
-							nodeId: testNodeId,
+							nodeIdentity: testNodeId,
 							dateModified: new Date("2025-01-01T00:00:00Z").toISOString()
 						}
 					}
@@ -655,7 +655,7 @@ describe("synchronisedStorageService", () => {
 						storageKey: "test-type",
 						syncPointers: {
 							"test-type":
-								"blob:memory:4d108764c5c4c5419e0f18df255b642f875eb91b680bf1bf420e6ff74e8798de"
+								"blob:memory:571e9def89ea2c83a79e1033d25121d35089da73b946a8e37567feb83246c381"
 						}
 					})
 				),
@@ -669,7 +669,7 @@ describe("synchronisedStorageService", () => {
 			version: "1",
 			storageKey: "test-type",
 			syncPointers: {
-				"test-type": "blob:memory:4d108764c5c4c5419e0f18df255b642f875eb91b680bf1bf420e6ff74e8798de"
+				"test-type": "blob:memory:571e9def89ea2c83a79e1033d25121d35089da73b946a8e37567feb83246c381"
 			}
 		});
 
@@ -682,15 +682,15 @@ describe("synchronisedStorageService", () => {
 			blobs[blobKey] = Converter.bytesToBase64(blobStorageStore[blobKey]);
 		}
 		expect(blobs).toEqual({
-			"root/4d108764c5c4c5419e0f18df255b642f875eb91b680bf1bf420e6ff74e8798de":
-				"BgYGBgYGBgYGBgYGLJGq0yTxbedRsJj85OTT/oJ8GlEXAFv343l3l6JMMoQyb+HOosrA5mnnkx+xFBRwGdaLweogfytylYQRbwQi3/omg2S6vkPCA1VMrRmE1sS9uFSF9aCqVOJIjj8mY/9OnbLXktRLLkEsb1u2NWw9lKdtEKQLQTpAghgzVSJuX2nfzJp38P1bI36+n/J5dz0GWDtMXm2q+Yy3jOwPwNi/Q6IQqKDWOeDzHIIEkK9ZJCs29FhXZ37VvFixAiY/otvslx8zstnZmpRdikYk7/djOIHTiaIzQLu9zsPRvintmvTssyDKAbwzs9nejB3qO9fIERM=",
-			"root/d120276227786bfebac056f78f7927aa6d817d620fd94033f3c4da3d14cfab51":
-				"/f39/f39/f39/f39uWjCVJIFMADDLRdLI0ixv5DA7JcZK6LzD2lc7tqwtsN0dQoIpyu+vWk8RHRduTDFqMxdRiQ9vp+BYvBtngLWHvfK6pNZaMwruY8B96ClIe45S7G19iqZAvZlQNiWQVKGqLLh+mP7GjeGGuu7dCwGDEwk4+M0ZeWzOtEm36xWb9PIMnsXpxzEQ4p/QmtelCJV1XbdLuFMteXnwe0DnNKoJqklTtqx+wyjedK+RxbkpArNUI9Grzyj+tYu0d70C7qXCCnFGX8bEaxeFoA0me6CtPRBxDE4ZANYxtlzcfGe0/QDfyyW3X5gFxEsN+jN7Df1ecI="
+			"root/48b5859e5a3b243cbae0c1fd34ac109f2e6b92bf6c63ff677fe6efa4b50a488b":
+				"/f39/f39/f39/f39uWjCVJIFMADDLRdLo0mxv4wB7Dlo/8u5dGs77gqwNsVAdRKIkKBu33w9qiYt5bCf6d4j8op1mpb5UqMIYNusg+Is2Gjk9ixGuOW5D2EOPjhgHh2EiOAcQ3zhnnoKe5sNN3g75/aKkF5/4Df5MBEvlohUCkBfeOvbVawHAUFoI2VslivWbuaVicGyJB01+1MXgU/bnjPckd9qZODXnButRqN53hOQYrPvFvgoa07fA/gX+f0WjWYI1/+HKXnjVjScvmPhD43byksJy+qIGI9lTIkAZgkmFXt6jNT6M411IybQfrtr8Yp3EbwWf+M+u2K+EQiT2w==",
+			"root/571e9def89ea2c83a79e1033d25121d35089da73b946a8e37567feb83246c381":
+				"BgYGBgYGBgYGBgYGLJGq0yTxbedRsJj86OTT/oa8GlFBm5ES+sRGaTPUvG0ClK1xcBmBNPyJnXWd1CzFyjHFfb6C61kekxjOXlzNGL8rhLgZR42lH+PsTf25cKWG1MgvTvvAN6PNKryBNPlC3bPX0nQyANPz8ZCyCpI9FcAzLL4aTbpB0oA6T3bqRjYp3V4LCAupnQyaMAJwvqUz/Pl5dfsRyD9Rr+wQ7tdegEcI4y2RNGGm8GJdARC0ZdyAbzwTrWZR+2yy+eUd4gdmyfwXs2CNsg4XUQgQhHYZ+6NJAwH9Pcxian4PIjIV8vXsHOrHMZhssVqO02XKfT7Afw=="
 		});
 
 		expect(
 			await expandObject(
-				blobs["root/d120276227786bfebac056f78f7927aa6d817d620fd94033f3c4da3d14cfab51"]
+				blobs["root/48b5859e5a3b243cbae0c1fd34ac109f2e6b92bf6c63ff677fe6efa4b50a488b"]
 			)
 		).toEqual({
 			"@context": SynchronisedStorageContexts.Namespace,
@@ -699,7 +699,7 @@ describe("synchronisedStorageService", () => {
 			dateCreated: "2025-05-29T01:00:00.000Z",
 			dateModified: "2025-05-29T01:00:00.000Z",
 			storageKey: "test-type",
-			nodeId: testNodeId,
+			nodeIdentity: testNodeId,
 			changes: [
 				{
 					entity: {
@@ -713,7 +713,7 @@ describe("synchronisedStorageService", () => {
 
 		expect(
 			await expandObject(
-				blobs["root/4d108764c5c4c5419e0f18df255b642f875eb91b680bf1bf420e6ff74e8798de"]
+				blobs["root/571e9def89ea2c83a79e1033d25121d35089da73b946a8e37567feb83246c381"]
 			)
 		).toEqual({
 			version: "1",
@@ -727,7 +727,7 @@ describe("synchronisedStorageService", () => {
 					isConsolidated: false,
 					epoch: 1,
 					changeSetStorageIds: [
-						"blob:memory:d120276227786bfebac056f78f7927aa6d817d620fd94033f3c4da3d14cfab51"
+						"blob:memory:48b5859e5a3b243cbae0c1fd34ac109f2e6b92bf6c63ff677fe6efa4b50a488b"
 					]
 				}
 			]
@@ -760,7 +760,7 @@ describe("synchronisedStorageService", () => {
 			dateCreated: "2025-05-29T01:00:00.000Z",
 			dateModified: "2025-05-29T01:00:00.000Z",
 			storageKey: "test-type",
-			nodeId: testNodeIdUntrusted,
+			nodeIdentity: testNodeIdUntrusted,
 			changes: [
 				{
 					entity: {
@@ -848,7 +848,7 @@ describe("synchronisedStorageService", () => {
 				entity: {
 					dateModified: "2025-01-01T00:00:00.000Z",
 					id: "test-id-1",
-					nodeId: testNodeIdUntrusted
+					nodeIdentity: testNodeIdUntrusted
 				},
 				storageKey: "test-type"
 			},
@@ -869,7 +869,7 @@ describe("synchronisedStorageService", () => {
 				isConsolidated: true,
 				epoch: 0,
 				changeSetStorageIds: [
-					"blob:memory:a0aa6da03fb566b4d7ed81f39239f4f5c5c053f67b8cc288c50754bf0492c425"
+					"blob:memory:159672866e4ff9ac4a566ca27ca60d6e6543a43977eeb6139dc9d98807634a46"
 				]
 			}
 		]);
@@ -918,7 +918,7 @@ describe("synchronisedStorageService", () => {
 						id: "test-id-1",
 						entity: {
 							id: "test-id-1",
-							nodeId: testNodeId,
+							nodeIdentity: testNodeId,
 							dateModified: new Date("2025-01-01T00:00:00Z").toISOString()
 						}
 					}
@@ -997,7 +997,7 @@ describe("synchronisedStorageService", () => {
 						storageKey: "test-type",
 						syncPointers: {
 							"test-type":
-								"blob:memory:2763584ae80a2713757a343f4a960340c2768c8695b2ad8f0f555f7fe763b539"
+								"blob:memory:5dd043a0297a617f5efe7663b89f2f9dae6ff9e0308d7aaaa6241b84ef768094"
 						}
 					})
 				),
@@ -1012,15 +1012,15 @@ describe("synchronisedStorageService", () => {
 			blobs[blobKey] = Converter.bytesToBase64(blobStorageStore[blobKey]);
 		}
 		expect(blobs).toEqual({
-			"root/2763584ae80a2713757a343f4a960340c2768c8695b2ad8f0f555f7fe763b539":
-				"FhYWFhYWFhYWFhYWO94qTmu3QuM52+UPLiCXOcDcPAu6P3dYse6aCw8sVQZK/fm5ZO85o8rCviZwZQaWyTnhR3tY7SkOZNEWXt9NDnUHisT81SVd0kJkv2qyIfjqQ/cXQXuSqVjbdnGKjBV4VNMb3qjRmYypmDj+2DCECWsUOETOTkVbAOxzvpKHS2qL0fD8Z3rJg7GC03XSMa40S0EWNSAJanS2MAXOwhTInltv76u9Z7j226VZEVtAfnyXkQWyBPpyzaBsHIyAUVTjP7gnnA5WRDrDxmeXNK9xeLl/nBIThQIa6fBtAY8cv+gU3AelMRllFq0bPAvGP3XN",
-			"root/5c2a21f186faca86ec5662a9e81c286e6b4a8cd3c0d3a0e4dec3dfbfdfb48a4d":
-				"CwsLCwsLCwsLCwsLCcnLtDtqrO6baeZR+jzb3UQ1SarE1GTTjZylEuyumsmeP7Yr5Wq6NBgn7/VPndpgVkKDM/ZomfumgAmXz4tSlXnrCH5BbMmk3xxeWpCg5FRFtBiDAdaJljvLo4V/TplNlmreN0gHwteOT010gkigzDUpEq4nauYJxJAoHYBjOzKYm/FagRYo0NlNjwU/R1sa4K7EKThvR9TTVA/rAgr8/mfgpYcgLhE723jxBYzRiiiNGFcNUpBDUD9lp2SpKj4mGP8WMKOh9Fv6QAh5hhHEiFm2kt16JJVdfzQMveDgy3hlxNC0hu0vdmRO1B+8DTQg34k="
+			"root/5dd043a0297a617f5efe7663b89f2f9dae6ff9e0308d7aaaa6241b84ef768094":
+				"FhYWFhYWFhYWFhYWO94qTmu3QuM52+UPICCXOcCcfAu6P3eITQLvpHWRhj03Sttjf9Ikh5crWIe2J4rF8kQPg7B2zCoOZJEWLt8PAHUHjtS8GSRd6MJnv2qJ5ejsQ/AXQXua2VTadnGLjHVLf9Ib3io/PsTXYxG9IMO30B1Ro4Uq3d1IE/pA/xDHk4NE47AWQMkmFF7h6O41pxIvDGueQ9Kw9sD1qpvirnolqI16llvm39kAR2koVnjqEKDkffRgD4LQh3b57DAuHwnILRF9TT6OA4alu4QOsbQ/deTQFzZSuRL87w9jHK10vuj23ysrodg66f6HWyaMPzFPqg==",
+			"root/8be62e8780c42498e46283e11a33b0a694dc3496a094cf8312b48ef1a4801f23":
+				"CwsLCwsLCwsLCwsLCcnLtDtqrO6baeZR+jzb3UQ1SarE1GTTjZylEuyumsmeP7Yr5Wq6NBgn7/VPndpwG0WDM/ZoV/p+CU0RoB0M8vRCxADuS7H/XwZwJGBKYyEToXMPnqToBhlqFK3YAGuvMdiocC2boI0wcfpk3x8q6gQ5f0BN7eXTn8+gajVsqB+xsqUqA+i9Iov+Ftjlnc9vSDJXeep/Y+IRlgmBgu7+zmLObWMw4T6d7G26EyBM2VFgTG4lQz2WxqsxW7ciBPkjQ9oEO9pBG+hRrjJQR6m3dOeWw9H9hcf1Ki5e/VscnwG2xRfq9z+5S4lOhsceY62q7UqmMA=="
 		});
 
 		expect(
 			await expandObject(
-				blobs["root/2763584ae80a2713757a343f4a960340c2768c8695b2ad8f0f555f7fe763b539"]
+				blobs["root/5dd043a0297a617f5efe7663b89f2f9dae6ff9e0308d7aaaa6241b84ef768094"]
 			)
 		).toEqual({
 			version: "1",
@@ -1034,7 +1034,7 @@ describe("synchronisedStorageService", () => {
 					isConsolidated: false,
 					epoch: 1,
 					changeSetStorageIds: [
-						"blob:memory:5c2a21f186faca86ec5662a9e81c286e6b4a8cd3c0d3a0e4dec3dfbfdfb48a4d"
+						"blob:memory:8be62e8780c42498e46283e11a33b0a694dc3496a094cf8312b48ef1a4801f23"
 					]
 				}
 			]
@@ -1042,7 +1042,7 @@ describe("synchronisedStorageService", () => {
 
 		expect(
 			await expandObject(
-				blobs["root/5c2a21f186faca86ec5662a9e81c286e6b4a8cd3c0d3a0e4dec3dfbfdfb48a4d"]
+				blobs["root/8be62e8780c42498e46283e11a33b0a694dc3496a094cf8312b48ef1a4801f23"]
 			)
 		).toEqual({
 			"@context": SynchronisedStorageContexts.Namespace,
@@ -1059,7 +1059,7 @@ describe("synchronisedStorageService", () => {
 			dateCreated: "2025-05-29T01:00:00.000Z",
 			dateModified: "2025-05-29T01:00:00.000Z",
 			id: "0808080808080808080808080808080808080808080808080808080808080808",
-			nodeId:
+			nodeIdentity:
 				"did:entity-storage:0xd2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2",
 			storageKey: "test-type"
 		});
@@ -1083,7 +1083,7 @@ describe("synchronisedStorageService", () => {
 				dateCreated: "2025-05-29T01:00:00.000Z",
 				dateModified: "2025-05-29T01:00:00.000Z",
 				storageKey: "test-type",
-				nodeId: testNodeIdUntrusted,
+				nodeIdentity: testNodeIdUntrusted,
 				changes: [
 					{
 						entity: { dateModified: "2025-01-01T00:00:00.000Z" },
@@ -1100,7 +1100,7 @@ describe("synchronisedStorageService", () => {
 				dateCreated: "2025-05-29T02:00:00.000Z",
 				dateModified: "2025-05-29T02:00:00.000Z",
 				storageKey: "test-type",
-				nodeId: testNodeIdUntrusted,
+				nodeIdentity: testNodeIdUntrusted,
 				changes: [
 					{
 						entity: { dateModified: "2025-01-02T00:00:00.000Z" },
@@ -1117,7 +1117,7 @@ describe("synchronisedStorageService", () => {
 				dateCreated: "2025-05-29T04:00:00.000Z",
 				dateModified: "2025-05-29T04:00:00.000Z",
 				storageKey: "test-type",
-				nodeId: testNodeIdUntrusted,
+				nodeIdentity: testNodeIdUntrusted,
 				changes: [
 					{
 						entity: { dateModified: "2025-01-03T00:00:00.000Z" },
@@ -1234,7 +1234,7 @@ describe("synchronisedStorageService", () => {
 				dateCreated: "2025-05-29T01:00:00.000Z",
 				dateModified: "2025-05-29T01:00:00.000Z",
 				storageKey: "test-type",
-				nodeId: testNodeIdUntrusted,
+				nodeIdentity: testNodeIdUntrusted,
 				changes: [
 					{
 						entity: { dateModified: "2025-01-01T00:00:00.000Z" },
@@ -1334,7 +1334,7 @@ describe("synchronisedStorageService", () => {
 				dateCreated: "2025-05-29T02:00:00.000Z",
 				dateModified: "2025-05-29T02:00:00.000Z",
 				storageKey: "test-type",
-				nodeId: testNodeIdUntrusted,
+				nodeIdentity: testNodeIdUntrusted,
 				changes: [
 					{
 						entity: { dateModified: "2025-01-02T00:00:00.000Z" },
@@ -1451,7 +1451,7 @@ describe("synchronisedStorageService", () => {
 				dateCreated: "2025-05-29T03:00:00.000Z",
 				dateModified: "2025-05-29T03:00:00.000Z",
 				storageKey: "test-type",
-				nodeId: testNodeIdUntrusted,
+				nodeIdentity: testNodeIdUntrusted,
 				changes: [
 					{
 						entity: { dateModified: "2025-01-01T00:00:00.000Z" },

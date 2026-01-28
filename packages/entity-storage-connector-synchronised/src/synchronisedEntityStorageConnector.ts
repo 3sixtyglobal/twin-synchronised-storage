@@ -49,7 +49,7 @@ export class SynchronisedEntityStorageConnector<T extends ISynchronisedEntity = 
 	 * Fixed name for node id properties.
 	 * @internal
 	 */
-	private static readonly _PROP_NAME_NODE_ID = "nodeId";
+	private static readonly _PROP_NAME_NODE_IDENTITY = "nodeIdentity";
 
 	/**
 	 * Fixed name for date modified properties.
@@ -127,7 +127,7 @@ export class SynchronisedEntityStorageConnector<T extends ISynchronisedEntity = 
 
 		const requiredProperties: (keyof ISynchronisedEntity)[] = [
 			SynchronisedEntityStorageConnector._PROP_NAME_ID,
-			SynchronisedEntityStorageConnector._PROP_NAME_NODE_ID,
+			SynchronisedEntityStorageConnector._PROP_NAME_NODE_IDENTITY,
 			SynchronisedEntityStorageConnector._PROP_NAME_DATE_MODIFIED
 		];
 
@@ -229,7 +229,7 @@ export class SynchronisedEntityStorageConnector<T extends ISynchronisedEntity = 
 		if (Is.stringValue(this._nodeId)) {
 			// Make sure the entity has the required properties populated
 			entity.dateModified = new Date(Date.now()).toISOString();
-			entity.nodeId = this._nodeId;
+			entity.nodeIdentity = this._nodeId;
 
 			await this._entityStorageConnector.set(entity, conditions);
 
@@ -393,7 +393,10 @@ export class SynchronisedEntityStorageConnector<T extends ISynchronisedEntity = 
 		// Only set the item if it matches the storage key
 		// and it is from another node, remote updates can not change data for this node
 		// That must be done via the regular entity storage methods
-		if (event.data.storageKey === this._storageKey && event.data.entity.nodeId !== this._nodeId) {
+		if (
+			event.data.storageKey === this._storageKey &&
+			event.data.entity.nodeIdentity !== this._nodeId
+		) {
 			await this._entityStorageConnector.set(event.data.entity as T);
 		}
 	}
@@ -430,7 +433,7 @@ export class SynchronisedEntityStorageConnector<T extends ISynchronisedEntity = 
 					event.data.requestMode === SyncNodeIdMode.Remote
 				) {
 					condition.conditions.push({
-						property: SynchronisedEntityStorageConnector._PROP_NAME_NODE_ID,
+						property: SynchronisedEntityStorageConnector._PROP_NAME_NODE_IDENTITY,
 						value: this._nodeId,
 						comparison:
 							event.data.requestMode === SyncNodeIdMode.Local
@@ -489,7 +492,7 @@ export class SynchronisedEntityStorageConnector<T extends ISynchronisedEntity = 
 					event.data.resetMode === SyncNodeIdMode.Remote
 				) {
 					condition.conditions.push({
-						property: "nodeId",
+						property: "nodeIdentity",
 						value: this._nodeId,
 						comparison:
 							event.data.resetMode === SyncNodeIdMode.Local

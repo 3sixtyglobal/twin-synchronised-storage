@@ -273,7 +273,7 @@ export class RemoteSyncStateHelper {
 					ObjectHelper.propertyDelete(change.entity, "id");
 					// Remove the node identity as the changeset has this stored at the top level
 					// and we do not want to store it in the change itself to reduce redundancy
-					ObjectHelper.propertyDelete(change.entity, "nodeId");
+					ObjectHelper.propertyDelete(change.entity, "nodeIdentity");
 				}
 			}
 
@@ -286,7 +286,7 @@ export class RemoteSyncStateHelper {
 				dateModified: now,
 				storageKey,
 				changes,
-				nodeId: this._nodeId
+				nodeIdentity: this._nodeId
 			};
 
 			try {
@@ -609,7 +609,7 @@ export class RemoteSyncStateHelper {
 					id: change.id
 				})),
 				storageKey: response.storageKey,
-				nodeId: this._nodeId
+				nodeIdentity: this._nodeId
 			};
 
 			// Store the changeset in the blob storage

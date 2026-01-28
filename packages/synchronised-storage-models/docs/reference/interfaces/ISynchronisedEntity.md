@@ -16,11 +16,12 @@ The id of the entry.
 
 ***
 
-### nodeId?
+### nodeIdentity
 
-> `optional` **nodeId**: `string`
+> **nodeIdentity**: `string`
 
 The identity of the node that owns the entry.
+json-ld namespace:twin-common
 
 ***
 
@@ -29,6 +30,7 @@ The identity of the node that owns the entry.
 > **dateModified**: `string`
 
 The date the entry was modified.
+json-ld type:schema:Date
 
 #### Inherited from
 

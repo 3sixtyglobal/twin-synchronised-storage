@@ -67,7 +67,7 @@ export function generateRestRoutesSynchronisedStorage(
 							id: "0909090909090909090909090909090909090909090909090909090909090909",
 							dateCreated: "2025-05-29T01:00:00.000Z",
 							dateModified: "2025-05-29T01:00:00.000Z",
-							nodeId:
+							nodeIdentity:
 								"did:entity-storage:0xd2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2",
 							changes: [
 								{

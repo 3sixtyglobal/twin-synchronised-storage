@@ -20,8 +20,9 @@ The LD Type for the request.
 
 ***
 
-### nodeId
+### nodeIdentity
 
-> **nodeId**: `string`
+> **nodeIdentity**: `string`
 
 The identity of the node that created the request.
+json-ld namespace:twin-common

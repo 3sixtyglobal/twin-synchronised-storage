@@ -19,6 +19,7 @@ export interface ISyncRequest {
 
 	/**
 	 * The identity of the node that created the request.
+	 * json-ld namespace:twin-common
 	 */
-	nodeId: string;
+	nodeIdentity: string;
 }

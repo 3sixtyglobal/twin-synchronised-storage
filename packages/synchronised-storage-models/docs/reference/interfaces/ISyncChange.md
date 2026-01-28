@@ -9,6 +9,7 @@ The object definition for a sync change.
 > **operation**: [`SyncChangeOperation`](../type-aliases/SyncChangeOperation.md)
 
 Operation.
+json-ld type:schema:Text
 
 ***
 
@@ -25,3 +26,4 @@ The item id.
 > `optional` **entity**: [`ISynchronisedEntityCore`](ISynchronisedEntityCore.md)
 
 The entity to set.
+json-ld type:json

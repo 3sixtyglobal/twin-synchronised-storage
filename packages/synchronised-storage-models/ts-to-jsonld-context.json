@@ -1,0 +1,20 @@
+{
+	"prefix": "twin-synchronised-storage",
+	"contextUrl": "https://schema.twindev.org/synchronised-storage/",
+	"additionalContextUrls": {
+		"twin-common": "https://schema.twindev.org/common/",
+		"schema": "http://schema.org/"
+	},
+	"fixedMappings": {
+		"id": "@id",
+		"type": "@type"
+	},
+	"types": [
+		"./src/models/ISyncRequest.ts",
+		"./src/models/ISyncChangeSet.ts",
+		"./src/models/ISyncChange.ts",
+		"./src/models/ISynchronisedEntity.ts",
+		"./src/models/ISynchronisedEntityCore.ts",
+		"./src/models/syncChangeOperation.ts"
+	]
+}

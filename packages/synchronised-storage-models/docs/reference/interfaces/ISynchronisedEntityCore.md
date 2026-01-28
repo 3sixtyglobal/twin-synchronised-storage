@@ -13,3 +13,4 @@ The base definition for synchronised entries.
 > **dateModified**: `string`
 
 The date the entry was modified.
+json-ld type:schema:Date

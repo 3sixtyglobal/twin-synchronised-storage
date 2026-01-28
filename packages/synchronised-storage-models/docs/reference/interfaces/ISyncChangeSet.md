@@ -33,6 +33,7 @@ The id of the change set.
 > **storageKey**: `string`
 
 The storage key of the change set. This is used to identify the entities being synchronised.
+json-ld type:schema:identifier
 
 ***
 
@@ -41,6 +42,7 @@ The storage key of the change set. This is used to identify the entities being s
 > **dateCreated**: `string`
 
 The date the change set was created.
+json-ld type:schema:Date
 
 ***
 
@@ -49,14 +51,16 @@ The date the change set was created.
 > **dateModified**: `string`
 
 The date the change set was last modified.
+json-ld type:schema:Date
 
 ***
 
-### nodeId
+### nodeIdentity
 
-> **nodeId**: `string`
+> **nodeIdentity**: `string`
 
 The identity of the node that created the change set.
+json-ld namespace:twin-common
 
 ***
 
@@ -65,3 +69,4 @@ The identity of the node that created the change set.
 > **changes**: [`ISyncChange`](ISyncChange.md)[]
 
 The changes to apply after a snapshot.
+json-ld type:json

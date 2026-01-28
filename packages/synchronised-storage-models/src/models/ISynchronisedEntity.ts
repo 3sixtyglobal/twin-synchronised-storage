@@ -13,6 +13,7 @@ export interface ISynchronisedEntity extends ISynchronisedEntityCore {
 
 	/**
 	 * The identity of the node that owns the entry.
+	 * json-ld namespace:twin-common
 	 */
-	nodeId?: string;
+	nodeIdentity: string;
 }

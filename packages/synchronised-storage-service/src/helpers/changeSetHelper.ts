@@ -126,7 +126,7 @@ export class ChangeSetHelper {
 
 		// Only apply changesets from other nodes, we don't want to overwrite
 		// any changes we have made to local entity storage
-		if (!Is.empty(syncChangeset) && syncChangeset.nodeId !== this._nodeId) {
+		if (!Is.empty(syncChangeset) && syncChangeset.nodeIdentity !== this._nodeId) {
 			await this.applyChangeset(syncChangeset);
 		}
 
@@ -166,7 +166,7 @@ export class ChangeSetHelper {
 									entity: {
 										...change.entity,
 										id: change.id,
-										nodeId: syncChangeset.nodeId
+										nodeIdentity: syncChangeset.nodeIdentity
 									}
 								}
 							);
@@ -179,7 +179,7 @@ export class ChangeSetHelper {
 								{
 									storageKey: syncChangeset.storageKey,
 									id: change.id,
-									nodeId: syncChangeset.nodeId
+									nodeId: syncChangeset.nodeIdentity
 								}
 							);
 						}

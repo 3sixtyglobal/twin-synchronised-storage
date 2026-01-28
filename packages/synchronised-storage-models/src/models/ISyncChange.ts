@@ -9,6 +9,7 @@ import type { SyncChangeOperation } from "./syncChangeOperation.js";
 export interface ISyncChange {
 	/**
 	 * Operation.
+	 * json-ld type:schema:Text
 	 */
 	operation: SyncChangeOperation;
 
@@ -19,6 +20,7 @@ export interface ISyncChange {
 
 	/**
 	 * The entity to set.
+	 * json-ld type:json
 	 */
 	entity?: ISynchronisedEntityCore;
 }
