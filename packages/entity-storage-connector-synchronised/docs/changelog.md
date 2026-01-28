@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3-next.7](https://github.com/twinfoundation/synchronised-storage/compare/entity-storage-connector-synchronised-v0.0.3-next.6...entity-storage-connector-synchronised-v0.0.3-next.7) (2026-01-28)
+
+
+### Features
+
+* json ld contexts ([#36](https://github.com/twinfoundation/synchronised-storage/issues/36)) ([3a87a9f](https://github.com/twinfoundation/synchronised-storage/commit/3a87a9fb16d21baf672e44b4e8914cf1937b1d6a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.3-next.6 to 0.0.3-next.7
+
 ## [0.0.3-next.6](https://github.com/twinfoundation/synchronised-storage/compare/entity-storage-connector-synchronised-v0.0.3-next.5...entity-storage-connector-synchronised-v0.0.3-next.6) (2026-01-22)
 
 
