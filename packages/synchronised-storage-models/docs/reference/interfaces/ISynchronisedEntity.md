@@ -30,7 +30,7 @@ json-ld namespace:twin-common
 > **dateModified**: `string`
 
 The date the entry was modified.
-json-ld type:schema:Date
+json-ld namespace:schema
 
 #### Inherited from
 

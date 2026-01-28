@@ -24,11 +24,11 @@
 		},
 		"dateCreated": {
 			"type": "string",
-			"description": "The date the change set was created. json-ld type:schema:Date"
+			"description": "The date the change set was created. json-ld namespace:schema"
 		},
 		"dateModified": {
 			"type": "string",
-			"description": "The date the change set was last modified. json-ld type:schema:Date"
+			"description": "The date the change set was last modified. json-ld namespace:schema"
 		},
 		"nodeIdentity": {
 			"type": "string",

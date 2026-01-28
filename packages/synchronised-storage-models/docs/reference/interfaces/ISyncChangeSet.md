@@ -42,7 +42,7 @@ json-ld type:schema:identifier
 > **dateCreated**: `string`
 
 The date the change set was created.
-json-ld type:schema:Date
+json-ld namespace:schema
 
 ***
 
@@ -51,7 +51,7 @@ json-ld type:schema:Date
 > **dateModified**: `string`
 
 The date the change set was last modified.
-json-ld type:schema:Date
+json-ld namespace:schema
 
 ***
 
