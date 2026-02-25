@@ -1,6 +1,6 @@
 {
-	"packages/synchronised-storage-models": "0.0.3-next.7",
-	"packages/synchronised-storage-service": "0.0.3-next.7",
-	"packages/synchronised-storage-rest-client": "0.0.3-next.7",
-	"packages/entity-storage-connector-synchronised": "0.0.3-next.7"
+	"packages/synchronised-storage-models": "0.0.3-next.8",
+	"packages/synchronised-storage-service": "0.0.3-next.8",
+	"packages/synchronised-storage-rest-client": "0.0.3-next.8",
+	"packages/entity-storage-connector-synchronised": "0.0.3-next.8"
 }

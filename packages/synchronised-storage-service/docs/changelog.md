@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.0.3-next.8](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.3-next.7...synchronised-storage-service-v0.0.3-next.8) (2026-02-25)
+
+
+### Features
+
+* add ts-to-jsonld-context tool ([16d7677](https://github.com/twinfoundation/synchronised-storage/commit/16d76776e7e3f75e6c4fb9f88cb32fed2967c4b6))
+* update schemas ([7566c48](https://github.com/twinfoundation/synchronised-storage/commit/7566c4860baad5ead4327ac19cb5b647e63f2ca3))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.3-next.7 to 0.0.3-next.8
+
 ## [0.0.3-next.7](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.3-next.6...synchronised-storage-service-v0.0.3-next.7) (2026-01-28)
 
 
