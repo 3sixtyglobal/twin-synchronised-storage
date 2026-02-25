@@ -21,6 +21,5 @@
 		"dateModified",
 		"id",
 		"nodeIdentity"
-	],
-	"additionalProperties": false
+	]
 }

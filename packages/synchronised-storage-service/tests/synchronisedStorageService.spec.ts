@@ -1,6 +1,10 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { TaskSchedulerService } from "@twin.org/background-task-scheduler";
+import {
+	type ScheduledTask,
+	TaskSchedulerService,
+	initSchema as initSchemaScheduler
+} from "@twin.org/background-task-scheduler";
 import { MemoryBlobStorageConnector } from "@twin.org/blob-storage-connector-memory";
 import { BlobStorageConnectorFactory } from "@twin.org/blob-storage-models";
 import { initSchema as initSchemaBlobStorage } from "@twin.org/blob-storage-service";
@@ -178,6 +182,7 @@ describe("synchronisedStorageService", () => {
 		initSchemaIdentity();
 		initSchemaVault();
 		initSchemaLogging();
+		initSchemaScheduler();
 
 		EntitySchemaFactory.register(nameof<TestType>(), () => EntitySchemaHelper.getSchema(TestType));
 
@@ -245,7 +250,15 @@ describe("synchronisedStorageService", () => {
 		});
 		ComponentFactory.register("event-bus-untrusted", () => eventBusUntrustedService);
 
-		const taskSchedulerComponent = new TaskSchedulerService({ config: { overrideInterval: 0.5 } });
+		EntityStorageConnectorFactory.register(
+			"scheduled-task",
+			() =>
+				new MemoryEntityStorageConnector<ScheduledTask>({
+					entitySchema: nameof<ScheduledTask>()
+				})
+		);
+
+		const taskSchedulerComponent = new TaskSchedulerService({ config: { intervalMs: 0.5 } });
 		ComponentFactory.register("task-scheduler", () => taskSchedulerComponent);
 
 		loggingMemoryEntityStorage = new MemoryEntityStorageConnector<LogEntry>({

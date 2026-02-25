@@ -20,6 +20,5 @@
 	"required": [
 		"operation",
 		"id"
-	],
-	"additionalProperties": false
+	]
 }

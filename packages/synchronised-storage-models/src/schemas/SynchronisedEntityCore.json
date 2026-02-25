@@ -11,6 +11,5 @@
 	},
 	"required": [
 		"dateModified"
-	],
-	"additionalProperties": false
+	]
 }

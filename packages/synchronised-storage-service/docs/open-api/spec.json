@@ -259,7 +259,6 @@
 					"name",
 					"message"
 				],
-				"additionalProperties": false,
 				"description": "Model to describe serialized error."
 			},
 			"SyncChange": {
@@ -280,7 +279,6 @@
 					"operation",
 					"id"
 				],
-				"additionalProperties": false,
 				"description": "The object definition for a sync change."
 			},
 			"SyncChangeOperation": {
@@ -349,7 +347,6 @@
 					"nodeIdentity",
 					"changes"
 				],
-				"additionalProperties": false,
 				"description": "The object definition for a sync change set."
 			},
 			"SyncDecryptionKeyResponse": {
@@ -363,7 +360,6 @@
 				"required": [
 					"decryptionKey"
 				],
-				"additionalProperties": false,
 				"description": "The body of the response."
 			},
 			"SynchronisedEntityCore": {
@@ -377,7 +373,6 @@
 				"required": [
 					"dateModified"
 				],
-				"additionalProperties": false,
 				"description": "The base definition for synchronised entries."
 			}
 		},
