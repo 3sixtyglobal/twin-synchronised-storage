@@ -37,9 +37,9 @@ import type { ISynchronisedEntityStorageConnectorConstructorOptions } from "./mo
 /**
  * Class for performing entity storage operations in synchronised storage.
  */
-export class SynchronisedEntityStorageConnector<T extends ISynchronisedEntity = ISynchronisedEntity>
-	implements IEntityStorageConnector<T>
-{
+export class SynchronisedEntityStorageConnector<
+	T extends ISynchronisedEntity = ISynchronisedEntity
+> implements IEntityStorageConnector<T> {
 	/**
 	 * Runtime name for the class.
 	 */
