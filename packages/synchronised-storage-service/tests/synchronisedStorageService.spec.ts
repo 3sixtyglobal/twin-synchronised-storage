@@ -302,12 +302,6 @@ describe("synchronisedStorageService", () => {
 					"life first castle choose joke eyebrow middle speak lucky improve awesome common energy oval use scare water cluster update steak endorse sweet festival error"
 			);
 
-		await vaultConnector.addKey(
-			"synchronised-storage-blob-encryption-key",
-			VaultKeyType.ChaCha20Poly1305,
-			mockChaCha20Poly1305Key
-		);
-
 		const didDocument = await identityConnector.createDocument("test-node-identity");
 		testNodeId = didDocument.id;
 		nodeId = didDocument.id;
@@ -329,6 +323,18 @@ describe("synchronisedStorageService", () => {
 			didDocumentUntrusted.id,
 			"assertionMethod",
 			"node-authentication-assertion"
+		);
+
+		await vaultConnector.addKey(
+			`${testNodeId}/synchronised-storage-blob-encryption-key`,
+			VaultKeyType.ChaCha20Poly1305,
+			mockChaCha20Poly1305Key
+		);
+
+		await vaultConnector.addKey(
+			`${testNodeIdUntrusted}/synchronised-storage-blob-encryption-key`,
+			VaultKeyType.ChaCha20Poly1305,
+			mockChaCha20Poly1305Key
 		);
 
 		mockTrustComponent = {
@@ -905,11 +911,11 @@ describe("synchronisedStorageService", () => {
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 
-		nodeId = testNodeIdUntrusted;
-		await connector.start("logging-untrusted");
-
 		nodeId = testNodeId;
 		await connectorTrusted.start("logging");
+
+		nodeId = testNodeIdUntrusted;
+		await connector.start("logging-untrusted");
 
 		await verifiableStorage.set({
 			id: verifiableStorageKeyId.split(":")[2],
