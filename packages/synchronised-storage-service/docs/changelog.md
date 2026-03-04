@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3-next.9](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.3-next.8...synchronised-storage-service-v0.0.3-next.9) (2026-03-04)
+
+
+### Bug Fixes
+
+* use node id for encryption key namespace ([3011e96](https://github.com/twinfoundation/synchronised-storage/commit/3011e9697de5473b34d0f49cdb601b905b3814fe))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.3-next.8 to 0.0.3-next.9
+
 ## [0.0.3-next.8](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.3-next.7...synchronised-storage-service-v0.0.3-next.8) (2026-02-25)
 
 
