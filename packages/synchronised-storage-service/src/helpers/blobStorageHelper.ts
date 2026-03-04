@@ -53,6 +53,12 @@ export class BlobStorageHelper {
 	private readonly _isTrustedNode: boolean;
 
 	/**
+	 * The node id of this node.
+	 * @internal
+	 */
+	private _nodeId?: string;
+
+	/**
 	 * Create a new instance of BlobStorageHelper.
 	 * @param logging The logging component to use for logging.
 	 * @param vaultConnector The vault connector to use for for the encryption key.
@@ -75,6 +81,14 @@ export class BlobStorageHelper {
 	}
 
 	/**
+	 * Set the node id of this node.
+	 * @param nodeId The node id to set.
+	 */
+	public setNodeId(nodeId: string): void {
+		this._nodeId = nodeId;
+	}
+
+	/**
 	 * Load a blob from storage.
 	 * @param blobId The id of the blob to apply.
 	 * @returns The blob.
@@ -94,7 +108,7 @@ export class BlobStorageHelper {
 
 			if (Is.uint8Array(encryptedBlob)) {
 				const compressedBlob = await this._vaultConnector.decrypt(
-					this._blobStorageEncryptionKeyId,
+					`${this._nodeId}/${this._blobStorageEncryptionKeyId}`,
 					VaultEncryptionType.ChaCha20Poly1305,
 					encryptedBlob
 				);
@@ -155,7 +169,7 @@ export class BlobStorageHelper {
 		);
 
 		const encryptedBlob = await this._vaultConnector.encrypt(
-			this._blobStorageEncryptionKeyId,
+			`${this._nodeId}/${this._blobStorageEncryptionKeyId}`,
 			VaultEncryptionType.ChaCha20Poly1305,
 			compressedBlob
 		);

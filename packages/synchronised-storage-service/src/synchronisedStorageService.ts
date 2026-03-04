@@ -325,6 +325,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 
 		this._remoteSyncStateHelper.setNodeId(this._nodeId);
 		this._changeSetHelper.setNodeId(this._nodeId);
+		this._blobStorageHelper.setNodeId(this._nodeId);
 
 		this._remoteSyncStateHelper.setSynchronisedStorageKey(this._synchronisedStorageKey);
 		this._serviceStarted = true;
@@ -341,17 +342,17 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 			const decryptionKey =
 				await this._trustedSynchronisedStorageComponent.getDecryptionKey(trustPayload);
 
+			const blobStorageEncryptionKeyId = `${this._nodeId}/${this._config.blobStorageEncryptionKeyId}`;
+
 			// If the key exists remove it and get a new one, in case the key has been rotated
-			const existingKey = await this._vaultConnector.getKey(
-				this._config.blobStorageEncryptionKeyId
-			);
+			const existingKey = await this._vaultConnector.getKey(blobStorageEncryptionKeyId);
 
 			if (!Is.empty(existingKey)) {
-				await this._vaultConnector.removeKey(this._config.blobStorageEncryptionKeyId);
+				await this._vaultConnector.removeKey(blobStorageEncryptionKeyId);
 			}
 
 			await this._vaultConnector.addKey(
-				this._config.blobStorageEncryptionKeyId,
+				blobStorageEncryptionKeyId,
 				VaultKeyType.ChaCha20Poly1305,
 				Converter.base64ToBytes(decryptionKey)
 			);
@@ -425,7 +426,8 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 			}
 		});
 
-		const key = await this._vaultConnector.getKey(this._config.blobStorageEncryptionKeyId);
+		const blobStorageEncryptionKeyId = `${this._nodeId}/${this._config.blobStorageEncryptionKeyId}`;
+		const key = await this._vaultConnector.getKey(blobStorageEncryptionKeyId);
 		if (Is.undefined(key.privateKey)) {
 			throw new UnauthorizedError(SynchronisedStorageService.CLASS_NAME, "decryptionKeyNotFound");
 		}
