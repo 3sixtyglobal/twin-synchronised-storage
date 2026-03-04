@@ -14,7 +14,7 @@
 		"node": ">=20.0.0"
 	},
 	"scripts": {
-		"clean": "rimraf dist coverage docs/reference",
+		"clean": "rimraf dist coverage",
 		"build:schema": "ts-to-schema ./ts-to-schema.json ./src/schemas",
 		"build:jsonld-context": "ts-to-jsonld-context ./ts-to-jsonld-context.json ./src/schemas/types.jsonld",
 		"build:compile": "tspc",
@@ -27,8 +27,8 @@
 		"docs:clean": "rimraf docs/reference",
 		"docs:generate": "typedoc",
 		"docs": "npm run docs:clean && npm run docs:generate",
-		"dist": "npm run clean && npm run build && npm run validate-locales && npm run test:build && npm run test && npm run docs",
-		"dist:no-test": "npm run clean && npm run build && npm run test:build && npm run docs"
+		"dist": "npm run clean && npm run build && npm run validate-locales && npm run test:build && npm run test",
+		"dist:no-test": "npm run clean && npm run build && npm run test:build"
 	},
 	"dependencies": {
 		"@twin.org/core": "next",
