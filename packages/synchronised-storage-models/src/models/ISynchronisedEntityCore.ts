@@ -7,7 +7,7 @@
 export interface ISynchronisedEntityCore {
 	/**
 	 * The date the entry was modified.
-	 * json-ld namespace:schema
+	 * @json-ld namespace:schema
 	 */
 	dateModified: string;
 }
