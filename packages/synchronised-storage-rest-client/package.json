@@ -1,7 +1,7 @@
 {
 	"name": "@twin.org/synchronised-storage-rest-client",
 	"version": "0.0.3-next.9",
-	"description": "Synchronised storage contract implementation which can connect to REST endpoints",
+	"description": "REST client for trusted decryption key retrieval and change set synchronisation.",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/twinfoundation/synchronised-storage.git",

@@ -1,6 +1,6 @@
-# TWIN Synchronised Storage Service
+# Synchronised Storage Service
 
-Synchronised storage contract implementation and REST endpoint definitions.
+This package provides the synchronisation service layer responsible for tracking local and remote change state, scheduling update cycles, and handling trusted interactions around key and change propagation.
 
 ## Installation
 

@@ -1,6 +1,6 @@
-# TWIN Synchronised Storage Models
+# Synchronised Storage Models
 
-Models which define the structure of the synchronised-storage contracts and connectors.
+This package defines the shared contracts for synchronised storage payloads, topics, and schema-aligned model structures. It is intended to keep producers and consumers aligned on message shape and semantics when exchanging state updates.
 
 ## Installation
 

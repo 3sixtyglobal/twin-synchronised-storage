@@ -1,13 +1,15 @@
 # TWIN Synchronised Storage
 
-This mono-repository contains the packages to use with synchronised storage in TWIN applications.
+This repository provides the building blocks needed to replicate entity changes safely across connected nodes. It brings together shared message models, a service that manages synchronisation state, a REST client for trusted node communication, and an entity storage connector that integrates synchronisation into application persistence flows.
+
+Taken together, these packages help teams establish consistent synchronisation behaviour across local and remote environments, while keeping contracts, change tracking, and transport concerns in clearly separated components.
 
 ## Packages
 
-- [synchronised-storage-models](packages/synchronised-storage-models/README.md) - Models which define the structure of the synchronised storage contracts and connectors.
-- [synchronised-storage-service](packages/synchronised-storage-service/README.md) - Synchronised storage contract implementation and REST endpoint definitions.
-- [synchronised-storage-rest-client](packages/synchronised-storage-rest-client/README.md) - Synchronised storage contract implementation which can connect to REST endpoints.
-- [entity-storage-connector-synchronised](packages/entity-storage-connector-synchronised/README.md) - Entity Storage connector which used event bus to communicate with synchronised storage.
+- [synchronised-storage-models](packages/synchronised-storage-models/README.md) - Shared models, constants, and schemas for synchronised storage messages and contracts.
+- [synchronised-storage-service](packages/synchronised-storage-service/README.md) - Service implementation that coordinates synchronisation state and exposes REST entry points.
+- [synchronised-storage-rest-client](packages/synchronised-storage-rest-client/README.md) - REST client for trusted decryption key retrieval and change set synchronisation.
+- [entity-storage-connector-synchronised](packages/entity-storage-connector-synchronised/README.md) - Entity storage connector that publishes local changes and applies remote updates.
 
 ## Contributing
 

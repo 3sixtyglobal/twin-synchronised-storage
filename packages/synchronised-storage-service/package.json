@@ -1,7 +1,7 @@
 {
 	"name": "@twin.org/synchronised-storage-service",
 	"version": "0.0.3-next.9",
-	"description": "Synchronised storage contract implementation and REST endpoint definitions",
+	"description": "Service implementation that coordinates synchronisation state and exposes REST entry points.",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/twinfoundation/synchronised-storage.git",

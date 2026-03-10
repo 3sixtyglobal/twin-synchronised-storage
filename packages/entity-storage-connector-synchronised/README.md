@@ -1,6 +1,6 @@
-# TWIN Entity Storage Connector Synchronised
+# Entity Storage Connector Synchronised
 
-Entity Storage connector implementation using synchronised storage.
+This package integrates synchronised storage with an entity storage connector so local writes can be published as sync events and remote updates can be applied to local persistence.
 
 ## Installation
 

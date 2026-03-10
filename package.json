@@ -1,7 +1,7 @@
 {
 	"name": "@twin.org/synchronised-storage",
 	"version": "0.0.0",
-	"description": "Synchronised Storage",
+	"description": "Repository for synchronised storage models, services, clients, and connectors.",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/twinfoundation/synchronised-storage.git"
