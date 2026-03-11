@@ -357,4 +357,4 @@
   * dependencies
     * @twin.org/synchronised-storage-models bumped from 0.0.1-next.0 to 0.0.1-next.1
 
-## @twin.org/synchronised-storage-rest-client - Changelog
+## Changelog

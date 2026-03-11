@@ -264,4 +264,4 @@
   * devDependencies
     * @twin.org/entity-storage-connector-memory bumped from 0.0.1-next.29 to 0.0.2-next.3
 
-## @twin.org/entity-storage-connector-synchronised - Changelog
+## Changelog

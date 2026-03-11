@@ -198,4 +198,4 @@
 
 * initial commit ([16949b8](https://github.com/twinfoundation/synchronised-storage/commit/16949b8e5bdb190f053c52af352290e3fd964f9a))
 
-## @twin.org/synchronised-storage-models - Changelog
+## Changelog
