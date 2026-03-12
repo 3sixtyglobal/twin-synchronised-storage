@@ -8,7 +8,7 @@ Class for performing synchronised storage operations.
 
 ## Methods
 
-### getDecryptionKey()
+### getDecryptionKey() {#getdecryptionkey}
 
 > **getDecryptionKey**(`trustPayload`): `Promise`\<`string`\>
 
@@ -31,7 +31,7 @@ The decryption key.
 
 ***
 
-### syncChangeSet()
+### syncChangeSet() {#syncchangeset}
 
 > **syncChangeSet**(`syncChangeSet`, `trustPayload`): `Promise`\<`void`\>
 

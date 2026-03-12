@@ -4,7 +4,7 @@ The payload for an item change.
 
 ## Properties
 
-### storageKey
+### storageKey {#storagekey}
 
 > **storageKey**: `string`
 
@@ -12,7 +12,7 @@ The key of the storage being changed.
 
 ***
 
-### operation
+### operation {#operation}
 
 > **operation**: [`SyncChangeOperation`](../type-aliases/SyncChangeOperation.md)
 
@@ -20,7 +20,7 @@ The operation being performed on the item.
 
 ***
 
-### nodeId
+### nodeId {#nodeid}
 
 > **nodeId**: `string`
 
@@ -28,7 +28,7 @@ The node performing the operation.
 
 ***
 
-### id
+### id {#id}
 
 > **id**: `string`
 

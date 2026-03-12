@@ -4,7 +4,7 @@ The payload for an item remove.
 
 ## Properties
 
-### storageKey
+### storageKey {#storagekey}
 
 > **storageKey**: `string`
 
@@ -12,7 +12,7 @@ The key of the storage being removed.
 
 ***
 
-### nodeId
+### nodeId {#nodeid}
 
 > **nodeId**: `string`
 
@@ -20,7 +20,7 @@ The node identity of the entity being removed.
 
 ***
 
-### id
+### id {#id}
 
 > **id**: `string`
 

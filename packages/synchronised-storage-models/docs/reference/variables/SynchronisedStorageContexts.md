@@ -6,19 +6,19 @@ The Contexts concerning Synchronised Storage.
 
 ## Type Declaration
 
-### Namespace
+### Namespace {#namespace}
 
 > `readonly` **Namespace**: `"https://schema.twindev.org/synchronised-storage/"` = `"https://schema.twindev.org/synchronised-storage/"`
 
 The canonical RDF namespace URI for Synchronised Storage.
 
-### Context
+### Context {#context}
 
 > `readonly` **Context**: `"https://schema.twindev.org/synchronised-storage/"` = `"https://schema.twindev.org/synchronised-storage/"`
 
 The value to use in context for Synchronised Storage.
 
-### JsonLdContext
+### JsonLdContext {#jsonldcontext}
 
 > `readonly` **JsonLdContext**: `"https://schema.twindev.org/synchronised-storage/types.jsonld"` = `"https://schema.twindev.org/synchronised-storage/types.jsonld"`
 

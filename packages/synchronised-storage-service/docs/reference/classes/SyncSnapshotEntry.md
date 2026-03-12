@@ -14,7 +14,7 @@ Class representing an entry for the sync snapshot.
 
 ## Properties
 
-### id
+### id {#id}
 
 > **id**: `string`
 
@@ -22,7 +22,7 @@ The id for the snapshot.
 
 ***
 
-### version
+### version {#version}
 
 > **version**: `string`
 
@@ -30,7 +30,7 @@ The version for the snapshot.
 
 ***
 
-### storageKey
+### storageKey {#storagekey}
 
 > **storageKey**: `string`
 
@@ -38,7 +38,7 @@ The storage key for the snapshot i.e. which entity is being synchronized.
 
 ***
 
-### dateCreated
+### dateCreated {#datecreated}
 
 > **dateCreated**: `string`
 
@@ -46,7 +46,7 @@ The date the snapshot was created.
 
 ***
 
-### dateModified
+### dateModified {#datemodified}
 
 > **dateModified**: `string`
 
@@ -54,7 +54,7 @@ The date the snapshot was last modified.
 
 ***
 
-### isLocal
+### isLocal {#islocal}
 
 > **isLocal**: `boolean`
 
@@ -62,7 +62,7 @@ The flag to determine if this is the snapshot is the local one containing change
 
 ***
 
-### isConsolidated
+### isConsolidated {#isconsolidated}
 
 > **isConsolidated**: `boolean`
 
@@ -70,7 +70,7 @@ The flag to determine if this is a consolidated snapshot.
 
 ***
 
-### epoch
+### epoch {#epoch}
 
 > **epoch**: `number`
 
@@ -78,7 +78,7 @@ The epoch for the changeset.
 
 ***
 
-### changeSetStorageIds?
+### changeSetStorageIds? {#changesetstorageids}
 
 > `optional` **changeSetStorageIds**: `string`[]
 
@@ -86,7 +86,7 @@ The ids of the storage for the change sets in the snapshot, if this is not a loc
 
 ***
 
-### changes?
+### changes? {#changes}
 
 > `optional` **changes**: `ISyncChange`[]
 

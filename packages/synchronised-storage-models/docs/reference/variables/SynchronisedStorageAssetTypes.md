@@ -6,25 +6,25 @@ The ODRL asset types for SynchronisedStorage.
 
 ## Type Declaration
 
-### DecryptionKey
+### DecryptionKey {#decryptionkey}
 
 > `readonly` **DecryptionKey**: `"decryption-key"` = `"decryption-key"`
 
 Decryption Key.
 
-### DecryptionKeyActions
+### DecryptionKeyActions {#decryptionkeyactions}
 
 > `readonly` **DecryptionKeyActions**: readonly \[`"read"`\]
 
 Decryption Key Actions.
 
-### ChangeSet
+### ChangeSet {#changeset}
 
 > `readonly` **ChangeSet**: `"change-set"` = `"change-set"`
 
 Change Set.
 
-### ChangeSetActions
+### ChangeSetActions {#changesetactions}
 
 > `readonly` **ChangeSetActions**: readonly \[`"write"`\]
 

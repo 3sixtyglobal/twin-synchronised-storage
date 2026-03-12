@@ -4,7 +4,7 @@ Response to a request for the decryption key for the synchronised storage.
 
 ## Properties
 
-### body
+### body {#body}
 
 > **body**: `object`
 

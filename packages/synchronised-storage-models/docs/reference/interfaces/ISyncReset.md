@@ -4,7 +4,7 @@ Request to reset the local storage.
 
 ## Properties
 
-### storageKey
+### storageKey {#storagekey}
 
 > **storageKey**: `string`
 
@@ -12,7 +12,7 @@ The key of the storage for the entities in the batch.
 
 ***
 
-### resetMode
+### resetMode {#resetmode}
 
 > **resetMode**: [`SyncNodeIdMode`](../type-aliases/SyncNodeIdMode.md)
 

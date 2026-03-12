@@ -4,7 +4,7 @@ Request for the decryption key for the synchronised storage.
 
 ## Properties
 
-### headers?
+### headers? {#headers}
 
 > `optional` **headers**: `object`
 

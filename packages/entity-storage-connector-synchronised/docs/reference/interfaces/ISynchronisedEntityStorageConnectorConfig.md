@@ -4,7 +4,7 @@ Configuration for the Synchronised Entity Storage Connector.
 
 ## Properties
 
-### storageKey?
+### storageKey? {#storagekey}
 
 > `optional` **storageKey**: `string`
 

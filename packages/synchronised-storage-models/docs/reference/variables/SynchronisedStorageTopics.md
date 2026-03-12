@@ -6,55 +6,55 @@ The topics for synchronised storage event bus notifications.
 
 ## Type Declaration
 
-### RegisterStorageKey
+### RegisterStorageKey {#registerstoragekey}
 
 > `readonly` **RegisterStorageKey**: `"synchronised-storage:register-storage-key"` = `"synchronised-storage:register-storage-key"`
 
 Register a storage key for the synchronised storage.
 
-### LocalItemChange
+### LocalItemChange {#localitemchange}
 
 > `readonly` **LocalItemChange**: `"synchronised-storage:local-item-change"` = `"synchronised-storage:local-item-change"`
 
 An item was changed in the storage by the local node.
 
-### LocalItemRequest
+### LocalItemRequest {#localitemrequest}
 
 > `readonly` **LocalItemRequest**: `"synchronised-storage:local-item-request"` = `"synchronised-storage:local-item-request"`
 
 A request has been made for a local item.
 
-### LocalItemResponse
+### LocalItemResponse {#localitemresponse}
 
 > `readonly` **LocalItemResponse**: `"synchronised-storage:local-item-response"` = `"synchronised-storage:local-item-response"`
 
 A response to a local item request.
 
-### Reset
+### Reset {#reset}
 
 > `readonly` **Reset**: `"synchronised-storage:reset"` = `"synchronised-storage:reset"`
 
 Reset the storage.
 
-### BatchRequest
+### BatchRequest {#batchrequest}
 
 > `readonly` **BatchRequest**: `"synchronised-storage:batch-request"` = `"synchronised-storage:batch-request"`
 
 A request has been made for a batch.
 
-### BatchResponse
+### BatchResponse {#batchresponse}
 
 > `readonly` **BatchResponse**: `"synchronised-storage:batch-response"` = `"synchronised-storage:batch-response"`
 
 A response to a batch.
 
-### RemoteItemSet
+### RemoteItemSet {#remoteitemset}
 
 > `readonly` **RemoteItemSet**: `"synchronised-storage:remote-item-set"` = `"synchronised-storage:remote-item-set"`
 
 An item was set in the storage by the remote node.
 
-### RemoteItemRemove
+### RemoteItemRemove {#remoteitemremove}
 
 > `readonly` **RemoteItemRemove**: `"synchronised-storage:remote-item-remove"` = `"synchronised-storage:remote-item-remove"`
 

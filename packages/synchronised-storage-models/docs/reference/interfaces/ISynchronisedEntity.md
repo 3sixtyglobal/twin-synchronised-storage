@@ -8,7 +8,7 @@ The base definition for synchronised entries.
 
 ## Properties
 
-### id
+### id {#id}
 
 > **id**: `string`
 
@@ -16,21 +16,19 @@ The id of the entry.
 
 ***
 
-### nodeIdentity
+### nodeIdentity {#nodeidentity}
 
 > **nodeIdentity**: `string`
 
 The identity of the node that owns the entry.
-json-ld namespace:twin-common
 
 ***
 
-### dateModified
+### dateModified {#datemodified}
 
 > **dateModified**: `string`
 
 The date the entry was modified.
-json-ld namespace:schema
 
 #### Inherited from
 

@@ -8,9 +8,8 @@ The base definition for synchronised entries.
 
 ## Properties
 
-### dateModified
+### dateModified {#datemodified}
 
 > **dateModified**: `string`
 
 The date the entry was modified.
-json-ld namespace:schema

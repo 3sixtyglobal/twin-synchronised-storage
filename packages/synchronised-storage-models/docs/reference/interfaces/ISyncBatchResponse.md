@@ -4,7 +4,7 @@ Response for a local batch.
 
 ## Properties
 
-### storageKey
+### storageKey {#storagekey}
 
 > **storageKey**: `string`
 
@@ -12,7 +12,7 @@ The key of the storage for the entities in the batch.
 
 ***
 
-### entities
+### entities {#entities}
 
 > **entities**: [`ISynchronisedEntity`](ISynchronisedEntity.md)[]
 
@@ -20,7 +20,7 @@ The entities in the batch.
 
 ***
 
-### lastEntry
+### lastEntry {#lastentry}
 
 > **lastEntry**: `boolean`
 

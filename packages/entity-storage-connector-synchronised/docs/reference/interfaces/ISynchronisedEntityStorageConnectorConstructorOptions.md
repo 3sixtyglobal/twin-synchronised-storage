@@ -4,7 +4,7 @@ Options for the Synchronised Entity Storage Connector constructor.
 
 ## Properties
 
-### entitySchema
+### entitySchema {#entityschema}
 
 > **entitySchema**: `string`
 
@@ -12,7 +12,7 @@ The name of the entity schema.
 
 ***
 
-### entityStorageConnectorType
+### entityStorageConnectorType {#entitystorageconnectortype}
 
 > **entityStorageConnectorType**: `string`
 
@@ -20,21 +20,15 @@ The entity storage connector type to use for actual data.
 
 ***
 
-### eventBusComponentType?
+### eventBusComponentType? {#eventbuscomponenttype}
 
 > `optional` **eventBusComponentType**: `string`
 
 The event bus component type.
 
-#### Default
-
-```ts
-event-bus
-```
-
 ***
 
-### config?
+### config? {#config}
 
 > `optional` **config**: [`ISynchronisedEntityStorageConnectorConfig`](ISynchronisedEntityStorageConnectorConfig.md)
 

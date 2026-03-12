@@ -6,19 +6,19 @@ The mode to determine how node identities are matched.
 
 ## Type Declaration
 
-### Local
+### Local {#local}
 
 > `readonly` **Local**: `"local"` = `"local"`
 
 Match the local node identity.
 
-### Remote
+### Remote {#remote}
 
 > `readonly` **Remote**: `"remote"` = `"remote"`
 
 Match all but the local node identity.
 
-### All
+### All {#all}
 
 > `readonly` **All**: `"all"` = `"all"`
 

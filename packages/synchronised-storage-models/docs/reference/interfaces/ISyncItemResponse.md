@@ -4,7 +4,7 @@ Response for a sync item request.
 
 ## Properties
 
-### storageKey
+### storageKey {#storagekey}
 
 > **storageKey**: `string`
 
@@ -12,7 +12,7 @@ The key of the storage for the entities in the batch.
 
 ***
 
-### id
+### id {#id}
 
 > **id**: `string`
 
@@ -20,7 +20,7 @@ The id of the entity in the sync item response.
 
 ***
 
-### entity?
+### entity? {#entity}
 
 > `optional` **entity**: [`ISynchronisedEntity`](ISynchronisedEntity.md)
 

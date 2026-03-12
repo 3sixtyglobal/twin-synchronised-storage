@@ -4,7 +4,7 @@ Register a key with synchronised storage.
 
 ## Properties
 
-### storageKey
+### storageKey {#storagekey}
 
 > **storageKey**: `string`
 

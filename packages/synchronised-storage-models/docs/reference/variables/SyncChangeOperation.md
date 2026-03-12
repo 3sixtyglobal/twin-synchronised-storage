@@ -6,13 +6,13 @@ The operations for a change.
 
 ## Type Declaration
 
-### Set
+### Set {#set}
 
 > `readonly` **Set**: `"set"` = `"set"`
 
 An item was set in the storage.
 
-### Delete
+### Delete {#delete}
 
 > `readonly` **Delete**: `"delete"` = `"delete"`
 

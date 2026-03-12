@@ -4,7 +4,7 @@ Options for the Synchronised Storage Service constructor.
 
 ## Properties
 
-### loggingComponentType?
+### loggingComponentType? {#loggingcomponenttype}
 
 > `optional` **loggingComponentType**: `string`
 
@@ -12,7 +12,7 @@ The logging component.
 
 ***
 
-### eventBusComponentType?
+### eventBusComponentType? {#eventbuscomponenttype}
 
 > `optional` **eventBusComponentType**: `string`
 
@@ -20,7 +20,7 @@ The event bus component type.
 
 ***
 
-### vaultConnectorType?
+### vaultConnectorType? {#vaultconnectortype}
 
 > `optional` **vaultConnectorType**: `string`
 
@@ -28,77 +28,47 @@ The vault connector type.
 
 ***
 
-### syncSnapshotStorageConnectorType?
+### syncSnapshotStorageConnectorType? {#syncsnapshotstorageconnectortype}
 
 > `optional` **syncSnapshotStorageConnectorType**: `string`
 
 The entity storage connector type to use for sync snapshots.
 
-#### Default
-
-```ts
-sync-snapshot-entry
-```
-
 ***
 
-### blobStorageConnectorType?
+### blobStorageConnectorType? {#blobstorageconnectortype}
 
 > `optional` **blobStorageConnectorType**: `string`
 
 The blob storage connector used for remote sync state.
 
-#### Default
-
-```ts
-blob-storage
-```
-
 ***
 
-### verifiableStorageConnectorType?
+### verifiableStorageConnectorType? {#verifiablestorageconnectortype}
 
 > `optional` **verifiableStorageConnectorType**: `string`
 
 The verifiable storage connector type to use for decentralised state.
 
-#### Default
-
-```ts
-verifiable-storage
-```
-
 ***
 
-### taskSchedulerComponentType?
+### taskSchedulerComponentType? {#taskschedulercomponenttype}
 
 > `optional` **taskSchedulerComponentType**: `string`
 
 The task scheduler component.
 
-#### Default
-
-```ts
-task-scheduler
-```
-
 ***
 
-### trustComponentType?
+### trustComponentType? {#trustcomponenttype}
 
 > `optional` **trustComponentType**: `string`
 
 The type of the trust component.
 
-#### Default
-
-```ts
-trust
-```
-
 ***
 
-### trustedSynchronisedStorageComponentType?
+### trustedSynchronisedStorageComponentType? {#trustedsynchronisedstoragecomponenttype}
 
 > `optional` **trustedSynchronisedStorageComponentType**: `string`
 
@@ -107,7 +77,7 @@ If this is set, this node uses it as the trusted node to store changesets.
 
 ***
 
-### config
+### config {#config}
 
 > **config**: [`ISynchronisedStorageServiceConfig`](ISynchronisedStorageServiceConfig.md)
 

@@ -4,7 +4,7 @@ The payload for an item set.
 
 ## Properties
 
-### storageKey
+### storageKey {#storagekey}
 
 > **storageKey**: `string`
 
@@ -12,7 +12,7 @@ The key of the storage being set.
 
 ***
 
-### entity
+### entity {#entity}
 
 > **entity**: [`ISynchronisedEntity`](ISynchronisedEntity.md)
 

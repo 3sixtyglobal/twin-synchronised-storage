@@ -4,7 +4,7 @@ Request for a local batch.
 
 ## Properties
 
-### storageKey
+### storageKey {#storagekey}
 
 > **storageKey**: `string`
 
@@ -12,7 +12,7 @@ The key of the storage for the entities in the batch.
 
 ***
 
-### batchSize
+### batchSize {#batchsize}
 
 > **batchSize**: `number`
 
@@ -20,7 +20,7 @@ The size of the batch.
 
 ***
 
-### requestMode
+### requestMode {#requestmode}
 
 > **requestMode**: [`SyncNodeIdMode`](../type-aliases/SyncNodeIdMode.md)
 

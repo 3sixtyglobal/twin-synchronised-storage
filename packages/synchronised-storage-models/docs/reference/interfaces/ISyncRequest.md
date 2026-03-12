@@ -4,7 +4,7 @@ The object definition for a sync request.
 
 ## Properties
 
-### @context
+### @context {#context}
 
 > **@context**: `"https://schema.twindev.org/synchronised-storage/"`
 
@@ -12,7 +12,7 @@ The LD Context for the request.
 
 ***
 
-### type
+### type {#type}
 
 > **type**: `"SyncRequest"`
 
@@ -20,9 +20,8 @@ The LD Type for the request.
 
 ***
 
-### nodeIdentity
+### nodeIdentity {#nodeidentity}
 
 > **nodeIdentity**: `string`
 
 The identity of the node that created the request.
-json-ld namespace:twin-common

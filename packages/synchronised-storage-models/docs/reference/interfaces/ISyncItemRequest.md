@@ -4,7 +4,7 @@ Request for a local item.
 
 ## Properties
 
-### storageKey
+### storageKey {#storagekey}
 
 > **storageKey**: `string`
 
@@ -12,7 +12,7 @@ The key of the storage for the entities in the batch.
 
 ***
 
-### id
+### id {#id}
 
 > **id**: `string`
 
