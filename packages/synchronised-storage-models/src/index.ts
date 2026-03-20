@@ -19,7 +19,6 @@ export * from "./models/ISynchronisedEntityCore.js";
 export * from "./models/ISynchronisedStorageComponent.js";
 export * from "./models/ISyncRequest.js";
 export * from "./models/syncChangeOperation.js";
-export * from "./models/synchronisedStorageAssetTypes.js";
 export * from "./models/synchronisedStorageContexts.js";
 export * from "./models/synchronisedStorageTopics.js";
 export * from "./models/synchronisedStorageTypes.js";

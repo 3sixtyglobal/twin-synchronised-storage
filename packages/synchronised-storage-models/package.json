@@ -34,9 +34,7 @@
 		"@twin.org/core": "next",
 		"@twin.org/entity": "next",
 		"@twin.org/identity-models": "next",
-		"@twin.org/nameof": "next",
-		"@twin.org/standards-w3c-did": "next",
-		"@twin.org/standards-w3c-odrl": "next"
+		"@twin.org/nameof": "next"
 	},
 	"devDependencies": {
 		"@twin.org/nameof-transformer": "next",
