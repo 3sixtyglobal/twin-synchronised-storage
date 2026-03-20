@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.3-next.10](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-models-v0.0.3-next.9...synchronised-storage-models-v0.0.3-next.10) (2026-03-20)
+
+
+### Bug Fixes
+
+* remove redundant code ([19edb23](https://github.com/twinfoundation/synchronised-storage/commit/19edb236f318b9c9454a64259d0ab5098a0c8173))
+
 ## [0.0.3-next.9](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-models-v0.0.3-next.8...synchronised-storage-models-v0.0.3-next.9) (2026-03-04)
 
 
