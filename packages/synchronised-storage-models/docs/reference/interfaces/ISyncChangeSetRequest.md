@@ -6,17 +6,17 @@ Request a trusted node to perform a sync request for a changeset.
 
 ### headers? {#headers}
 
-> `optional` **headers**: `object`
+> `optional` **headers?**: `object`
 
 The headers which can be used to determine the response data type.
 
 #### accept?
 
-> `optional` **accept**: `"application/ld+json"` \| `"application/json"`
+> `optional` **accept?**: `"application/ld+json"` \| `"application/json"`
 
 #### authorization?
 
-> `optional` **authorization**: `string`
+> `optional` **authorization?**: `string`
 
 ***
 

@@ -22,14 +22,20 @@ The entity storage connector type to use for actual data.
 
 ### eventBusComponentType? {#eventbuscomponenttype}
 
-> `optional` **eventBusComponentType**: `string`
+> `optional` **eventBusComponentType?**: `string`
 
 The event bus component type.
+
+#### Default
+
+```ts
+event-bus
+```
 
 ***
 
 ### config? {#config}
 
-> `optional` **config**: [`ISynchronisedEntityStorageConnectorConfig`](ISynchronisedEntityStorageConnectorConfig.md)
+> `optional` **config?**: [`ISynchronisedEntityStorageConnectorConfig`](ISynchronisedEntityStorageConnectorConfig.md)
 
 The configuration for the connector.

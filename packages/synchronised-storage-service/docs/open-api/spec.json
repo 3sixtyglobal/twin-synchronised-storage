@@ -228,6 +228,7 @@
 	"components": {
 		"schemas": {
 			"Error": {
+				"description": "Model to describe serialized error.",
 				"type": "object",
 				"properties": {
 					"name": {
@@ -258,10 +259,10 @@
 				"required": [
 					"name",
 					"message"
-				],
-				"description": "Model to describe serialized error."
+				]
 			},
 			"SyncChange": {
+				"description": "The object definition for a sync change.",
 				"type": "object",
 				"properties": {
 					"operation": {
@@ -278,34 +279,30 @@
 				"required": [
 					"operation",
 					"id"
-				],
-				"description": "The object definition for a sync change."
+				]
 			},
 			"SyncChangeOperation": {
+				"description": "The operations for a change",
 				"anyOf": [
 					{
-						"type": "string",
 						"const": "set",
 						"description": "An item was set in the storage."
 					},
 					{
-						"type": "string",
 						"const": "delete",
 						"description": "An item was deleted from the storage."
 					}
-				],
-				"description": "The operations for a change.   The operations for a change"
+				]
 			},
 			"SyncChangeSet": {
+				"description": "The object definition for a sync change set.",
 				"type": "object",
 				"properties": {
 					"@context": {
-						"type": "string",
 						"const": "https://schema.twindev.org/synchronised-storage/",
 						"description": "The LD Context for the change set."
 					},
 					"type": {
-						"type": "string",
 						"const": "ChangeSet",
 						"description": "The LD Type for the change set."
 					},
@@ -346,8 +343,7 @@
 					"dateModified",
 					"nodeIdentity",
 					"changes"
-				],
-				"description": "The object definition for a sync change set."
+				]
 			},
 			"SyncDecryptionKeyResponse": {
 				"type": "object",
@@ -363,6 +359,7 @@
 				"description": "The body of the response."
 			},
 			"SynchronisedEntityCore": {
+				"description": "The base definition for synchronised entries.",
 				"type": "object",
 				"properties": {
 					"dateModified": {
@@ -372,8 +369,7 @@
 				},
 				"required": [
 					"dateModified"
-				],
-				"description": "The base definition for synchronised entries."
+				]
 			}
 		},
 		"securitySchemes": {

@@ -22,6 +22,6 @@ The item id.
 
 ### entity? {#entity}
 
-> `optional` **entity**: [`ISynchronisedEntityCore`](ISynchronisedEntityCore.md)
+> `optional` **entity?**: [`ISynchronisedEntityCore`](ISynchronisedEntityCore.md)
 
 The entity to set.

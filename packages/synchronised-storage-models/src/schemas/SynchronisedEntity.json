@@ -1,13 +1,10 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"$id": "https://schema.twindev.org/synchronised-storage/SynchronisedEntity",
+	"title": "SynchronisedEntity",
 	"description": "The base definition for synchronised entries.",
 	"type": "object",
 	"properties": {
-		"dateModified": {
-			"type": "string",
-			"description": "The date the entry was modified."
-		},
 		"id": {
 			"type": "string",
 			"description": "The id of the entry."
@@ -18,8 +15,12 @@
 		}
 	},
 	"required": [
-		"dateModified",
 		"id",
 		"nodeIdentity"
+	],
+	"allOf": [
+		{
+			"$ref": "https://schema.twindev.org/synchronised-storage/SynchronisedEntityCore"
+		}
 	]
 }

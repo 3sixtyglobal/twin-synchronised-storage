@@ -9,7 +9,7 @@
 		"./src/models/syncChangeOperation.ts"
 	],
 	"externalReferences": {
-		"IJsonLd(.*)": "https://schema.twindev.org/json-ld/JsonLd$1",
-		"IProof": "https://schema.twindev.org/w3c-did/Proof"
+		"JsonLd(.*)": "https://schema.twindev.org/json-ld/JsonLd$1",
+		"Proof": "https://schema.twindev.org/w3c-did/Proof"
 	}
 }

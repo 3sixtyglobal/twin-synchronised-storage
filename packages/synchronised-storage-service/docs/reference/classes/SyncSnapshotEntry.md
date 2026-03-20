@@ -80,7 +80,7 @@ The epoch for the changeset.
 
 ### changeSetStorageIds? {#changesetstorageids}
 
-> `optional` **changeSetStorageIds**: `string`[]
+> `optional` **changeSetStorageIds?**: `string`[]
 
 The ids of the storage for the change sets in the snapshot, if this is not a local snapshot.
 
@@ -88,6 +88,6 @@ The ids of the storage for the change sets in the snapshot, if this is not a loc
 
 ### changes? {#changes}
 
-> `optional` **changes**: `ISyncChange`[]
+> `optional` **changes?**: `ISyncChange`[]
 
 The changes that were made in this snapshot, if this is a local snapshot.

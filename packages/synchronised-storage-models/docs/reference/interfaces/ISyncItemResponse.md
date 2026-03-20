@@ -22,6 +22,6 @@ The id of the entity in the sync item response.
 
 ### entity? {#entity}
 
-> `optional` **entity**: [`ISynchronisedEntity`](ISynchronisedEntity.md)
+> `optional` **entity?**: [`ISynchronisedEntity`](ISynchronisedEntity.md)
 
 The entity in the sync item response, undefined if not found.
