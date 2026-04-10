@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3-next.11](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.3-next.10...synchronised-storage-service-v0.0.3-next.11) (2026-04-10)
+
+
+### Features
+
+* skipTenant for trust routes ([#41](https://github.com/twinfoundation/synchronised-storage/issues/41)) ([b7bb0a8](https://github.com/twinfoundation/synchronised-storage/commit/b7bb0a8771951d4b28c419e946b715b8905b012e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.3-next.10 to 0.0.3-next.11
+
 ## [0.0.3-next.10](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-service-v0.0.3-next.9...synchronised-storage-service-v0.0.3-next.10) (2026-03-20)
 
 

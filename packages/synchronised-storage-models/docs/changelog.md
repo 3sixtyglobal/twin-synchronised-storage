@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.3-next.11](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-models-v0.0.3-next.10...synchronised-storage-models-v0.0.3-next.11) (2026-04-10)
+
+
+### Miscellaneous Chores
+
+* **synchronised-storage-models:** Synchronize repo versions
+
 ## [0.0.3-next.10](https://github.com/twinfoundation/synchronised-storage/compare/synchronised-storage-models-v0.0.3-next.9...synchronised-storage-models-v0.0.3-next.10) (2026-03-20)
 
 
