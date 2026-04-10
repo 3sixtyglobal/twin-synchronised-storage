@@ -89,7 +89,8 @@ export function generateRestRoutesSynchronisedStorage(
 				type: nameof<INoContentResponse>()
 			}
 		],
-		skipAuth: true
+		skipAuth: true,
+		skipTenant: true
 	};
 
 	const getDecryptionKeyRoute: IRestRoute<ISyncDecryptionKeyRequest, ISyncDecryptionKeyResponse> = {
@@ -128,7 +129,8 @@ export function generateRestRoutesSynchronisedStorage(
 				type: nameof<IUnauthorizedResponse>()
 			}
 		],
-		skipAuth: true
+		skipAuth: true,
+		skipTenant: true
 	};
 
 	return [syncChangeSetRoute, getDecryptionKeyRoute];
