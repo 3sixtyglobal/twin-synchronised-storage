@@ -4,7 +4,7 @@
 	"description": "Service implementation that coordinates synchronisation state and exposes REST entry points.",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/twinfoundation/synchronised-storage.git",
+		"url": "git+https://github.com/iotaledger/synchronised-storage.git",
 		"directory": "packages/synchronised-storage-service"
 	},
 	"author": "martyn.janes@iota.org",
@@ -103,7 +103,7 @@
 		"business-logic"
 	],
 	"bugs": {
-		"url": "git+https://github.com/twinfoundation/synchronised-storage/issues"
+		"url": "git+https://github.com/iotaledger/synchronised-storage/issues"
 	},
 	"homepage": "https://twindev.org"
 }
