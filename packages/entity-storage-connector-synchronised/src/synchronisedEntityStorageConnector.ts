@@ -247,6 +247,37 @@ export class SynchronisedEntityStorageConnector<
 	}
 
 	/**
+	 * Set multiple entities in a batch.
+	 * @param entities The entities to set.
+	 * @returns Nothing.
+	 */
+	public async setBatch(entities: T[]): Promise<void> {
+		Guards.arrayValue(SynchronisedEntityStorageConnector.CLASS_NAME, nameof(entities), entities);
+
+		if (Is.stringValue(this._nodeId)) {
+			const now = new Date(Date.now()).toISOString();
+			for (const entity of entities) {
+				entity.dateModified = now;
+				entity.nodeIdentity = this._nodeId;
+			}
+
+			await this._entityStorageConnector.setBatch(entities);
+
+			for (const entity of entities) {
+				await this._eventBusComponent.publish<ISyncItemChange>(
+					SynchronisedStorageTopics.LocalItemChange,
+					{
+						storageKey: this._storageKey,
+						operation: SyncChangeOperation.Set,
+						nodeId: this._nodeId,
+						id: entity[this._primaryKey.property] as string
+					}
+				);
+			}
+		}
+	}
+
+	/**
 	 * Remove the entity.
 	 * @param id The id of the entity to remove.
 	 * @param conditions The optional conditions to match for the entities.
@@ -272,6 +303,77 @@ export class SynchronisedEntityStorageConnector<
 				}
 			);
 		}
+	}
+
+	/**
+	 * Remove multiple entities by id.
+	 * @param ids The ids of the entities to remove.
+	 * @returns Nothing.
+	 */
+	public async removeBatch(ids: string[]): Promise<void> {
+		Guards.arrayValue(SynchronisedEntityStorageConnector.CLASS_NAME, nameof(ids), ids);
+
+		if (Is.stringValue(this._nodeId)) {
+			await this._entityStorageConnector.removeBatch(ids);
+
+			for (const id of ids) {
+				await this._eventBusComponent.publish<ISyncItemChange>(
+					SynchronisedStorageTopics.LocalItemChange,
+					{
+						storageKey: this._storageKey,
+						operation: SyncChangeOperation.Delete,
+						nodeId: this._nodeId,
+						id
+					}
+				);
+			}
+		}
+	}
+
+	/**
+	 * Remove all entities from the storage.
+	 * @returns Nothing.
+	 */
+	public async empty(): Promise<void> {
+		if (Is.stringValue(this._nodeId)) {
+			let cursor: string | undefined;
+			const ids: string[] = [];
+
+			do {
+				const result = await this._entityStorageConnector.query(
+					undefined,
+					undefined,
+					[this._primaryKey.property],
+					cursor
+				);
+				cursor = result.cursor;
+				ids.push(...result.entities.map(e => (e as T)[this._primaryKey.property] as string));
+			} while (Is.stringValue(cursor));
+
+			await this._entityStorageConnector.empty();
+
+			for (const id of ids) {
+				await this._eventBusComponent.publish<ISyncItemChange>(
+					SynchronisedStorageTopics.LocalItemChange,
+					{
+						storageKey: this._storageKey,
+						operation: SyncChangeOperation.Delete,
+						nodeId: this._nodeId,
+						id
+					}
+				);
+			}
+		} else {
+			await this._entityStorageConnector.empty();
+		}
+	}
+
+	/**
+	 * Count all the entities which match the conditions.
+	 * @returns The total count of entities in the storage.
+	 */
+	public async count(): Promise<number> {
+		return this._entityStorageConnector.count();
 	}
 
 	/**
