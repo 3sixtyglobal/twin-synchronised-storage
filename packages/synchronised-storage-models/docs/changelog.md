@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.3-next.12](https://github.com/iotaledger/twin-synchronised-storage/compare/synchronised-storage-models-v0.0.3-next.11...synchronised-storage-models-v0.0.3-next.12) (2026-05-07)
+
+
+### Miscellaneous Chores
+
+* **synchronised-storage-models:** Synchronize repo versions
+
 ## [0.0.3-next.11](https://github.com/iotaledger/twin-synchronised-storage/compare/synchronised-storage-models-v0.0.3-next.10...synchronised-storage-models-v0.0.3-next.11) (2026-04-10)
 
 

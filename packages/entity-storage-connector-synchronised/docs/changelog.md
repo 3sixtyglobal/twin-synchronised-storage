@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3-next.12](https://github.com/iotaledger/twin-synchronised-storage/compare/entity-storage-connector-synchronised-v0.0.3-next.11...entity-storage-connector-synchronised-v0.0.3-next.12) (2026-05-07)
+
+
+### Features
+
+* update to latest entity storage model ([14fc53f](https://github.com/iotaledger/twin-synchronised-storage/commit/14fc53fd93140fb9aff6bf937a7646d0a654fd9d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.3-next.11 to 0.0.3-next.12
+
 ## [0.0.3-next.11](https://github.com/iotaledger/twin-synchronised-storage/compare/entity-storage-connector-synchronised-v0.0.3-next.10...entity-storage-connector-synchronised-v0.0.3-next.11) (2026-04-10)
 
 
