@@ -158,7 +158,7 @@ async function waitForLogEntries(
 	count: number
 ): Promise<void> {
 	let retries = 0;
-	let logEntries: LogEntry[] = [];
+	let logEntries: LogEntry[];
 	do {
 		logEntries = store.getStore();
 		await new Promise(resolve => setTimeout(resolve, 100));
