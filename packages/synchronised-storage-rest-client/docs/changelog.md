@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3-next.13](https://github.com/iotaledger/twin-synchronised-storage/compare/synchronised-storage-rest-client-v0.0.3-next.12...synchronised-storage-rest-client-v0.0.3-next.13) (2026-05-12)
+
+
+### Features
+
+* typescript 6 update ([b0e6d52](https://github.com/iotaledger/twin-synchronised-storage/commit/b0e6d52f622dc1ff2273f5e09e8370382742ae50))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.3-next.12 to 0.0.3-next.13
+
 ## [0.0.3-next.12](https://github.com/iotaledger/twin-synchronised-storage/compare/synchronised-storage-rest-client-v0.0.3-next.11...synchronised-storage-rest-client-v0.0.3-next.12) (2026-05-07)
 
 
