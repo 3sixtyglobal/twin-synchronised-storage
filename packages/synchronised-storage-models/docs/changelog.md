@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.3-next.14](https://github.com/iotaledger/twin-synchronised-storage/compare/synchronised-storage-models-v0.0.3-next.13...synchronised-storage-models-v0.0.3-next.14) (2026-05-20)
+
+
+### Features
+
+* update dependencies ([2bce2e2](https://github.com/iotaledger/twin-synchronised-storage/commit/2bce2e205f9e1acdef41681720e192b77aa50468))
+
 ## [0.0.3-next.13](https://github.com/iotaledger/twin-synchronised-storage/compare/synchronised-storage-models-v0.0.3-next.12...synchronised-storage-models-v0.0.3-next.13) (2026-05-12)
 
 

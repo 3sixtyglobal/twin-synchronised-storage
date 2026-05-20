@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3-next.14](https://github.com/iotaledger/twin-synchronised-storage/compare/synchronised-storage-rest-client-v0.0.3-next.13...synchronised-storage-rest-client-v0.0.3-next.14) (2026-05-20)
+
+
+### Miscellaneous Chores
+
+* **synchronised-storage-rest-client:** Synchronize repo versions
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.3-next.13 to 0.0.3-next.14
+
 ## [0.0.3-next.13](https://github.com/iotaledger/twin-synchronised-storage/compare/synchronised-storage-rest-client-v0.0.3-next.12...synchronised-storage-rest-client-v0.0.3-next.13) (2026-05-12)
 
 
