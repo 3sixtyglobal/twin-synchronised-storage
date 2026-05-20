@@ -44,7 +44,7 @@
 		"@twin.org/entity-storage-connector-memory": "next",
 		"@twin.org/event-bus-connector-local": "next",
 		"@twin.org/event-bus-service": "next",
-		"@types/node": "25.7.0",
+		"@types/node": "25.9.1",
 		"@vitest/coverage-v8": "4.1.6",
 		"copyfiles": "2.4.1",
 		"dotenv": "17.4.2",
