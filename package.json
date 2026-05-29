@@ -4,7 +4,7 @@
 	"description": "Repository for synchronised storage models, services, clients, and connectors.",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/iotaledger/synchronised-storage.git"
+		"url": "git+https://github.com/iotaledger/twin-synchronised-storage.git"
 	},
 	"author": "martyn.janes@iota.org",
 	"license": "Apache-2.0",
@@ -61,7 +61,7 @@
 	],
 	"type": "module",
 	"bugs": {
-		"url": "git+https://github.com/iotaledger/synchronised-storage/issues"
+		"url": "git+https://github.com/iotaledger/twin-synchronised-storage/issues"
 	},
 	"homepage": "https://twindev.org"
 }
