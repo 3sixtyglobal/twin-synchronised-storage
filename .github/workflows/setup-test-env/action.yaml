@@ -14,12 +14,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Write Test Environment Variables
-      if: inputs.package == 'packages/messaging-connector-aws' || inputs.package == 'all'
-      shell: bash
-      run: |
-        echo "${{ inputs.test_env_vars }}" > /tmp/test_env_vars.txt
-
     - name: No setup
       shell: bash
       run: |

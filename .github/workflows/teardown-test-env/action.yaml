@@ -8,8 +8,3 @@ runs:
       shell: bash
       run: |
         echo "No Docker test resources are created by setup-test-env in this repository."
-
-    - name: Remove Test Environment Variables File
-      shell: bash
-      run: |
-        rm -f /tmp/test_env_vars.txt

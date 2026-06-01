@@ -159,12 +159,10 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Setup Test Environment
-        shell: bash
-        run: |
-          if [ "${{ matrix.package }}" = "packages/messaging-connector-aws" ] || [ "${{ matrix.package }}" = "all" ]; then
-            echo "${{ secrets.TWIN_TEST_ENV_VARS }}" > /tmp/test_env_vars.txt
-          fi
-          echo "No setup required for this workflow."
+        uses: ./.github/workflows/setup-test-env
+        with:
+          package: ${{ matrix.package }}
+          test_env_vars: ${{ secrets.TWIN_TEST_ENV_VARS }}
 
       - name: Remove Mono-Repo Node Modules
         run: |
@@ -252,10 +250,7 @@ jobs:
 
       - name: Teardown Test Environment
         if: always()
-        shell: bash
-        run: |
-          echo "No Docker test resources are created by setup-test-env in this repository."
-          rm -f /tmp/test_env_vars.txt
+        uses: ./.github/workflows/teardown-test-env
 
   publish-gh-releases:
     name: Publish GitHub Releases
