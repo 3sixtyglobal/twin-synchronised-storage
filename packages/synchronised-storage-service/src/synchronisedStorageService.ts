@@ -549,6 +549,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 
 	/**
 	 * Find any local updates and send them to the remote storage.
+	 * @param storageKey The key of the storage to synchronise.
 	 * @returns Nothing.
 	 * @internal
 	 */

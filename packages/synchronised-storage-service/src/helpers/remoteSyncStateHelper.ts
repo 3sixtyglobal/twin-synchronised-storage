@@ -592,6 +592,7 @@ export class RemoteSyncStateHelper {
 	/**
 	 * Handle the batch response which is triggered from a consolidation request.
 	 * @param response The batch response to handle.
+	 * @internal
 	 */
 	private async handleBatchResponse(response: ISyncBatchResponse): Promise<void> {
 		if (Is.stringValue(this._nodeId)) {
@@ -681,6 +682,7 @@ export class RemoteSyncStateHelper {
 	/**
 	 * Handle the item response.
 	 * @param response The item response to handle.
+	 * @internal
 	 */
 	private async handleLocalItemResponse(response: ISyncItemResponse): Promise<void> {
 		await this._logging?.log({
