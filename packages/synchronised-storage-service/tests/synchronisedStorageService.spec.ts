@@ -901,9 +901,7 @@ describe("synchronisedStorageService", () => {
 				isLocal: false,
 				isConsolidated: true,
 				epoch: 0,
-				changeSetStorageIds: [
-					"blob:memory:159672866e4ff9ac4a566ca27ca60d6e6543a43977eeb6139dc9d98807634a46"
-				]
+				changeSetStorageIds: [blobChangeSetId]
 			}
 		]);
 	});
