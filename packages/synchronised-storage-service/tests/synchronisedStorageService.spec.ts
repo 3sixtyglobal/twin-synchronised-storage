@@ -265,7 +265,15 @@ describe("synchronisedStorageService", () => {
 			entitySchema: nameof<LogEntry>()
 		});
 		EntityStorageConnectorFactory.register("log-entry", () => loggingMemoryEntityStorage);
-		LoggingConnectorFactory.register("logging", () => new EntityStorageLoggingConnector());
+		LoggingConnectorFactory.register(
+			"logging",
+			() =>
+				new EntityStorageLoggingConnector({
+					config: {
+						batchSize: 1
+					}
+				})
+		);
 
 		loggingUntrustedMemoryEntityStorage = new MemoryEntityStorageConnector<LogEntry>({
 			entitySchema: nameof<LogEntry>()
@@ -277,7 +285,10 @@ describe("synchronisedStorageService", () => {
 		LoggingConnectorFactory.register(
 			"logging-untrusted",
 			() =>
-				new EntityStorageLoggingConnector({ logEntryStorageConnectorType: "log-entry-untrusted" })
+				new EntityStorageLoggingConnector({
+					logEntryStorageConnectorType: "log-entry-untrusted",
+					config: { batchSize: 1 }
+				})
 		);
 
 		const loggingService = new LoggingService({ loggingConnectorType: "logging" });
@@ -378,7 +389,8 @@ describe("synchronisedStorageService", () => {
 
 	test("can register a type before the service has been started", async () => {
 		const connector = new SynchronisedStorageService({
-			config: { verifiableStorageKeyId, consolidationIntervalMinutes: 0 }
+			config: { verifiableStorageKeyId, consolidationIntervalMinutes: 0 },
+			loggingComponentType: "logging"
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 
@@ -390,6 +402,8 @@ describe("synchronisedStorageService", () => {
 				storageKey: "test-type"
 			}
 		);
+
+		await waitForLogEntries(loggingMemoryEntityStorage, 10);
 
 		const logStore = loggingMemoryEntityStorage.getStore();
 		expect(logStore.map(e => e.message)).toEqual([
@@ -408,7 +422,8 @@ describe("synchronisedStorageService", () => {
 
 	test("can register a type after the service has started", async () => {
 		const connector = new SynchronisedStorageService({
-			config: { verifiableStorageKeyId, consolidationIntervalMinutes: 0 }
+			config: { verifiableStorageKeyId, consolidationIntervalMinutes: 0 },
+			loggingComponentType: "logging"
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
 
@@ -420,6 +435,8 @@ describe("synchronisedStorageService", () => {
 				storageKey: "test-type"
 			}
 		);
+
+		await waitForLogEntries(loggingMemoryEntityStorage, 10);
 
 		const logStore = loggingMemoryEntityStorage.getStore();
 		expect(logStore.map(e => e.message)).toEqual([
@@ -438,6 +455,7 @@ describe("synchronisedStorageService", () => {
 
 	test("can process a local update to entity storage", async () => {
 		const connector = new SynchronisedStorageService({
+			loggingComponentType: "logging",
 			config: { verifiableStorageKeyId, consolidationIntervalMinutes: 0 }
 		});
 		expect(connector).toBeInstanceOf(SynchronisedStorageService);
@@ -461,7 +479,7 @@ describe("synchronisedStorageService", () => {
 		expect(localSnapshots).toEqual([
 			{
 				version: "1",
-				id: "f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0",
+				id: expect.stringMatching(/^[\da-f]{64}$/),
 				storageKey: "test-type",
 				dateCreated: "2025-05-29T01:00:00.000Z",
 				dateModified: "2025-05-29T01:00:00.000Z",
@@ -477,6 +495,8 @@ describe("synchronisedStorageService", () => {
 				]
 			}
 		]);
+
+		await waitForLogEntries(loggingMemoryEntityStorage, 14);
 
 		const logStore = loggingMemoryEntityStorage.getStore();
 		expect(logStore.map(e => e.message)).toEqual([
@@ -499,6 +519,7 @@ describe("synchronisedStorageService", () => {
 
 	test("can process subsequent local update to entity storage", async () => {
 		const connector = new SynchronisedStorageService({
+			loggingComponentType: "logging",
 			config: {
 				verifiableStorageKeyId,
 				consolidationIntervalMinutes: 0
@@ -532,7 +553,7 @@ describe("synchronisedStorageService", () => {
 		expect(localSnapshots).toEqual([
 			{
 				version: "1",
-				id: "f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0",
+				id: expect.stringMatching(/^[\da-f]{64}$/),
 				storageKey: "test-type",
 				dateCreated: "2025-05-29T01:00:00.000Z",
 				dateModified: "2025-05-29T01:00:00.000Z",
@@ -548,6 +569,8 @@ describe("synchronisedStorageService", () => {
 				]
 			}
 		]);
+
+		await waitForLogEntries(loggingMemoryEntityStorage, 18);
 
 		const logStore = loggingMemoryEntityStorage.getStore();
 		expect(logStore.map(e => e.message)).toEqual([
@@ -574,6 +597,7 @@ describe("synchronisedStorageService", () => {
 
 	test("can process update and perform sync", async () => {
 		const connector = new SynchronisedStorageService({
+			loggingComponentType: "logging",
 			config: {
 				verifiableStorageKeyId,
 				consolidationIntervalMinutes: 0
@@ -624,7 +648,7 @@ describe("synchronisedStorageService", () => {
 			}
 		);
 
-		await waitForLogEntries(loggingMemoryEntityStorage, 20);
+		await waitForLogEntries(loggingMemoryEntityStorage, 29);
 
 		// Should be no local snapshot remaining as they will have been synced to remote storage
 		const localSnapshots = syncSnapshotStorageConnector.getStore();
@@ -755,6 +779,7 @@ describe("synchronisedStorageService", () => {
 
 	test("can receive the updates from a remote sync state", async () => {
 		const connector = new SynchronisedStorageService({
+			loggingComponentType: "logging",
 			config: {
 				verifiableStorageKeyId,
 				consolidationIntervalMinutes: 0
@@ -833,6 +858,8 @@ describe("synchronisedStorageService", () => {
 			}
 		);
 
+		await waitForLogEntries(loggingMemoryEntityStorage, 24);
+
 		const logStore = loggingMemoryEntityStorage.getStore();
 		expect(logStore.map(e => e.message)).toEqual([
 			"registerStorageKey",
@@ -896,6 +923,7 @@ describe("synchronisedStorageService", () => {
 
 	test("can use a trusted node to synchronise a non trusted node", async () => {
 		const connectorTrusted = new SynchronisedStorageService({
+			loggingComponentType: "logging",
 			config: { verifiableStorageKeyId }
 		});
 		ComponentFactory.register("trusted", () => connectorTrusted);
@@ -962,7 +990,8 @@ describe("synchronisedStorageService", () => {
 			}
 		);
 
-		await waitForLogEntries(loggingUntrustedMemoryEntityStorage, 18);
+		await waitForLogEntries(loggingUntrustedMemoryEntityStorage, 20);
+		await waitForLogEntries(loggingMemoryEntityStorage, 14);
 
 		const logStoreUntrusted = loggingUntrustedMemoryEntityStorage.getStore();
 		expect(logStoreUntrusted.map(e => e.message)).toEqual([
@@ -1087,6 +1116,7 @@ describe("synchronisedStorageService", () => {
 	describe("consolidation behavior", () => {
 		test("can handle multiple snapshots with consolidation present", async () => {
 			const connector = new SynchronisedStorageService({
+				loggingComponentType: "logging",
 				config: {
 					verifiableStorageKeyId,
 					consolidationIntervalMinutes: 0
@@ -1239,6 +1269,7 @@ describe("synchronisedStorageService", () => {
 
 		test("can handle sync with no consolidation available", async () => {
 			const connector = new SynchronisedStorageService({
+				loggingComponentType: "logging",
 				config: {
 					verifiableStorageKeyId,
 					consolidationIntervalMinutes: 0
@@ -1324,6 +1355,7 @@ describe("synchronisedStorageService", () => {
 
 		test("can handle incremental sync with consolidation already present", async () => {
 			const connector = new SynchronisedStorageService({
+				loggingComponentType: "logging",
 				config: {
 					verifiableStorageKeyId,
 					consolidationIntervalMinutes: 0
@@ -1442,6 +1474,7 @@ describe("synchronisedStorageService", () => {
 
 		test("can handle epoch gap requiring full sync", async () => {
 			const connector = new SynchronisedStorageService({
+				loggingComponentType: "logging",
 				config: {
 					verifiableStorageKeyId,
 					consolidationIntervalMinutes: 0

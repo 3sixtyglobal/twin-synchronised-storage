@@ -207,7 +207,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 		);
 
 		this._eventBusComponent = ComponentFactory.get(options.eventBusComponentType ?? "event-bus");
-		this._logging = ComponentFactory.getIfExists(options.loggingComponentType ?? "logging");
+		this._logging = ComponentFactory.getIfExists(options.loggingComponentType);
 		this._vaultConnector = VaultConnectorFactory.get(options.vaultConnectorType ?? "vault");
 
 		this._localSyncSnapshotEntryEntityStorage = EntityStorageConnectorFactory.get<
