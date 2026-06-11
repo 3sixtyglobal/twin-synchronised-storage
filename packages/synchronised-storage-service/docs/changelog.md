@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.0.3-next.15](https://github.com/iotaledger/twin-synchronised-storage/compare/synchronised-storage-service-v0.0.3-next.14...synchronised-storage-service-v0.0.3-next.15) (2026-06-11)
+
+
+### Features
+
+* remove default loggers ([b276692](https://github.com/iotaledger/twin-synchronised-storage/commit/b2766926d48bf599cc9629ee2daa526843026159))
+* remove default loggers ([5619842](https://github.com/iotaledger/twin-synchronised-storage/commit/5619842f997d285d8ac6e8c6060d7974b90f61c1))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.0.3-next.14 to 0.0.3-next.15
+
 ## [0.0.3-next.14](https://github.com/iotaledger/twin-synchronised-storage/compare/synchronised-storage-service-v0.0.3-next.13...synchronised-storage-service-v0.0.3-next.14) (2026-05-20)
 
 
