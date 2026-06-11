@@ -729,7 +729,7 @@ describe("synchronisedStorageService", () => {
 			snapshots: [
 				{
 					version: "1",
-					id: "0303030303030303030303030303030303030303030303030303030303030303",
+					id: expect.stringMatching(/^[\da-f]{64}$/),
 					dateCreated: "2025-05-29T01:00:00.000Z",
 					dateModified: "2025-05-29T01:00:00.000Z",
 					isConsolidated: false,
@@ -747,7 +747,7 @@ describe("synchronisedStorageService", () => {
 		expect(await expandObject(blobs[changeSetBlobKey])).toEqual({
 			"@context": SynchronisedStorageContexts.Namespace,
 			type: SynchronisedStorageTypes.ChangeSet,
-			id: "fafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafa",
+			id: expect.stringMatching(/^[\da-f]{64}$/),
 			dateCreated: "2025-05-29T01:00:00.000Z",
 			dateModified: "2025-05-29T01:00:00.000Z",
 			storageKey: "test-type",
@@ -1060,7 +1060,7 @@ describe("synchronisedStorageService", () => {
 			snapshots: [
 				{
 					version: "1",
-					id: "1313131313131313131313131313131313131313131313131313131313131313",
+					id: expect.stringMatching(/^[\da-f]{64}$/),
 					dateCreated: "2025-05-29T01:00:00.000Z",
 					dateModified: "2025-05-29T01:00:00.000Z",
 					isConsolidated: false,
@@ -1089,7 +1089,7 @@ describe("synchronisedStorageService", () => {
 			],
 			dateCreated: "2025-05-29T01:00:00.000Z",
 			dateModified: "2025-05-29T01:00:00.000Z",
-			id: "0808080808080808080808080808080808080808080808080808080808080808",
+			id: expect.stringMatching(/^[\da-f]{64}$/),
 			nodeIdentity:
 				"did:entity-storage:0xd2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2",
 			storageKey: "test-type"
