@@ -158,15 +158,16 @@ async function waitForLogEntries(
 	count: number
 ): Promise<void> {
 	let retries = 0;
-	let logEntries: LogEntry[];
-	do {
-		logEntries = store.getStore();
+	let logEntries = store.getStore();
+	while (logEntries.length < count && retries < 50) {
 		await new Promise(resolve => setTimeout(resolve, 100));
-		if (logEntries.length >= count) {
-			return;
-		}
+		logEntries = store.getStore();
 		retries++;
-	} while (retries < 50);
+	}
+
+	if (logEntries.length >= count) {
+		return;
+	}
 
 	console.log(JSON.stringify(store.getStore(), null, 2));
 	throw new Error(
