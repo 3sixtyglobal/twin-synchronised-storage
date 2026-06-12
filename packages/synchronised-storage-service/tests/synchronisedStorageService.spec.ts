@@ -262,6 +262,12 @@ describe("synchronisedStorageService", () => {
 		const taskSchedulerComponent = new TaskSchedulerService({ config: { intervalMs: 0.5 } });
 		ComponentFactory.register("task-scheduler", () => taskSchedulerComponent);
 
+		ComponentFactory.register("platform", () => ({
+			className: () => "platform",
+			isMultiTenant: () => false,
+			execute: async (method: () => Promise<void>) => method()
+		}));
+
 		loggingMemoryEntityStorage = new MemoryEntityStorageConnector<LogEntry>({
 			entitySchema: nameof<LogEntry>()
 		});
