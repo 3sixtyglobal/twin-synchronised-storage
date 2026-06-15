@@ -159,6 +159,7 @@ export class RemoteSyncStateHelper {
 
 	/**
 	 * Start the remote sync state helper.
+	 * @returns A promise that resolves when all event bus subscriptions are registered.
 	 */
 	public async start(): Promise<void> {
 		await this._eventBusComponent.subscribe<ISyncBatchResponse>(
@@ -185,11 +186,11 @@ export class RemoteSyncStateHelper {
 	}
 
 	/**
-	 * Build a changeset.
+	 * Build a changeset and invoke the callback when complete.
 	 * @param storageKey The storage key of the change set.
 	 * @param changes The changes to apply.
-	 * @param completeCallback The callback to call when the changeset is created and stored.
-	 * @returns The storage id of the change set if created.
+	 * @param completeCallback The callback invoked when the changeset is created and stored.
+	 * @returns A promise that resolves when item requests are dispatched or the changeset is finalised immediately.
 	 */
 	public async buildChangeSet(
 		storageKey: string,
@@ -247,8 +248,8 @@ export class RemoteSyncStateHelper {
 	/**
 	 * Finalise the full details for the sync change set.
 	 * @param storageKey The storage key of the change set.
-	 * @param completeCallback The callback to call when the changeset is populated.
-	 * @returns Nothing.
+	 * @param completeCallback The callback invoked when the changeset is populated and optionally stored.
+	 * @returns A promise that resolves when the changeset is built and the callback is invoked.
 	 */
 	public async finaliseFullChanges(
 		storageKey: string,
@@ -317,8 +318,8 @@ export class RemoteSyncStateHelper {
 	/**
 	 * Add a new changeset into the sync state.
 	 * @param storageKey The storage key of the change set to add.
-	 * @param changeSetStorageId The id of the change set to add the current state
-	 * @returns Nothing.
+	 * @param changeSetStorageId The id of the change set to add.
+	 * @returns A promise that resolves when the sync state and verifiable sync pointer are updated.
 	 */
 	public async addChangeSetToSyncState(
 		storageKey: string,
@@ -389,7 +390,7 @@ export class RemoteSyncStateHelper {
 	 * Create a consolidated snapshot for the entire storage.
 	 * @param storageKey The storage key of the snapshot to create.
 	 * @param batchSize The batch size to use for consolidation.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the batch request is published to the event bus.
 	 */
 	public async consolidationStart(storageKey: string, batchSize: number): Promise<void> {
 		await this._logging?.log({
@@ -462,7 +463,7 @@ export class RemoteSyncStateHelper {
 	/**
 	 * Store the verifiable sync pointer in the verifiable storage.
 	 * @param syncPointerStore The sync pointer store to store.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the pointer store is persisted to verifiable storage.
 	 */
 	public async storeVerifiableSyncPointerStore(syncPointerStore: ISyncPointerStore): Promise<void> {
 		if (Is.stringValue(this._nodeId) && Is.stringValue(this._synchronisedStorageKey)) {
@@ -592,6 +593,7 @@ export class RemoteSyncStateHelper {
 	/**
 	 * Handle the batch response which is triggered from a consolidation request.
 	 * @param response The batch response to handle.
+	 * @returns A promise that resolves when the batch is processed and, if it is the last entry, the consolidated snapshot is stored.
 	 * @internal
 	 */
 	private async handleBatchResponse(response: ISyncBatchResponse): Promise<void> {
@@ -682,6 +684,7 @@ export class RemoteSyncStateHelper {
 	/**
 	 * Handle the item response.
 	 * @param response The item response to handle.
+	 * @returns A promise that resolves when the entity is recorded and the complete callback is invoked if all requests are fulfilled.
 	 * @internal
 	 */
 	private async handleLocalItemResponse(response: ISyncItemResponse): Promise<void> {

@@ -71,7 +71,7 @@ export class SynchronisedStorageRestClient
 	 * Synchronise a set of changes from an untrusted node, assumes this is a trusted node.
 	 * @param syncChangeSet The change set to synchronise.
 	 * @param trustPayload Trust payload to verify the requesters identity.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the change set has been accepted by the trusted node.
 	 */
 	public async syncChangeSet(syncChangeSet: ISyncChangeSet, trustPayload: unknown): Promise<void> {
 		Guards.object<ISyncChangeSet>(

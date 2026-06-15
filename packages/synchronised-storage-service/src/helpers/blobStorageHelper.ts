@@ -200,7 +200,7 @@ export class BlobStorageHelper {
 	/**
 	 * Remove a blob from storage.
 	 * @param blobId The id of the blob to remove.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the blob is removed.
 	 */
 	public async removeBlob(blobId: string): Promise<void> {
 		await this._logging?.log({

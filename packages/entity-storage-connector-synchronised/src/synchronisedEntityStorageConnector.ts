@@ -182,7 +182,7 @@ export class SynchronisedEntityStorageConnector<
 	/**
 	 * The component needs to be started when the node is initialized.
 	 * @param nodeLoggingComponentType The node logging component type.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the connector is started and event bus subscriptions are active.
 	 */
 	public async start(nodeLoggingComponentType?: string): Promise<void> {
 		const contextIds = await ContextIdStore.getContextIds();
@@ -221,7 +221,7 @@ export class SynchronisedEntityStorageConnector<
 	 * Set an entity.
 	 * @param entity The entity to set.
 	 * @param conditions The optional conditions to match for the entities.
-	 * @returns The id of the entity.
+	 * @returns A promise that resolves when the entity is stored and the change event is published.
 	 */
 	public async set(entity: T, conditions?: { property: keyof T; value: unknown }[]): Promise<void> {
 		Guards.object<T>(SynchronisedEntityStorageConnector.CLASS_NAME, nameof(entity), entity);
@@ -249,7 +249,7 @@ export class SynchronisedEntityStorageConnector<
 	/**
 	 * Set multiple entities in a batch.
 	 * @param entities The entities to set.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when all entities are stored and change events are published.
 	 */
 	public async setBatch(entities: T[]): Promise<void> {
 		Guards.arrayValue(SynchronisedEntityStorageConnector.CLASS_NAME, nameof(entities), entities);
@@ -281,7 +281,7 @@ export class SynchronisedEntityStorageConnector<
 	 * Remove the entity.
 	 * @param id The id of the entity to remove.
 	 * @param conditions The optional conditions to match for the entities.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the entity is removed and the delete event is published.
 	 */
 	public async remove(
 		id: string,
@@ -308,7 +308,7 @@ export class SynchronisedEntityStorageConnector<
 	/**
 	 * Remove multiple entities by id.
 	 * @param ids The ids of the entities to remove.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when all entities are removed and delete events are published.
 	 */
 	public async removeBatch(ids: string[]): Promise<void> {
 		Guards.arrayValue(SynchronisedEntityStorageConnector.CLASS_NAME, nameof(ids), ids);
@@ -332,7 +332,7 @@ export class SynchronisedEntityStorageConnector<
 
 	/**
 	 * Remove all entities from the storage.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when all entities are removed and delete events are published.
 	 */
 	public async empty(): Promise<void> {
 		if (Is.stringValue(this._nodeId)) {
@@ -417,6 +417,7 @@ export class SynchronisedEntityStorageConnector<
 
 	/**
 	 * Handle the event bus messages.
+	 * @returns A promise that resolves when all subscriptions are registered.
 	 * @internal
 	 */
 	private async handleEventBusMessages(): Promise<void> {
@@ -463,7 +464,8 @@ export class SynchronisedEntityStorageConnector<
 
 	/**
 	 * Handle a local item request.
-	 * @param event The request parameters
+	 * @param event The request parameters.
+	 * @returns A promise that resolves when the item response is published.
 	 * @internal
 	 */
 	private async handleLocalItemRequest(event: IEvent<ISyncItemRequest>): Promise<void> {
@@ -488,7 +490,8 @@ export class SynchronisedEntityStorageConnector<
 
 	/**
 	 * Handle a remote item set event.
-	 * @param event The event parameters
+	 * @param event The event parameters.
+	 * @returns A promise that resolves when the entity is stored locally if it matches this connector's storage key.
 	 * @internal
 	 */
 	private async handleRemoteItemSet(event: IEvent<ISyncItemSet>): Promise<void> {
@@ -505,7 +508,8 @@ export class SynchronisedEntityStorageConnector<
 
 	/**
 	 * Handle a remote item remove event.
-	 * @param params The event parameters
+	 * @param params The event parameters.
+	 * @returns A promise that resolves when the entity is removed locally if it matches this connector's storage key.
 	 * @internal
 	 */
 	private async handleRemoteItemRemove(params: IEvent<ISyncItemRemove>): Promise<void> {
@@ -519,7 +523,8 @@ export class SynchronisedEntityStorageConnector<
 
 	/**
 	 * Handle a batch request.
-	 * @param event The request parameters
+	 * @param event The request parameters.
+	 * @returns A promise that resolves when all batch response pages are published.
 	 * @internal
 	 */
 	private async handleBatchRequest(event: IEvent<ISyncBatchRequest>): Promise<void> {
@@ -573,7 +578,8 @@ export class SynchronisedEntityStorageConnector<
 
 	/**
 	 * Handle a reset event.
-	 * @param event The event parameters
+	 * @param event The event parameters.
+	 * @returns A promise that resolves when matching entities are removed from local storage.
 	 * @internal
 	 */
 	private async handleReset(event: IEvent<ISyncReset>): Promise<void> {

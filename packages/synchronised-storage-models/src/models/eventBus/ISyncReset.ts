@@ -7,7 +7,7 @@ import type { SyncNodeIdMode } from "../syncNodeIdMode.js";
  */
 export interface ISyncReset {
 	/**
-	 * The key of the storage for the entities in the batch.
+	 * The key of the storage to reset.
 	 */
 	storageKey: string;
 

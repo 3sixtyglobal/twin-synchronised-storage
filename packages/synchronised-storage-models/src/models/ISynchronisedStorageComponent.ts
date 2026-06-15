@@ -19,7 +19,7 @@ export interface ISynchronisedStorageComponent extends IComponent {
 	 * Synchronise a set of changes from an untrusted node, assumes this is a trusted node.
 	 * @param syncChangeSet The change set to synchronise.
 	 * @param trustPayload Trust payload to verify the requesters identity.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the change set has been applied and stored.
 	 */
 	syncChangeSet(syncChangeSet: ISyncChangeSet, trustPayload: unknown): Promise<void>;
 }

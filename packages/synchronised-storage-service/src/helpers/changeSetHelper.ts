@@ -136,7 +136,7 @@ export class ChangeSetHelper {
 	/**
 	 * Apply a sync changeset.
 	 * @param syncChangeset The sync changeset to apply.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when all changes in the set have been published to the event bus.
 	 */
 	public async applyChangeset(syncChangeset: ISyncChangeSet): Promise<void> {
 		if (Is.arrayValue(syncChangeset.changes)) {
@@ -244,8 +244,8 @@ export class ChangeSetHelper {
 	/**
 	 * Reset the storage for a given storage key.
 	 * @param storageKey The key of the storage to reset.
-	 * @param resetMode The reset mode, this will use the nodeId in the entities to determine which are local/remote.
-	 * @returns Nothing.
+	 * @param resetMode The reset mode, which uses the nodeId in the entities to determine which are local or remote.
+	 * @returns A promise that resolves when the reset event is published to the event bus.
 	 */
 	public async reset(storageKey: string, resetMode: SyncNodeIdMode): Promise<void> {
 		// If we are applying a consolidation we need to reset the local db

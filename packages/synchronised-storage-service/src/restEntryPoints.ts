@@ -6,6 +6,9 @@ import {
 	tagsSynchronisedStorage
 } from "./synchronisedStorageRoutes.js";
 
+/**
+ * REST entry points for the synchronised storage service.
+ */
 export const restEntryPoints: IRestRouteEntryPoint[] = [
 	{
 		name: "synchronised-storage",

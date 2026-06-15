@@ -7,7 +7,7 @@ import type { ISynchronisedEntity } from "../ISynchronisedEntity.js";
  */
 export interface ISyncItemResponse {
 	/**
-	 * The key of the storage for the entities in the batch.
+	 * The key of the storage containing the responding item.
 	 */
 	storageKey: string;
 

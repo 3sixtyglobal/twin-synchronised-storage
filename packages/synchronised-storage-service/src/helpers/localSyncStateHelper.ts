@@ -59,7 +59,7 @@ export class LocalSyncStateHelper {
 	 * @param storageKey The storage key of the snapshot to add the change for.
 	 * @param operation The operation to perform.
 	 * @param id The id of the entity to add the change for.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the change is recorded in the local snapshot.
 	 */
 	public async addLocalChange(
 		storageKey: string,
@@ -175,7 +175,7 @@ export class LocalSyncStateHelper {
 	/**
 	 * Set the current local snapshot with changes for this node.
 	 * @param localChangeSnapshot The local change snapshot to set.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the snapshot is persisted to entity storage.
 	 */
 	public async setLocalChangeSnapshot(localChangeSnapshot: SyncSnapshotEntry): Promise<void> {
 		await this._logging?.log({
@@ -190,9 +190,9 @@ export class LocalSyncStateHelper {
 	}
 
 	/**
-	 * Get the current local snapshot with the changes for this node.
+	 * Remove the local snapshot entry from storage.
 	 * @param localChangeSnapshot The local change snapshot to remove.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the snapshot is removed from entity storage.
 	 */
 	public async removeLocalChangeSnapshot(localChangeSnapshot: SyncSnapshotEntry): Promise<void> {
 		await this._logging?.log({
@@ -210,7 +210,7 @@ export class LocalSyncStateHelper {
 	 * Apply a sync state to the local node.
 	 * @param storageKey The storage key of the snapshot to sync with.
 	 * @param syncState The sync state to sync with.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when all new and modified snapshots have been processed.
 	 */
 	public async applySyncState(storageKey: string, syncState: ISyncState): Promise<void> {
 		await this._logging?.log({
@@ -382,7 +382,7 @@ export class LocalSyncStateHelper {
 	/**
 	 * Process the modified snapshots and store them in the local storage.
 	 * @param modifiedSnapshots The modified snapshots to process.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when all new changesets in each snapshot have been applied and the snapshots saved.
 	 * @internal
 	 */
 	private async processModifiedSnapshots(
@@ -427,7 +427,7 @@ export class LocalSyncStateHelper {
 	/**
 	 * Process the new snapshots and store them in the local storage.
 	 * @param newSnapshots The new snapshots to process.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when all changesets for each snapshot have been applied and the snapshots saved.
 	 * @internal
 	 */
 	private async processNewSnapshots(newSnapshots: SyncSnapshotEntry[]): Promise<void> {

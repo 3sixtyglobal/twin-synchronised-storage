@@ -316,7 +316,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	/**
 	 * The component needs to be started when the node is initialized.
 	 * @param nodeLoggingComponentType The node logging component type.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the service is started and all event bus subscriptions are active.
 	 */
 	public async start(nodeLoggingComponentType?: string): Promise<void> {
 		const contextIds = await ContextIdStore.getContextIds();
@@ -388,7 +388,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	/**
 	 * The component needs to be stopped when the node is closed.
 	 * @param nodeLoggingComponentType The node logging component type.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when all scheduled tasks are removed and storage keys are deactivated.
 	 */
 	public async stop(nodeLoggingComponentType?: string): Promise<void> {
 		for (const storageKey in this._activeStorageKeys) {
@@ -439,7 +439,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	 * Synchronise a set of changes from an untrusted node, assumes this is a trusted node.
 	 * @param syncChangeSet The change set to synchronise.
 	 * @param trustPayload Trust payload to verify the requesters identity.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the change set has been applied and the sync state updated.
 	 */
 	public async syncChangeSet(syncChangeSet: ISyncChangeSet, trustPayload: unknown): Promise<void> {
 		if (!Is.empty(this._trustedSynchronisedStorageComponent)) {
@@ -484,7 +484,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	/**
 	 * Start the sync with further updates after an interval.
 	 * @param storageKey The storage key to sync.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the remote and local sync passes are complete.
 	 * @internal
 	 */
 	private async startEntitySync(storageKey: string): Promise<void> {
@@ -516,7 +516,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	/**
 	 * Check for updates in the remote storage.
 	 * @param storageKey The storage key to check for updates.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the local state has been updated from the remote sync state.
 	 * @internal
 	 */
 	private async updateFromRemoteSyncState(storageKey: string): Promise<void> {
@@ -550,7 +550,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	/**
 	 * Find any local updates and send them to the remote storage.
 	 * @param storageKey The key of the storage to synchronise.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when local changes have been built into a changeset and dispatched.
 	 * @internal
 	 */
 	private async updateFromLocalSyncState(storageKey: string): Promise<void> {
@@ -654,7 +654,7 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	/**
 	 * Start the consolidation sync.
 	 * @param storageKey The storage key to consolidate.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the consolidation batch request is dispatched.
 	 * @internal
 	 */
 	private async startConsolidationSync(storageKey: string): Promise<void> {
@@ -682,8 +682,9 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	}
 
 	/**
-	 * Register a new sync type.
-	 * @param syncRegisterStorageKey The sync register type to register.
+	 * Register a new storage key for synchronisation.
+	 * @param syncRegisterStorageKey The registration payload containing the storage key.
+	 * @returns A promise that resolves when the storage key is registered and activated if the service has started.
 	 * @internal
 	 */
 	private async registerStorageKey(syncRegisterStorageKey: ISyncRegisterStorageKey): Promise<void> {
@@ -706,8 +707,9 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 	}
 
 	/**
-	 * Activate a storage key.
+	 * Activate a storage key by scheduling update and consolidation tasks.
 	 * @param storageKey The storage key to activate.
+	 * @returns A promise that resolves when the scheduled tasks are registered.
 	 * @internal
 	 */
 	private async activateStorageKey(storageKey: string): Promise<void> {
