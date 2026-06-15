@@ -63,7 +63,8 @@ describe("synchronisedEntityStorageConnector", () => {
 	beforeEach(() => {
 		EntitySchemaFactory.register(nameof<TestType>(), () => EntitySchemaHelper.getSchema(TestType));
 		memoryStorageConnector = new MemoryEntityStorageConnector<TestType>({
-			entitySchema: nameof<TestType>()
+			entitySchema: nameof<TestType>(),
+			config: { storageKey: "test-type-100" }
 		});
 		EntityStorageConnectorFactory.register("memory", () => memoryStorageConnector);
 
@@ -78,6 +79,10 @@ describe("synchronisedEntityStorageConnector", () => {
 		ContextIdStore.getContextIds = vi
 			.fn()
 			.mockImplementation(() => ({ node: testNodeId, org: "org", user: "user" }));
+	});
+
+	afterEach(async () => {
+		await memoryStorageConnector.teardown();
 	});
 
 	test("can create an instance of the connector", async () => {
@@ -150,7 +155,7 @@ describe("synchronisedEntityStorageConnector", () => {
 		expect(localItemChangeEventData?.data.operation).toBe("set");
 		expect(localItemChangeEventData?.data.id).toBe("test-id");
 
-		expect(memoryStorageConnector.getStore()).toEqual([
+		expect(await memoryStorageConnector.getStore()).toEqual([
 			{
 				id: "test-id",
 				nodeIdentity: testNodeId,
@@ -193,7 +198,7 @@ describe("synchronisedEntityStorageConnector", () => {
 		expect(localItemChangeEventData?.data.id).toBe("test-id");
 		expect(localItemChangeEventData?.data.operation).toEqual("delete");
 
-		expect(memoryStorageConnector.getStore()).toEqual([]);
+		expect(await memoryStorageConnector.getStore()).toEqual([]);
 	});
 
 	test("can respond to an item request", async () => {
@@ -344,7 +349,7 @@ describe("synchronisedEntityStorageConnector", () => {
 			}
 		});
 
-		expect(memoryStorageConnector.getStore()).toEqual([
+		expect(await memoryStorageConnector.getStore()).toEqual([
 			{
 				id: "test-id",
 				nodeIdentity: testNodeId2,
@@ -376,7 +381,7 @@ describe("synchronisedEntityStorageConnector", () => {
 			nodeId: testNodeId2
 		});
 
-		expect(memoryStorageConnector.getStore()).toEqual([]);
+		expect(await memoryStorageConnector.getStore()).toEqual([]);
 	});
 
 	test("can reset and remove local items", async () => {
@@ -406,7 +411,7 @@ describe("synchronisedEntityStorageConnector", () => {
 			resetMode: SyncNodeIdMode.Local
 		});
 
-		expect(memoryStorageConnector.getStore()).toEqual([
+		expect(await memoryStorageConnector.getStore()).toEqual([
 			{
 				id: "test-id-remote",
 				dateModified: expect.any(String),
@@ -442,7 +447,7 @@ describe("synchronisedEntityStorageConnector", () => {
 			resetMode: SyncNodeIdMode.Remote
 		});
 
-		expect(memoryStorageConnector.getStore()).toEqual([
+		expect(await memoryStorageConnector.getStore()).toEqual([
 			{
 				id: "test-id-local",
 				dateModified: expect.any(String),
@@ -478,6 +483,6 @@ describe("synchronisedEntityStorageConnector", () => {
 			resetMode: SyncNodeIdMode.All
 		});
 
-		expect(memoryStorageConnector.getStore()).toEqual([]);
+		expect(await memoryStorageConnector.getStore()).toEqual([]);
 	});
 });
