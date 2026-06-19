@@ -271,7 +271,8 @@ describe("synchronisedStorageService", () => {
 		ComponentFactory.register("platform", () => ({
 			className: () => "platform",
 			isMultiTenant: () => false,
-			execute: async (method: () => Promise<void>) => method()
+			execute: async (method: () => Promise<void>) => method(),
+			getLocalOriginContext: async () => undefined
 		}));
 
 		loggingMemoryEntityStorage = new MemoryEntityStorageConnector<LogEntry>({
