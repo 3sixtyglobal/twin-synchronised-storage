@@ -102,6 +102,7 @@ export class SynchronisedEntityStorageConnector<
 	/**
 	 * Create a new instance of SynchronisedEntityStorageConnector.
 	 * @param options The options for the connector.
+	 * @throws GeneralError if the entity schema is missing required synchronisation properties.
 	 */
 	constructor(options: ISynchronisedEntityStorageConnectorConstructorOptions) {
 		Guards.object<ISynchronisedEntityStorageConnectorConstructorOptions>(
