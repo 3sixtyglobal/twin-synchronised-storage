@@ -8,7 +8,7 @@ Request for a local item.
 
 > **storageKey**: `string`
 
-The key of the storage for the entities in the batch.
+The key of the storage containing the requested item.
 
 ***
 

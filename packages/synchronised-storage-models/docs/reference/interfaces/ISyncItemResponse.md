@@ -8,7 +8,7 @@ Response for a sync item request.
 
 > **storageKey**: `string`
 
-The key of the storage for the entities in the batch.
+The key of the storage containing the responding item.
 
 ***
 

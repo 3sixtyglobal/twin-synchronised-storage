@@ -72,7 +72,7 @@ The node logging component type.
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when the service is started and all event bus subscriptions are active.
 
 #### Implementation of
 
@@ -98,7 +98,7 @@ The node logging component type.
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when all scheduled tasks are removed and storage keys are deactivated.
 
 #### Implementation of
 
@@ -157,7 +157,7 @@ Trust payload to verify the requesters identity.
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when the change set has been applied and the sync state updated.
 
 #### Implementation of
 

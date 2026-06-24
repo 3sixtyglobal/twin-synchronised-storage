@@ -55,4 +55,4 @@ Trust payload to verify the requesters identity.
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when the change set has been applied and stored.

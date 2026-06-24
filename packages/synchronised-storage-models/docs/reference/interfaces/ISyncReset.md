@@ -8,7 +8,7 @@ Request to reset the local storage.
 
 > **storageKey**: `string`
 
-The key of the storage for the entities in the batch.
+The key of the storage to reset.
 
 ***
 

@@ -32,6 +32,10 @@ The options for the connector.
 
 `SynchronisedEntityStorageConnector`\<`T`\>
 
+#### Throws
+
+GeneralError if the entity schema is missing required synchronisation properties.
+
 ## Properties
 
 ### CLASS\_NAME {#class_name}
@@ -96,7 +100,7 @@ The node logging component type.
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when the connector is started and event bus subscriptions are active.
 
 #### Implementation of
 
@@ -166,7 +170,7 @@ The optional conditions to match for the entities.
 
 `Promise`\<`void`\>
 
-The id of the entity.
+A promise that resolves when the entity is stored and the change event is published.
 
 #### Implementation of
 
@@ -192,7 +196,7 @@ The entities to set.
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when all entities are stored and change events are published.
 
 #### Implementation of
 
@@ -224,7 +228,7 @@ The optional conditions to match for the entities.
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when the entity is removed and the delete event is published.
 
 #### Implementation of
 
@@ -250,7 +254,7 @@ The ids of the entities to remove.
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when all entities are removed and delete events are published.
 
 #### Implementation of
 
@@ -268,7 +272,7 @@ Remove all entities from the storage.
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when all entities are removed and delete events are published.
 
 #### Implementation of
 
