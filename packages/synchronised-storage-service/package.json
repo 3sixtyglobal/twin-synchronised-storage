@@ -1,6 +1,6 @@
 {
 	"name": "@twin.org/synchronised-storage-service",
-	"version": "0.9.0-next.0",
+	"version": "0.9.0-next.1",
 	"description": "Service implementation that coordinates synchronisation state and exposes REST entry points.",
 	"repository": {
 		"type": "git",
@@ -41,7 +41,7 @@
 		"@twin.org/identity-models": "0.9.0-next.1",
 		"@twin.org/logging-models": "0.9.0-next.1",
 		"@twin.org/nameof": "0.9.0-next.1",
-		"@twin.org/synchronised-storage-models": "0.9.0-next.0",
+		"@twin.org/synchronised-storage-models": "0.9.0-next.1",
 		"@twin.org/trust-models": "0.9.0-next.1",
 		"@twin.org/verifiable-storage-models": "0.9.0-next.1",
 		"@twin.org/web": "0.9.0-next.1"

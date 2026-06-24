@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.9.0-next.1](https://github.com/iotaledger/twin-synchronised-storage/compare/synchronised-storage-rest-client-v0.9.0-next.0...synchronised-storage-rest-client-v0.9.0-next.1) (2026-06-24)
+
+
+### Features
+
+* add context id features ([#24](https://github.com/iotaledger/twin-synchronised-storage/issues/24)) ([5266b18](https://github.com/iotaledger/twin-synchronised-storage/commit/5266b18088317c7dc274a209a79102a6fc88a8e4))
+* add rights management integration ([d003d33](https://github.com/iotaledger/twin-synchronised-storage/commit/d003d33d2d2b4a4aa1379071eed71a707ebcb4de))
+* add trustPayload guards ([cf1622f](https://github.com/iotaledger/twin-synchronised-storage/commit/cf1622f8b65a4b77032e31ecaa41664499f4c892))
+* add validate-locales ([e3d7b98](https://github.com/iotaledger/twin-synchronised-storage/commit/e3d7b98839e9ca624855717c8957d572c4e09abf))
+* blob storage connector instead of component ([#7](https://github.com/iotaledger/twin-synchronised-storage/issues/7)) ([ea27241](https://github.com/iotaledger/twin-synchronised-storage/commit/ea27241cf0810b52ab7a6be7346809d127b7109a))
+* eslint migration to flat config ([f601c14](https://github.com/iotaledger/twin-synchronised-storage/commit/f601c14f6adef3290554dc7df6e6b3528aa0dc2b))
+* initial commit ([16949b8](https://github.com/iotaledger/twin-synchronised-storage/commit/16949b8e5bdb190f053c52af352290e3fd964f9a))
+* remove unused dependencies ([518c460](https://github.com/iotaledger/twin-synchronised-storage/commit/518c460d2e5e2b2c487565acb5162a03ddb85eae))
+* typescript 6 update ([b0e6d52](https://github.com/iotaledger/twin-synchronised-storage/commit/b0e6d52f622dc1ff2273f5e09e8370382742ae50))
+* update framework core ([99f09cc](https://github.com/iotaledger/twin-synchronised-storage/commit/99f09cc94cfb9fff6b3a345775eeae2ab3192ed2))
+* update to in built vc auth mechanism ([411a371](https://github.com/iotaledger/twin-synchronised-storage/commit/411a3716830195ebf54755a1633b05d5c3f96754))
+* use trust component ([424f0d6](https://github.com/iotaledger/twin-synchronised-storage/commit/424f0d6aaacfdc7700c46fe6c2def23b2eacddc9))
+
+
+### Bug Fixes
+
+* remove redundant code ([19edb23](https://github.com/iotaledger/twin-synchronised-storage/commit/19edb236f318b9c9454a64259d0ab5098a0c8173))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.9.0-next.0 to 0.9.0-next.1
+
 ## [0.0.3-next.15](https://github.com/iotaledger/twin-synchronised-storage/compare/synchronised-storage-rest-client-v0.0.3-next.14...synchronised-storage-rest-client-v0.0.3-next.15) (2026-06-11)
 
 

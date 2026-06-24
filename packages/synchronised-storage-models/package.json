@@ -1,6 +1,6 @@
 {
 	"name": "@twin.org/synchronised-storage-models",
-	"version": "0.9.0-next.0",
+	"version": "0.9.0-next.1",
 	"description": "Shared models, constants, and schemas for synchronised storage messages and contracts.",
 	"repository": {
 		"type": "git",
