@@ -8,22 +8,51 @@ Class for performing synchronised storage operations.
 
 ## Methods
 
-### syncChangeSet()
+### getDecryptionKey() {#getdecryptionkey}
 
-> **syncChangeSet**(`changeSetStorageId`): `Promise`\<`void`\>
+> **getDecryptionKey**(`trustPayload`): `Promise`\<`string`\>
 
-Synchronise a complete set of changes, assumes this is a trusted node.
+Get the decryption key for the synchronised storage.
+This is used to decrypt the data stored in the synchronised storage.
 
 #### Parameters
 
-##### changeSetStorageId
+##### trustPayload
 
-`string`
+`unknown`
 
-The id of the change set to synchronise in blob storage.
+Trust payload to verify the requesters identity.
+
+#### Returns
+
+`Promise`\<`string`\>
+
+The decryption key.
+
+***
+
+### syncChangeSet() {#syncchangeset}
+
+> **syncChangeSet**(`syncChangeSet`, `trustPayload`): `Promise`\<`void`\>
+
+Synchronise a set of changes from an untrusted node, assumes this is a trusted node.
+
+#### Parameters
+
+##### syncChangeSet
+
+[`ISyncChangeSet`](ISyncChangeSet.md)
+
+The change set to synchronise.
+
+##### trustPayload
+
+`unknown`
+
+Trust payload to verify the requesters identity.
 
 #### Returns
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when the change set has been applied and stored.

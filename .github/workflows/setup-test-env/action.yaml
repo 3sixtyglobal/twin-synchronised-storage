@@ -6,6 +6,10 @@ inputs:
     description: 'The package to set up the test environment for.'
     required: true
     default: 'all'
+  test_env_vars:
+    description: 'Newline-separated KEY=VALUE pairs to inject as environment variables into the test services.'
+    required: false
+    default: ''
 
 runs:
   using: 'composite'

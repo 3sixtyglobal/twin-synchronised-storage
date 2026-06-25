@@ -21,8 +21,8 @@
 		}
 	],
 	"paths": {
-		"/synchronised-storage": {
-			"get": {
+		"/synchronised-storage/sync-changeset": {
+			"post": {
 				"operationId": "synchronisedStorageSyncChangeSetRequest",
 				"summary": "Request that the node perform a sync request for a changeset.",
 				"tags": [
@@ -30,21 +30,58 @@
 				],
 				"parameters": [
 					{
-						"name": "changeSetStorageId",
-						"description": "The storage id of the changeset.",
-						"in": "query",
-						"required": false,
+						"name": "accept",
+						"in": "header",
+						"required": true,
 						"schema": {
 							"type": "string"
 						},
-						"example": "12345"
-					}
-				],
-				"security": [
+						"style": "simple"
+					},
 					{
-						"jwtBearerAuthScheme": []
+						"name": "authorization",
+						"in": "header",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple",
+						"example": "z3V32BP9ShC...z3V32BP9ShC"
 					}
 				],
+				"requestBody": {
+					"description": "Request a trusted node to perform a sync request for a changeset.",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SyncChangeSet"
+							},
+							"examples": {
+								"synchronisedStorageSyncChangeSetRequestExample": {
+									"value": {
+										"@context": "https://schema.twindev.org/synchronised-storage/",
+										"type": "ChangeSet",
+										"id": "0909090909090909090909090909090909090909090909090909090909090909",
+										"dateCreated": "2025-05-29T01:00:00.000Z",
+										"dateModified": "2025-05-29T01:00:00.000Z",
+										"nodeIdentity": "did:entity-storage:0xd2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2",
+										"changes": [
+											{
+												"entity": {
+													"dateModified": "2025-01-01T00:00:00.000Z"
+												},
+												"id": "test-id-1",
+												"operation": "set"
+											}
+										],
+										"storageKey": "test-type"
+									}
+								}
+							}
+						}
+					}
+				},
 				"responses": {
 					"204": {
 						"description": "The rest request ended in success with no data."
@@ -60,7 +97,85 @@
 									"exampleResponse": {
 										"value": {
 											"name": "GeneralError",
-											"message": "component.error",
+											"message": "errorMessage",
+											"properties": {
+												"foo": "bar"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "The server has encountered a situation it does not know how to handle, see the content for more details.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								},
+								"examples": {
+									"exampleResponse": {
+										"value": {
+											"name": "InternalServerError",
+											"message": "errorMessage"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/synchronised-storage/decryption-key": {
+			"post": {
+				"operationId": "synchronisedStorageGetDecryptionKeyRequest",
+				"summary": "Request the decryption key.",
+				"tags": [
+					"Synchronised Storage"
+				],
+				"requestBody": {
+					"description": "Request a trusted node to perform a sync request for a changeset.",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SyncChangeSet"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response to a request for the decryption key for the synchronised storage.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/SyncDecryptionKeyResponse"
+								},
+								"examples": {
+									"synchronisedStorageSyncGetDecryptionKeyResponseExample": {
+										"value": {
+											"decryptionKey": "z5efBErQs3YBLZoH7jgKMQaRc9YjAxA5XSYKmW3FmTBDw9WionT2NS2x1SMvcRyBvw53cSSoaCT1xQH9tkWngGCX3"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "The server cannot process the request, see the content for more details.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								},
+								"examples": {
+									"exampleResponse": {
+										"value": {
+											"name": "GeneralError",
+											"message": "errorMessage",
 											"properties": {
 												"foo": "bar"
 											}
@@ -81,7 +196,7 @@
 									"exampleResponse": {
 										"value": {
 											"name": "UnauthorizedError",
-											"message": "component.error"
+											"message": "errorMessage"
 										}
 									}
 								}
@@ -99,7 +214,7 @@
 									"exampleResponse": {
 										"value": {
 											"name": "InternalServerError",
-											"message": "component.error"
+											"message": "errorMessage"
 										}
 									}
 								}
@@ -113,6 +228,7 @@
 	"components": {
 		"schemas": {
 			"Error": {
+				"description": "Model to describe serialized error.",
 				"type": "object",
 				"properties": {
 					"name": {
@@ -121,7 +237,7 @@
 					},
 					"message": {
 						"type": "string",
-						"description": "The message for the error."
+						"description": "The message for the error as an i18n key."
 					},
 					"source": {
 						"type": "string",
@@ -136,16 +252,124 @@
 						"type": "string",
 						"description": "The stack trace for the error."
 					},
-					"inner": {
+					"cause": {
 						"$ref": "#/components/schemas/Error"
 					}
 				},
 				"required": [
 					"name",
 					"message"
+				]
+			},
+			"SyncChange": {
+				"description": "The object definition for a sync change.",
+				"type": "object",
+				"properties": {
+					"operation": {
+						"$ref": "#/components/schemas/SyncChangeOperation"
+					},
+					"id": {
+						"type": "string",
+						"description": "The item id."
+					},
+					"entity": {
+						"$ref": "#/components/schemas/SynchronisedEntityCore"
+					}
+				},
+				"required": [
+					"operation",
+					"id"
+				]
+			},
+			"SyncChangeOperation": {
+				"description": "The operations for a change",
+				"anyOf": [
+					{
+						"const": "set",
+						"description": "An item was set in the storage."
+					},
+					{
+						"const": "delete",
+						"description": "An item was deleted from the storage."
+					}
+				]
+			},
+			"SyncChangeSet": {
+				"description": "The object definition for a sync change set.",
+				"type": "object",
+				"properties": {
+					"@context": {
+						"const": "https://schema.twindev.org/synchronised-storage/",
+						"description": "The LD Context for the change set."
+					},
+					"type": {
+						"const": "ChangeSet",
+						"description": "The LD Type for the change set."
+					},
+					"id": {
+						"type": "string",
+						"description": "The id of the change set."
+					},
+					"storageKey": {
+						"type": "string",
+						"description": "The storage key of the change set. This is used to identify the entities being synchronised."
+					},
+					"dateCreated": {
+						"type": "string",
+						"description": "The date the change set was created."
+					},
+					"dateModified": {
+						"type": "string",
+						"description": "The date the change set was last modified."
+					},
+					"nodeIdentity": {
+						"type": "string",
+						"description": "The identity of the node that created the change set."
+					},
+					"changes": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/SyncChange"
+						},
+						"description": "The changes to apply after a snapshot."
+					}
+				},
+				"required": [
+					"@context",
+					"type",
+					"id",
+					"storageKey",
+					"dateCreated",
+					"dateModified",
+					"nodeIdentity",
+					"changes"
+				]
+			},
+			"SyncDecryptionKeyResponse": {
+				"type": "object",
+				"properties": {
+					"decryptionKey": {
+						"type": "string",
+						"description": "The decryption key for the synchronised storage as base64."
+					}
+				},
+				"required": [
+					"decryptionKey"
 				],
-				"additionalProperties": false,
-				"description": "Model to describe serialized error."
+				"description": "The body of the response."
+			},
+			"SynchronisedEntityCore": {
+				"description": "The base definition for synchronised entries.",
+				"type": "object",
+				"properties": {
+					"dateModified": {
+						"type": "string",
+						"description": "The date the entry was modified."
+					}
+				},
+				"required": [
+					"dateModified"
+				]
 			}
 		},
 		"securitySchemes": {

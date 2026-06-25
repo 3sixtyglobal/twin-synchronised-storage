@@ -4,8 +4,11 @@ import type { IRestRouteEntryPoint } from "@twin.org/api-models";
 import {
 	generateRestRoutesSynchronisedStorage,
 	tagsSynchronisedStorage
-} from "./synchronisedStorageRoutes";
+} from "./synchronisedStorageRoutes.js";
 
+/**
+ * REST entry points for the synchronised storage service.
+ */
 export const restEntryPoints: IRestRouteEntryPoint[] = [
 	{
 		name: "synchronised-storage",

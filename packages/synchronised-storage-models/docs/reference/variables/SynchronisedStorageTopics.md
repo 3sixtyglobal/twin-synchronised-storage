@@ -4,45 +4,57 @@
 
 The topics for synchronised storage event bus notifications.
 
-## Type declaration
+## Type Declaration
 
-### RegisterSchemaType
+### RegisterStorageKey {#registerstoragekey}
 
-> `readonly` **RegisterSchemaType**: `"synchronised-storage:register-schema-type"` = `"synchronised-storage:register-schema-type"`
+> `readonly` **RegisterStorageKey**: `"synchronised-storage:register-storage-key"` = `"synchronised-storage:register-storage-key"`
 
-Register a schema type for the synchronised storage.
+Register a storage key for the synchronised storage.
 
-### LocalItemSet
+### LocalItemChange {#localitemchange}
 
-> `readonly` **LocalItemSet**: `"synchronised-storage:local-item-set"` = `"synchronised-storage:local-item-set"`
+> `readonly` **LocalItemChange**: `"synchronised-storage:local-item-change"` = `"synchronised-storage:local-item-change"`
 
-An item was set in the storage by the local node.
+An item was changed in the storage by the local node.
 
-### LocalItemRemove
+### LocalItemRequest {#localitemrequest}
 
-> `readonly` **LocalItemRemove**: `"synchronised-storage:local-item-remove"` = `"synchronised-storage:local-item-remove"`
+> `readonly` **LocalItemRequest**: `"synchronised-storage:local-item-request"` = `"synchronised-storage:local-item-request"`
 
-An item was removed from the storage by the local node.
+A request has been made for a local item.
 
-### ConsolidationBatchRequest
+### LocalItemResponse {#localitemresponse}
 
-> `readonly` **ConsolidationBatchRequest**: `"synchronised-storage:consolidation-batch-request"` = `"synchronised-storage:consolidation-batch-request"`
+> `readonly` **LocalItemResponse**: `"synchronised-storage:local-item-response"` = `"synchronised-storage:local-item-response"`
 
-A request has been made for a consolidation batch.
+A response to a local item request.
 
-### ConsolidationBatchResponse
+### Reset {#reset}
 
-> `readonly` **ConsolidationBatchResponse**: `"synchronised-storage:consolidation-batch-response"` = `"synchronised-storage:consolidation-batch-response"`
+> `readonly` **Reset**: `"synchronised-storage:reset"` = `"synchronised-storage:reset"`
 
-A response to a consolidation batch.
+Reset the storage.
 
-### RemoteItemSet
+### BatchRequest {#batchrequest}
+
+> `readonly` **BatchRequest**: `"synchronised-storage:batch-request"` = `"synchronised-storage:batch-request"`
+
+A request has been made for a batch.
+
+### BatchResponse {#batchresponse}
+
+> `readonly` **BatchResponse**: `"synchronised-storage:batch-response"` = `"synchronised-storage:batch-response"`
+
+A response to a batch.
+
+### RemoteItemSet {#remoteitemset}
 
 > `readonly` **RemoteItemSet**: `"synchronised-storage:remote-item-set"` = `"synchronised-storage:remote-item-set"`
 
 An item was set in the storage by the remote node.
 
-### RemoteItemRemove
+### RemoteItemRemove {#remoteitemremove}
 
 > `readonly` **RemoteItemRemove**: `"synchronised-storage:remote-item-remove"` = `"synchronised-storage:remote-item-remove"`
 

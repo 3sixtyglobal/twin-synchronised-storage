@@ -6,6 +6,11 @@
  */
 export interface ISyncSnapshot {
 	/**
+	 * The version of the sync state.
+	 */
+	version: string;
+
+	/**
 	 * The id of the snapshot.
 	 */
 	id: string;
@@ -18,7 +23,17 @@ export interface ISyncSnapshot {
 	/**
 	 * The date the snapshot was last modified.
 	 */
-	dateModified?: string;
+	dateModified: string;
+
+	/**
+	 * Is this a consolidated snapshot?
+	 */
+	isConsolidated: boolean;
+
+	/**
+	 * The epoch of the snapshot.
+	 */
+	epoch: number;
 
 	/**
 	 * The ids of the storage for the change sets in the snapshot.

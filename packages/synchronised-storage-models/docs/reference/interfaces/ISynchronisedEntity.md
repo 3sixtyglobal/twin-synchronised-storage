@@ -2,18 +2,34 @@
 
 The base definition for synchronised entries.
 
+## Extends
+
+- [`ISynchronisedEntityCore`](ISynchronisedEntityCore.md)
+
 ## Properties
 
-### dateModified
+### id {#id}
 
-> **dateModified**: `string`
+> **id**: `string`
 
-The date the entry was modified
+The id of the entry.
 
 ***
 
-### nodeIdentity
+### nodeIdentity {#nodeidentity}
 
 > **nodeIdentity**: `string`
 
 The identity of the node that owns the entry.
+
+***
+
+### dateModified {#datemodified}
+
+> **dateModified**: `string`
+
+The date the entry was modified.
+
+#### Inherited from
+
+[`ISynchronisedEntityCore`](ISynchronisedEntityCore.md).[`dateModified`](ISynchronisedEntityCore.md#datemodified)

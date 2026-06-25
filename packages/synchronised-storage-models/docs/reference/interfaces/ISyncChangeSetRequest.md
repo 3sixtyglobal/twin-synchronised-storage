@@ -4,14 +4,24 @@ Request a trusted node to perform a sync request for a changeset.
 
 ## Properties
 
-### query
+### headers? {#headers}
 
-> **query**: `object`
+> `optional` **headers?**: `object`
 
-The query parameters.
+The headers which can be used to determine the response data type.
 
-#### changeSetStorageId
+#### accept?
 
-> **changeSetStorageId**: `string`
+> `optional` **accept?**: `"application/ld+json"` \| `"application/json"`
 
-The storage id of the changeset.
+#### authorization?
+
+> `optional` **authorization?**: `string`
+
+***
+
+### body {#body}
+
+> **body**: [`ISyncChangeSet`](ISyncChangeSet.md)
+
+The body of the request.

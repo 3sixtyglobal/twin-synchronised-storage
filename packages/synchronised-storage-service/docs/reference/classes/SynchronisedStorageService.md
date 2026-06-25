@@ -1,12 +1,6 @@
-# Class: SynchronisedStorageService\<T\>
+# Class: SynchronisedStorageService
 
 Class for performing synchronised storage operations.
-
-## Type Parameters
-
-### T
-
-`T` *extends* `ISynchronisedEntity` = `ISynchronisedEntity`
 
 ## Implements
 
@@ -16,7 +10,7 @@ Class for performing synchronised storage operations.
 
 ### Constructor
 
-> **new SynchronisedStorageService**\<`T`\>(`options`): `SynchronisedStorageService`\<`T`\>
+> **new SynchronisedStorageService**(`options`): `SynchronisedStorageService`
 
 Create a new instance of SynchronisedStorageService.
 
@@ -30,51 +24,55 @@ The options for the service.
 
 #### Returns
 
-`SynchronisedStorageService`\<`T`\>
+`SynchronisedStorageService`
 
 ## Properties
 
-### CLASS\_NAME
+### CLASS\_NAME {#class_name}
 
-> `readonly` **CLASS\_NAME**: `string`
+> `readonly` `static` **CLASS\_NAME**: `string`
 
 Runtime name for the class.
 
-#### Implementation of
-
-`ISynchronisedStorageComponent.CLASS_NAME`
-
 ## Methods
 
-### start()
+### className() {#classname}
 
-> **start**(`nodeIdentity`, `nodeLoggingConnectorType`, `componentState?`): `Promise`\<`void`\>
+> **className**(): `string`
+
+Returns the class name of the component.
+
+#### Returns
+
+`string`
+
+The class name of the component.
+
+#### Implementation of
+
+`ISynchronisedStorageComponent.className`
+
+***
+
+### start() {#start}
+
+> **start**(`nodeLoggingComponentType?`): `Promise`\<`void`\>
 
 The component needs to be started when the node is initialized.
 
 #### Parameters
 
-##### nodeIdentity
+##### nodeLoggingComponentType?
 
 `string`
 
-The identity of the node starting the component.
-
-##### nodeLoggingConnectorType
-
-The node logging connector type, defaults to "node-logging".
-
-`undefined` | `string`
-
-##### componentState?
-
-A persistent state which can be modified by the method.
+The node logging component type.
 
 #### Returns
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when the service is started and all event bus subscriptions are active.
 
 #### Implementation of
 
@@ -82,35 +80,25 @@ Nothing.
 
 ***
 
-### stop()
+### stop() {#stop}
 
-> **stop**(`nodeIdentity`, `nodeLoggingConnectorType`, `componentState?`): `Promise`\<`void`\>
+> **stop**(`nodeLoggingComponentType?`): `Promise`\<`void`\>
 
 The component needs to be stopped when the node is closed.
 
 #### Parameters
 
-##### nodeIdentity
+##### nodeLoggingComponentType?
 
 `string`
 
-The identity of the node stopping the component.
-
-##### nodeLoggingConnectorType
-
-The node logging connector type, defaults to "node-logging".
-
-`undefined` | `string`
-
-##### componentState?
-
-A persistent state which can be modified by the method.
+The node logging component type.
 
 #### Returns
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when all scheduled tasks are removed and storage keys are deactivated.
 
 #### Implementation of
 
@@ -118,25 +106,58 @@ Nothing.
 
 ***
 
-### syncChangeSet()
+### getDecryptionKey() {#getdecryptionkey}
 
-> **syncChangeSet**(`changeSetStorageId`): `Promise`\<`void`\>
+> **getDecryptionKey**(`trustPayload`): `Promise`\<`string`\>
 
-Synchronise a complete set of changes, assumes this is a trusted node.
+Get the decryption key for the synchronised storage.
+This is used to decrypt the data stored in the synchronised storage.
 
 #### Parameters
 
-##### changeSetStorageId
+##### trustPayload
 
-`string`
+`unknown`
 
-The id of the change set to synchronise in blob storage.
+Trust payload to verify the requesters identity.
+
+#### Returns
+
+`Promise`\<`string`\>
+
+The decryption key.
+
+#### Implementation of
+
+`ISynchronisedStorageComponent.getDecryptionKey`
+
+***
+
+### syncChangeSet() {#syncchangeset}
+
+> **syncChangeSet**(`syncChangeSet`, `trustPayload`): `Promise`\<`void`\>
+
+Synchronise a set of changes from an untrusted node, assumes this is a trusted node.
+
+#### Parameters
+
+##### syncChangeSet
+
+`ISyncChangeSet`
+
+The change set to synchronise.
+
+##### trustPayload
+
+`unknown`
+
+Trust payload to verify the requesters identity.
 
 #### Returns
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when the change set has been applied and the sync state updated.
 
 #### Implementation of
 

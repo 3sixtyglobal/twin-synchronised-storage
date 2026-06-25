@@ -1,14 +1,13 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import { entity, property } from "@twin.org/entity";
-import type { ISynchronisedEntity } from "@twin.org/synchronised-storage-models";
-import type { ISyncChange } from "../models/ISyncChange";
+import type { ISyncChange } from "@twin.org/synchronised-storage-models";
 
 /**
  * Class representing an entry for the sync snapshot.
  */
 @entity()
-export class SyncSnapshotEntry<T extends ISynchronisedEntity = ISynchronisedEntity> {
+export class SyncSnapshotEntry {
 	/**
 	 * The id for the snapshot.
 	 */
@@ -16,10 +15,16 @@ export class SyncSnapshotEntry<T extends ISynchronisedEntity = ISynchronisedEnti
 	public id!: string;
 
 	/**
-	 * The schema type for the snapshot i.e. which entity is being synchronized.
+	 * The version for the snapshot.
+	 */
+	@property({ type: "string" })
+	public version!: string;
+
+	/**
+	 * The storage key for the snapshot i.e. which entity is being synchronized.
 	 */
 	@property({ type: "string", isSecondary: true })
-	public schemaType!: string;
+	public storageKey!: string;
 
 	/**
 	 * The date the snapshot was created.
@@ -30,14 +35,26 @@ export class SyncSnapshotEntry<T extends ISynchronisedEntity = ISynchronisedEnti
 	/**
 	 * The date the snapshot was last modified.
 	 */
-	@property({ type: "string", optional: true })
-	public dateModified?: string;
+	@property({ type: "string" })
+	public dateModified!: string;
 
 	/**
-	 * The flag to determine if this is the current local snapshot containing changes for this node.
+	 * The flag to determine if this is the snapshot is the local one containing changes for this node.
 	 */
-	@property({ type: "boolean", optional: true })
-	public isLocalSnapshot?: boolean;
+	@property({ type: "boolean" })
+	public isLocal!: boolean;
+
+	/**
+	 * The flag to determine if this is a consolidated snapshot.
+	 */
+	@property({ type: "boolean" })
+	public isConsolidated!: boolean;
+
+	/**
+	 * The epoch for the changeset.
+	 */
+	@property({ type: "number" })
+	public epoch!: number;
 
 	/**
 	 * The ids of the storage for the change sets in the snapshot, if this is not a local snapshot.
@@ -49,5 +66,5 @@ export class SyncSnapshotEntry<T extends ISynchronisedEntity = ISynchronisedEnti
 	 * The changes that were made in this snapshot, if this is a local snapshot.
 	 */
 	@property({ type: "array", itemType: "object", optional: true })
-	public localChanges?: ISyncChange<T>[];
+	public changes?: ISyncChange[];
 }

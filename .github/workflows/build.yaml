@@ -5,9 +5,15 @@ on:
   pull_request:
     branches:
       - next
+    paths-ignore:
+      - '**/*.md'
+      - '.github/**'
   push:
     branches:
       - next
+    paths-ignore:
+      - '**/*.md'
+      - '.github/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -15,31 +21,36 @@ concurrency:
 
 jobs:
   dist-all-packages:
-    runs-on: ubuntu-latest
-
-    # Add env vars for tests
-    env:
-      TEST_MNEMONIC: ${{ secrets.TEST_MNEMONIC }}
-      TEST_2_MNEMONIC: ${{ secrets.TEST_2_MNEMONIC }}
-      TEST_NODE_MNEMONIC: ${{ secrets.TEST_NODE_MNEMONIC }}
+    # No need to trigger on merging pull request 'chore: release next'
+    # or 'docs: regenerate package documentation' as they have already performed a build
+    if: "${{ github.event_name != 'push' || (!startsWith(github.event.head_commit.message, 'Merge pull request') && !startsWith(github.event.head_commit.message, 'chore: release next') && !startsWith(github.event.head_commit.message, 'docs: regenerate package documentation') && !startsWith(github.event.head_commit.message, 'chore: merge next into main for production release')) }}"
+    runs-on:
+      labels: ${{ github.event.repository.private && 'self-hosted' || 'ubuntu-latest' }}
+      group: ${{ github.event.repository.private && 'twin' || 'default' }}
 
     steps:
-      # Get the code
+      # Clone the repository to the runner
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+
+      # Load test environment variables into the runner environment
+      - name: Load Test Environment Variables
+        shell: bash
+        run: |
+          printf '%s\n' "${{ secrets.TWIN_TEST_ENV_VARS }}" >> "$GITHUB_ENV"
 
       # Setup Node
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
 
       # Install dependencies with retry
       - name: Install dependencies
         run: |
-          for i in {1..3}; do
+          for i in {1..5}; do
             npm ci && break || {
-              if [ $i -eq 3 ]; then
+              if [ $i -eq 5 ]; then
                 echo "npm ci failed after 3 attempts"
                 exit 1
               fi
@@ -51,9 +62,17 @@ jobs:
       # Setup any services required for tests here
       - name: Setup Test Environment
         uses: ./.github/workflows/setup-test-env
+        with:
+          test_env_vars: ${{ secrets.TWIN_TEST_ENV_VARS }}
 
       # Run Lint and Dist
       - name: Run Lint and Dist
         run: |
           npm run lint
           npm run dist
+          npm run docs
+
+      # Always teardown the environment, necessary to cleanup self-hosted
+      - name: Teardown Test Environment
+        if: always()
+        uses: ./.github/workflows/teardown-test-env

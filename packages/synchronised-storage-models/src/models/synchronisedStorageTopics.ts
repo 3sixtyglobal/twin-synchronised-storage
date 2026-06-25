@@ -7,29 +7,39 @@
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const SynchronisedStorageTopics = {
 	/**
-	 * Register a schema type for the synchronised storage.
+	 * Register a storage key for the synchronised storage.
 	 */
-	RegisterSchemaType: "synchronised-storage:register-schema-type",
+	RegisterStorageKey: "synchronised-storage:register-storage-key",
 
 	/**
-	 * An item was set in the storage by the local node.
+	 * An item was changed in the storage by the local node.
 	 */
-	LocalItemSet: "synchronised-storage:local-item-set",
+	LocalItemChange: "synchronised-storage:local-item-change",
 
 	/**
-	 * An item was removed from the storage by the local node.
+	 * A request has been made for a local item.
 	 */
-	LocalItemRemove: "synchronised-storage:local-item-remove",
+	LocalItemRequest: "synchronised-storage:local-item-request",
 
 	/**
-	 * A request has been made for a consolidation batch.
+	 * A response to a local item request.
 	 */
-	ConsolidationBatchRequest: "synchronised-storage:consolidation-batch-request",
+	LocalItemResponse: "synchronised-storage:local-item-response",
 
 	/**
-	 * A response to a consolidation batch.
+	 * Reset the storage.
 	 */
-	ConsolidationBatchResponse: "synchronised-storage:consolidation-batch-response",
+	Reset: "synchronised-storage:reset",
+
+	/**
+	 * A request has been made for a batch.
+	 */
+	BatchRequest: "synchronised-storage:batch-request",
+
+	/**
+	 * A response to a batch.
+	 */
+	BatchResponse: "synchronised-storage:batch-response",
 
 	/**
 	 * An item was set in the storage by the remote node.

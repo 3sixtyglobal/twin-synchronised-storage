@@ -7,7 +7,9 @@
 
 ## Interfaces
 
-- [ISyncChange](interfaces/ISyncChange.md)
+- [ISyncPointerStore](interfaces/ISyncPointerStore.md)
+- [ISyncSnapshot](interfaces/ISyncSnapshot.md)
+- [ISyncState](interfaces/ISyncState.md)
 - [ISynchronisedStorageServiceConfig](interfaces/ISynchronisedStorageServiceConfig.md)
 - [ISynchronisedStorageServiceConstructorOptions](interfaces/ISynchronisedStorageServiceConstructorOptions.md)
 
@@ -21,3 +23,4 @@
 - [initSchema](functions/initSchema.md)
 - [generateRestRoutesSynchronisedStorage](functions/generateRestRoutesSynchronisedStorage.md)
 - [synchronisedStorageSyncChangeSetRequest](functions/synchronisedStorageSyncChangeSetRequest.md)
+- [synchronisedStorageGetDecryptionKeyRequest](functions/synchronisedStorageGetDecryptionKeyRequest.md)

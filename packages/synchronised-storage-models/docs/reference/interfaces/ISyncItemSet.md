@@ -1,33 +1,19 @@
-# Interface: ISyncItemSet\<T\>
+# Interface: ISyncItemSet
 
 The payload for an item set.
 
-## Type Parameters
-
-### T
-
-`T` *extends* [`ISynchronisedEntity`](ISynchronisedEntity.md) = [`ISynchronisedEntity`](ISynchronisedEntity.md)
-
 ## Properties
 
-### schemaType
+### storageKey {#storagekey}
 
-> **schemaType**: `string`
+> **storageKey**: `string`
 
-The type of the schema being set.
-
-***
-
-### id
-
-> **id**: `string`
-
-The id of the item being set.
+The key of the storage being set.
 
 ***
 
-### entity
+### entity {#entity}
 
-> **entity**: `T`
+> **entity**: [`ISynchronisedEntity`](ISynchronisedEntity.md)
 
 The entity being set in the item set.

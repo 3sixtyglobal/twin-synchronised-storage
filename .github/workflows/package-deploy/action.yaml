@@ -1,0 +1,59 @@
+name: 'Package Deploy'
+description: 'Perform any operations that require some deployment tasks. See deploy-config.json.example for details on the structure of the input data.'
+
+inputs:
+  branch:
+    description: 'The branch the deployment is being performed on.'
+    required: true
+  branch-name:
+    description: 'The full name of the branch the deployment is being created in.'
+    required: true
+  deploy-config-json:
+    description: 'The configuration to use when deploying, stored as JSON.'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Write deploy-config.json
+      if: inputs.package == 'packages/synchronised-storage-service' || inputs.package == 'all'
+      shell: bash
+      run: |
+        echo '${{ inputs.deploy-config-json }}' > ./packages/synchronised-storage-service/scripts/deploy-config.json
+
+    - name: Setup sync storage for mainnet
+      shell: bash
+      run: |
+        cd packages/synchronised-storage-service
+        export DEPLOY_MNEMONIC=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.mainnet.mnemonic')
+        export DEPLOY_NODE_URL=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.mainnet.nodeUrl')
+        export DEPLOY_NETWORK=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.mainnet.network')
+        export DEPLOY_CONTROLLER=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.mainnet.controller')
+        export DEPLOY_WALLET_INDEX=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.mainnet.walletIndex')
+        export DEPLOY_ALLOW_LIST=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.mainnet.allowList | join(",")')
+        node ./scripts/deploy-sync-storage.mjs
+
+    - name: Setup sync storage for testnet
+      shell: bash
+      run: |
+        cd packages/synchronised-storage-service
+        export DEPLOY_MNEMONIC=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.testnet.mnemonic')
+        export DEPLOY_NODE_URL=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.testnet.nodeUrl')
+        export DEPLOY_NETWORK=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.testnet.network')
+        export DEPLOY_CONTROLLER=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.testnet.controller')
+        export DEPLOY_WALLET_INDEX=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.testnet.walletIndex')
+        export DEPLOY_ALLOW_LIST=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.testnet.allowList | join(",")')
+        node ./scripts/deploy-sync-storage.mjs
+
+    # Disable until verifiable storage is fixed for devnet
+    # - name: Setup sync storage for devnet
+    #   shell: bash
+    #   run: |
+    #     cd packages/synchronised-storage-service
+    #     export DEPLOY_MNEMONIC=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.devnet.mnemonic')
+    #     export DEPLOY_NODE_URL=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.devnet.nodeUrl')
+    #     export DEPLOY_NETWORK=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.devnet.network')
+    #     export DEPLOY_CONTROLLER=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.devnet.controller')
+    #     export DEPLOY_WALLET_INDEX=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.devnet.walletIndex')
+    #     export DEPLOY_ALLOW_LIST=$(echo '${{ inputs.deploy-config-json }}' | jq -r '.devnet.allowList | join(",")')
+    #     node ./scripts/deploy-sync-storage.mjs

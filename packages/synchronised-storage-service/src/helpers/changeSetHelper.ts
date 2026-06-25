@@ -1,38 +1,34 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import {
-	BlobStorageCompressionType,
-	type IBlobStorageComponent
-} from "@twin.org/blob-storage-models";
-import { Converter, Is, ObjectHelper } from "@twin.org/core";
-import type { IJsonLdNodeObject } from "@twin.org/data-json-ld";
+import { BaseError, Converter, Is, ObjectHelper, RandomHelper } from "@twin.org/core";
 import type { IEventBusComponent } from "@twin.org/event-bus-models";
-import { DocumentHelper, type IIdentityConnector } from "@twin.org/identity-models";
-import type { ILoggingConnector } from "@twin.org/logging-models";
+import type { ILoggingComponent } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
-import { type IProof, ProofTypes } from "@twin.org/standards-w3c-did";
 import {
+	type ISyncChangeSet,
+	type ISyncItemRemove,
 	type ISyncItemSet,
+	type ISyncReset,
+	SyncChangeOperation,
 	SynchronisedStorageTopics,
-	type ISynchronisedEntity,
-	type ISyncItemRemove
+	type SyncNodeIdMode
 } from "@twin.org/synchronised-storage-models";
-import type { ISyncChangeSet } from "../models/ISyncChangeSet";
+import type { BlobStorageHelper } from "./blobStorageHelper.js";
 
 /**
  * Class for performing change set operations.
  */
-export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity> {
+export class ChangeSetHelper {
 	/**
 	 * Runtime name for the class.
 	 */
-	public readonly CLASS_NAME: string = nameof<ChangeSetHelper>();
+	public static readonly CLASS_NAME: string = nameof<ChangeSetHelper>();
 
 	/**
-	 * The logging connector to use for logging.
+	 * The logging component to use for logging.
 	 * @internal
 	 */
-	private readonly _logging: ILoggingConnector | undefined;
+	private readonly _logging?: ILoggingComponent;
 
 	/**
 	 * The event bus component.
@@ -41,95 +37,113 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 	private readonly _eventBusComponent: IEventBusComponent;
 
 	/**
-	 * The blob storage component to use for remote sync states.
+	 * The blob storage helper to use for remote sync states.
 	 * @internal
 	 */
-	private readonly _blobStorageComponent: IBlobStorageComponent;
+	private readonly _blobStorageHelper: BlobStorageHelper;
 
 	/**
-	 * The identity connector to use for signing/verifying changesets.
+	 * The identity of the node that is performing the update.
 	 * @internal
 	 */
-	private readonly _identityConnector: IIdentityConnector;
-
-	/**
-	 * The id of the identity method to use when signing/verifying changesets.
-	 * @internal
-	 */
-	private readonly _decentralisedStorageMethodId: string;
+	private _nodeId?: string;
 
 	/**
 	 * Create a new instance of ChangeSetHelper.
-	 * @param logging The logging connector to use for logging.
+	 * @param logging The logging component to use for logging.
 	 * @param eventBusComponent The event bus component to use for events.
-	 * @param blobStorageComponent The blob storage component to use for remote sync states.
-	 * @param identityConnector The identity connector to use for signing/verifying changesets.
-	 * @param decentralisedStorageMethodId The id of the identity method to use when signing/verifying changesets.
+	 * @param blobStorageHelper The blob storage component to use for remote sync states.
 	 */
 	constructor(
-		logging: ILoggingConnector | undefined,
+		logging: ILoggingComponent | undefined,
 		eventBusComponent: IEventBusComponent,
-		blobStorageComponent: IBlobStorageComponent,
-		identityConnector: IIdentityConnector,
-		decentralisedStorageMethodId: string
+		blobStorageHelper: BlobStorageHelper
 	) {
 		this._logging = logging;
 		this._eventBusComponent = eventBusComponent;
-		this._decentralisedStorageMethodId = decentralisedStorageMethodId;
-		this._blobStorageComponent = blobStorageComponent;
-		this._identityConnector = identityConnector;
+		this._blobStorageHelper = blobStorageHelper;
 	}
 
 	/**
-	 * Get and verify a changeset.
+	 * Set the node identity to use for signing changesets.
+	 * @param nodeId The identity of the node that is performing the update.
+	 */
+	public setNodeId(nodeId: string): void {
+		this._nodeId = nodeId;
+	}
+
+	/**
+	 * Get a changeset.
 	 * @param changeSetStorageId The id of the sync changeset to apply.
 	 * @returns The changeset if it was verified.
 	 */
-	public async getAndVerifyChangeset(
-		changeSetStorageId: string
-	): Promise<ISyncChangeSet<T> | undefined> {
-		// Changesets are not encrypted as they are signed with the node identity
-		// and they are publicly accessible so that other nodes can retrieve them.
-		const blobEntry = await this._blobStorageComponent.get(changeSetStorageId, {
-			includeContent: true
+	public async getChangeset(changeSetStorageId: string): Promise<ISyncChangeSet | undefined> {
+		await this._logging?.log({
+			level: "info",
+			source: ChangeSetHelper.CLASS_NAME,
+			message: "getChangeSet",
+			data: {
+				changeSetStorageId
+			}
 		});
-		if (Is.stringBase64(blobEntry.blob)) {
-			const syncChangeset = ObjectHelper.fromBytes<ISyncChangeSet<T>>(
-				Converter.base64ToBytes(blobEntry.blob)
-			);
 
-			const verified = await this.verifyChangesetProof(syncChangeset);
-			return verified ? syncChangeset : undefined;
+		try {
+			const syncChangeSet =
+				await this._blobStorageHelper.loadBlob<ISyncChangeSet>(changeSetStorageId);
+
+			return syncChangeSet;
+		} catch (error) {
+			await this._logging?.log({
+				level: "warn",
+				source: ChangeSetHelper.CLASS_NAME,
+				message: "getChangeSetError",
+				data: {
+					changeSetStorageId
+				},
+				error: BaseError.fromError(error)
+			});
 		}
+
+		await this._logging?.log({
+			level: "info",
+			source: ChangeSetHelper.CLASS_NAME,
+			message: "getChangeSetEmpty",
+			data: {
+				changeSetStorageId
+			}
+		});
 	}
 
 	/**
 	 * Apply a sync changeset.
 	 * @param changeSetStorageId The id of the sync changeset to apply.
-	 * @returns True if the change was applied.
+	 * @returns The changeset if it existed.
 	 */
-	public async getAndApplyChangeset(changeSetStorageId: string): Promise<boolean> {
-		const syncChangeset = await this.getAndVerifyChangeset(changeSetStorageId);
+	public async getAndApplyChangeset(
+		changeSetStorageId: string
+	): Promise<ISyncChangeSet | undefined> {
+		const syncChangeset = await this.getChangeset(changeSetStorageId);
 
-		if (!Is.empty(syncChangeset)) {
+		// Only apply changesets from other nodes, we don't want to overwrite
+		// any changes we have made to local entity storage
+		if (!Is.empty(syncChangeset) && syncChangeset.nodeIdentity !== this._nodeId) {
 			await this.applyChangeset(syncChangeset);
-			return true;
 		}
 
-		return false;
+		return syncChangeset;
 	}
 
 	/**
 	 * Apply a sync changeset.
 	 * @param syncChangeset The sync changeset to apply.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when all changes in the set have been published to the event bus.
 	 */
-	public async applyChangeset(syncChangeset: ISyncChangeSet<T>): Promise<void> {
+	public async applyChangeset(syncChangeset: ISyncChangeSet): Promise<void> {
 		if (Is.arrayValue(syncChangeset.changes)) {
 			for (const change of syncChangeset.changes) {
 				await this._logging?.log({
 					level: "info",
-					source: this.CLASS_NAME,
+					source: ChangeSetHelper.CLASS_NAME,
 					message: "changeSetApplyingChange",
 					data: {
 						operation: change.operation,
@@ -138,29 +152,34 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 				});
 
 				switch (change.operation) {
-					case "set":
+					case SyncChangeOperation.Set:
 						if (!Is.empty(change.entity)) {
-							// The node identity was stripped when stored in the changeset
+							// The id was stripped from the entity as it is part of the operation
+							// we make sure we reinstate it in the publish
+							// Also the node identity was stripped when stored in the changeset
 							// as the changeset is signed with the node identity.
 							// so we need to restore it here.
-							change.entity.nodeIdentity = syncChangeset.nodeIdentity;
 							await this._eventBusComponent.publish<ISyncItemSet>(
 								SynchronisedStorageTopics.RemoteItemSet,
 								{
-									schemaType: syncChangeset.schemaType,
-									id: change.id,
-									entity: change.entity
+									storageKey: syncChangeset.storageKey,
+									entity: {
+										...change.entity,
+										id: change.id,
+										nodeIdentity: syncChangeset.nodeIdentity
+									}
 								}
 							);
 						}
 						break;
-					case "delete":
+					case SyncChangeOperation.Delete:
 						if (!Is.empty(change.id)) {
 							await this._eventBusComponent.publish<ISyncItemRemove>(
 								SynchronisedStorageTopics.RemoteItemRemove,
 								{
-									schemaType: syncChangeset.schemaType,
-									id: change.id
+									storageKey: syncChangeset.storageKey,
+									id: change.id,
+									nodeId: syncChangeset.nodeIdentity
 								}
 							);
 						}
@@ -178,101 +197,70 @@ export class ChangeSetHelper<T extends ISynchronisedEntity = ISynchronisedEntity
 	public async storeChangeSet(syncChangeSet: ISyncChangeSet): Promise<string> {
 		await this._logging?.log({
 			level: "info",
-			source: this.CLASS_NAME,
+			source: ChangeSetHelper.CLASS_NAME,
 			message: "changeSetStoring",
 			data: {
 				id: syncChangeSet.id
 			}
 		});
 
-		// We don't want to encrypt the sync state as no other nodes would be able to read it
-		// the blob storage also needs to be publicly accessible so that other nodes can retrieve it
-		return this._blobStorageComponent.create(
-			Converter.bytesToBase64(ObjectHelper.toBytes<ISyncChangeSet>(syncChangeSet)),
-			undefined,
-			undefined,
-			undefined,
-			{
-				disableEncryption: true,
-				compress: BlobStorageCompressionType.Gzip
-			}
-		);
+		return this._blobStorageHelper.saveBlob(syncChangeSet);
 	}
 
 	/**
-	 * Verify the proof of a sync changeset.
-	 * @param syncChangeset The sync changeset to verify.
-	 * @returns True if the proof is valid, false otherwise.
+	 * Copy a change set.
+	 * @param syncChangeSet The sync changeset to copy.
+	 * @returns The id of the updated change set.
 	 */
-	public async verifyChangesetProof(syncChangeset: ISyncChangeSet): Promise<boolean> {
-		if (Is.empty(syncChangeset.proof)) {
+	public async copyChangeset(syncChangeSet: ISyncChangeSet): Promise<
+		| {
+				syncChangeSet: ISyncChangeSet;
+				changeSetStorageId: string;
+		  }
+		| undefined
+	> {
+		if (Is.stringValue(this._nodeId)) {
 			await this._logging?.log({
 				level: "info",
-				source: this.CLASS_NAME,
-				message: "verifyChangeSetProofMissing",
+				source: ChangeSetHelper.CLASS_NAME,
+				message: "copyChangeSet",
 				data: {
-					snapshotId: syncChangeset.id
+					changeSetStorageId: syncChangeSet.id
 				}
 			});
-			return false;
+
+			// Allocate a new id to the changeset copy
+			const copy = ObjectHelper.clone(syncChangeSet);
+			copy.id = Converter.bytesToHex(RandomHelper.generate(32));
+
+			// Store the copy
+			return {
+				syncChangeSet: copy,
+				changeSetStorageId: await this.storeChangeSet(copy)
+			};
 		}
-		const changeSetWithoutProof = ObjectHelper.clone(syncChangeset);
-		delete changeSetWithoutProof.proof;
-
-		const isValid = await this._identityConnector.verifyProof(
-			changeSetWithoutProof as unknown as IJsonLdNodeObject,
-			syncChangeset.proof
-		);
-
-		if (!isValid) {
-			await this._logging?.log({
-				level: "error",
-				source: this.CLASS_NAME,
-				message: "verifyChangeSetProofInvalid",
-				data: {
-					id: syncChangeset.id
-				}
-			});
-		} else {
-			await this._logging?.log({
-				level: "error",
-				source: this.CLASS_NAME,
-				message: "verifyChangeSetProofValid",
-				data: {
-					id: syncChangeset.id
-				}
-			});
-		}
-
-		return isValid;
 	}
 
 	/**
-	 * Create the proof of a sync change set.
-	 * @param syncChangeset The sync changeset to create the proof for.
-	 * @returns The proof.
+	 * Reset the storage for a given storage key.
+	 * @param storageKey The key of the storage to reset.
+	 * @param resetMode The reset mode, which uses the nodeId in the entities to determine which are local or remote.
+	 * @returns A promise that resolves when the reset event is published to the event bus.
 	 */
-	public async createChangeSetProof(syncChangeset: ISyncChangeSet): Promise<IProof> {
-		const changeSetWithoutProof = ObjectHelper.clone(syncChangeset);
-		delete changeSetWithoutProof.proof;
-
-		const proof = await this._identityConnector.createProof(
-			syncChangeset.nodeIdentity,
-			DocumentHelper.joinId(syncChangeset.nodeIdentity, this._decentralisedStorageMethodId),
-			ProofTypes.DataIntegrityProof,
-			changeSetWithoutProof as unknown as IJsonLdNodeObject
-		);
-
+	public async reset(storageKey: string, resetMode: SyncNodeIdMode): Promise<void> {
+		// If we are applying a consolidation we need to reset the local db
+		// but keep any entries from the local node, as they might have been updated
 		await this._logging?.log({
-			level: "error",
-			source: this.CLASS_NAME,
-			message: "createdChangeSetProof",
+			level: "info",
+			source: ChangeSetHelper.CLASS_NAME,
+			message: "storageReset",
 			data: {
-				id: syncChangeset.id,
-				...proof
+				storageKey
 			}
 		});
-
-		return proof;
+		await this._eventBusComponent.publish<ISyncReset>(SynchronisedStorageTopics.Reset, {
+			storageKey,
+			resetMode
+		});
 	}
 }

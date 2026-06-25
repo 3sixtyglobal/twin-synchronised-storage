@@ -1,17 +1,19 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
+import type { ISynchronisedEntityCore } from "./ISynchronisedEntityCore.js";
 
 /**
  * The base definition for synchronised entries.
  */
-export interface ISynchronisedEntity {
+export interface ISynchronisedEntity extends ISynchronisedEntityCore {
 	/**
-	 * The date the entry was modified
+	 * The id of the entry.
 	 */
-	dateModified: string;
+	id: string;
 
 	/**
 	 * The identity of the node that owns the entry.
+	 * @json-ld namespace:twin-common
 	 */
 	nodeIdentity: string;
 }

@@ -1,6 +1,6 @@
-# TWIN Synchronised Storage REST Client
+# Synchronised Storage REST Client
 
-Synchronised storage contract implementation which can connect to REST endpoints.
+This package provides a client for calling trusted synchronised storage REST endpoints, including decryption key retrieval and submission of change sets from connected nodes.
 
 ## Installation
 
