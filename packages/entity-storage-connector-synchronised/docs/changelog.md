@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/iotaledger/twin-synchronised-storage/compare/entity-storage-connector-synchronised-v0.9.0...entity-storage-connector-synchronised-v0.9.0) (2026-06-25)
+
+
+### Features
+
+* release to production ([#55](https://github.com/iotaledger/twin-synchronised-storage/issues/55)) ([8e5df2f](https://github.com/iotaledger/twin-synchronised-storage/commit/8e5df2fd3ef9c7a39d7bd9f366fe54b266eb0d5b))
+
 ## [0.9.0-next.1](https://github.com/iotaledger/twin-synchronised-storage/compare/entity-storage-connector-synchronised-v0.9.0-next.0...entity-storage-connector-synchronised-v0.9.0-next.1) (2026-06-24)
 
 
