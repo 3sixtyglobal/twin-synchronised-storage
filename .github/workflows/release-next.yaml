@@ -7,10 +7,16 @@ name: Release Next
 
 # Orchestrates the full prerelease lifecycle in a single run.
 #
-# Phase – Prepare:
-#   Refreshes docs, runs release-please to create a versioned PR. Stops here.
+# Phase – Reset next branch versions (optional):
+#   Sets all packages to <customVersion>-next.0; skipped when customVersion is blank.
 #
-# Gate  – Wait for release PR:
+# Gate  – Merge version reset PR (optional):
+#   Polls until the version reset PR is approved and merged.
+#
+# Phase – Prepare prerelease PR:
+#   Runs release-please to create a versioned prerelease PR. Stops here.
+#
+# Gate  – Merge prerelease PR:
 #   Polls until the release PR (autorelease: pending) is approved and merged.
 #
 # Phase – Publish:
@@ -138,7 +144,7 @@ jobs:
 
   # Prepare
   prepare:
-    name: 'Phase: Prepare release PR'
+    name: 'Phase: Prepare prerelease PR'
     needs: [gate-reset-pr, reset-next-versions]
     if: |
       always() &&
@@ -175,11 +181,11 @@ jobs:
       - name: Announce release PR
         if: ${{ steps.release-prepare.outputs.pr_url != '' }}
         run: |
-          echo "::notice title=Gate – Release PR::Review and merge to publish: ${{ steps.release-prepare.outputs.pr_url }}"
+          echo "::notice title=Gate – Prerelease PR::Review and merge to publish: ${{ steps.release-prepare.outputs.pr_url }}"
 
   # Polls until the release PR is approved and merged into next.
   gate-release-pr:
-    name: 'Gate: Merge release PR'
+    name: 'Gate: Merge prerelease PR'
     needs: prepare
     if: always() && !cancelled() && needs.prepare.result == 'success'
     runs-on:

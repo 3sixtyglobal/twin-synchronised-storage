@@ -10,12 +10,19 @@ name: Release Production
 # review boundary until the generated pull request is approved and merged.
 #
 # Flow:
-#   Phase – Run the versions-prepare composite action for main and create the alignment PR.
-#   Gate  – Poll until the main alignment PR is approved and merged.
-#   Phase – Run the release-prepare composite action for main and wait for the release PR.
-#   Gate  – Poll until the release PR is approved and merged.
-#           Publishing and next-branch realignment proceed automatically via
-#           the Release workflow once the release PR is merged.
+#   Phase – Merge next into main (optional):
+#     Creates a signed merge branch and opens a PR from next into main.
+#   Gate  – Merge next into main PR (optional):
+#     Polls until the PR is approved and merged.
+#   Phase – Prepare and build main branch:
+#     Runs versions-prepare on main and opens the alignment PR.
+#   Gate  – Merge main alignment PR:
+#     Polls until the alignment PR is approved and merged.
+#   Phase – Prepare release PR:
+#     Runs release-prepare on main and opens the production release PR.
+#   Gate  – Merge release PR:
+#     Polls until the release PR is merged. Publishing and next-branch
+#     realignment then proceed automatically.
 #
 # Event-driven note: The gate jobs poll the GitHub API every 60 seconds for up
 # to 6 hours each. For repositories where holding a runner for that duration is
