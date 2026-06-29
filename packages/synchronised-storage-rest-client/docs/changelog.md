@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.9.1-next.2](https://github.com/iotaledger/twin-synchronised-storage/compare/synchronised-storage-rest-client-v0.9.1-next.1...synchronised-storage-rest-client-v0.9.1-next.2) (2026-06-29)
+
+
+### Features
+
+* enhanced rest testing ([#59](https://github.com/iotaledger/twin-synchronised-storage/issues/59)) ([3a913ec](https://github.com/iotaledger/twin-synchronised-storage/commit/3a913ec1e91ae0436d99d0642e6c468d72d9a73b))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.9.1-next.1 to 0.9.1-next.2
+
 ## [0.9.1-next.1](https://github.com/iotaledger/twin-synchronised-storage/compare/synchronised-storage-rest-client-v0.9.1-next.0...synchronised-storage-rest-client-v0.9.1-next.1) (2026-06-26)
 
 
