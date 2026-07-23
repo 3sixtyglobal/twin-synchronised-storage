@@ -111,6 +111,7 @@ let loggingUntrustedMemoryEntityStorage: MemoryEntityStorageConnector<LogEntry>;
 let identityDocumentEntityStorage: MemoryEntityStorageConnector<IdentityDocument>;
 let secretEntityStorage: MemoryEntityStorageConnector<VaultSecret>;
 let keyEntityStorage: MemoryEntityStorageConnector<VaultKey>;
+let taskSchedulerComponent: TaskSchedulerService;
 let nodeId: string;
 let testNodeId: string;
 let testNodeIdUntrusted: string;
@@ -265,8 +266,9 @@ describe("synchronisedStorageService", () => {
 				})
 		);
 
-		const taskSchedulerComponent = new TaskSchedulerService({ config: { intervalMs: 0.5 } });
+		taskSchedulerComponent = new TaskSchedulerService({ config: { intervalMs: 0.5 } });
 		ComponentFactory.register("task-scheduler", () => taskSchedulerComponent);
+		await taskSchedulerComponent.start();
 
 		ComponentFactory.register("platform", () => ({
 			className: () => "platform",
@@ -285,7 +287,8 @@ describe("synchronisedStorageService", () => {
 			() =>
 				new EntityStorageLoggingConnector({
 					config: {
-						batchSize: 1
+						batchSize: 1,
+						batchIntervalMs: 0
 					}
 				})
 		);
@@ -303,7 +306,7 @@ describe("synchronisedStorageService", () => {
 			() =>
 				new EntityStorageLoggingConnector({
 					logEntryStorageConnectorType: "log-entry-untrusted",
-					config: { batchSize: 1 }
+					config: { batchSize: 1, batchIntervalMs: 0 }
 				})
 		);
 
@@ -384,6 +387,7 @@ describe("synchronisedStorageService", () => {
 	});
 
 	afterEach(async () => {
+		await taskSchedulerComponent.stop();
 		await verifiableStorage.teardown();
 		await syncSnapshotStorageConnector.teardown();
 		await loggingMemoryEntityStorage.teardown();
