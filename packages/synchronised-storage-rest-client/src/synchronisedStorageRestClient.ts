@@ -11,7 +11,7 @@ import type {
 	ISyncDecryptionKeyResponse,
 	ISynchronisedStorageComponent
 } from "@twin.org/synchronised-storage-models";
-import { HeaderHelper, HeaderTypes } from "@twin.org/web";
+import { HeaderHelper, HeaderTypes, HttpMethod } from "@twin.org/web";
 
 /**
  * Client for performing synchronised storage through to REST endpoints.
@@ -56,7 +56,7 @@ export class SynchronisedStorageRestClient
 
 		const response = await this.fetch<ISyncDecryptionKeyRequest, ISyncDecryptionKeyResponse>(
 			"/decryption-key",
-			"GET",
+			HttpMethod.GET,
 			{
 				headers: {
 					[HeaderTypes.Authorization]: HeaderHelper.createBearer(trustPayload)
@@ -86,11 +86,15 @@ export class SynchronisedStorageRestClient
 			trustPayload
 		);
 
-		await this.fetch<ISyncChangeSetRequest, INoContentResponse>("/sync-changeset", "POST", {
-			headers: {
-				[HeaderTypes.Authorization]: HeaderHelper.createBearer(trustPayload)
-			},
-			body: syncChangeSet
-		});
+		await this.fetch<ISyncChangeSetRequest, INoContentResponse>(
+			"/sync-changeset",
+			HttpMethod.POST,
+			{
+				headers: {
+					[HeaderTypes.Authorization]: HeaderHelper.createBearer(trustPayload)
+				},
+				body: syncChangeSet
+			}
+		);
 	}
 }

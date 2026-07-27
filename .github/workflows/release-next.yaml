@@ -7,13 +7,19 @@ name: Release Next
 
 # Orchestrates the full prerelease lifecycle in a single run.
 #
-# Phase – Prepare:
-#   Refreshes docs, runs release-please to create a versioned PR. Stops here.
+# Reset next branch versions (optional):
+#   Sets all packages to <customVersion>-next.0; skipped when customVersion is blank.
 #
-# Gate  – Wait for release PR:
+# Gate  – Merge version reset PR (optional):
+#   Polls until the version reset PR is approved and merged.
+#
+# Prepare prerelease PR:
+#   Runs release-please to create a versioned prerelease PR. Stops here.
+#
+# Gate  – Merge prerelease PR:
 #   Polls until the release PR (autorelease: pending) is approved and merged.
 #
-# Phase – Publish:
+# Publish:
 #   Publishes packages to npm (next tag) and creates GitHub releases.
 
 on:
@@ -60,7 +66,7 @@ jobs:
   # set all packages to <customVersion>-next.0 and updates the prerelease
   # manifest. Creates a PR on next for review before the release PR is opened.
   reset-next-versions:
-    name: 'Phase: Reset next branch versions'
+    name: Reset next branch versions
     needs: [validate-custom-version]
     if: |
       always() &&
@@ -138,12 +144,13 @@ jobs:
 
   # Prepare
   prepare:
-    name: 'Phase: Prepare release PR'
-    needs: [gate-reset-pr, reset-next-versions]
+    name: Prepare prerelease PR
+    needs: [validate-custom-version, reset-next-versions, gate-reset-pr]
     if: |
       always() &&
       !cancelled() &&
-      (needs.reset-next-versions.result == 'skipped' || needs.reset-next-versions.result == 'success') &&
+      (needs.validate-custom-version.result == 'success' || needs.validate-custom-version.result == 'skipped') &&
+      (needs.reset-next-versions.result == 'success' || needs.reset-next-versions.result == 'skipped') &&
       (needs.gate-reset-pr.result == 'success' || needs.gate-reset-pr.result == 'skipped')
     runs-on:
       labels: ${{ github.event.repository.private && 'self-hosted' || 'ubuntu-latest' }}
@@ -175,11 +182,11 @@ jobs:
       - name: Announce release PR
         if: ${{ steps.release-prepare.outputs.pr_url != '' }}
         run: |
-          echo "::notice title=Gate – Release PR::Review and merge to publish: ${{ steps.release-prepare.outputs.pr_url }}"
+          echo "::notice title=Gate – Prerelease PR::Review and merge to publish: ${{ steps.release-prepare.outputs.pr_url }}"
 
   # Polls until the release PR is approved and merged into next.
   gate-release-pr:
-    name: 'Gate: Merge release PR'
+    name: 'Gate: Merge prerelease PR'
     needs: prepare
     if: always() && !cancelled() && needs.prepare.result == 'success'
     runs-on:
