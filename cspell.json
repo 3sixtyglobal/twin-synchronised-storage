@@ -24,10 +24,11 @@
 		"cryptosuite",
 		"devnet",
 		"eddsa",
+		"hotfixes",
 		"IPFS",
 		"nameof",
-		"openapi",
 		"Odrl",
+		"openapi",
 		"SPKI",
 		"Stiftung"
 	],
