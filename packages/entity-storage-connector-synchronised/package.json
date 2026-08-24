@@ -1,6 +1,6 @@
 {
 	"name": "@twin.org/entity-storage-connector-synchronised",
-	"version": "0.9.2-next.1",
+	"version": "0.9.3-next.0",
 	"description": "Entity storage connector that publishes local changes and applies remote updates.",
 	"repository": {
 		"type": "git",
@@ -35,7 +35,7 @@
 		"@twin.org/event-bus-models": "next",
 		"@twin.org/logging-models": "next",
 		"@twin.org/nameof": "next",
-		"@twin.org/synchronised-storage-models": "0.9.2-next.1"
+		"@twin.org/synchronised-storage-models": "0.9.3-next.0"
 	},
 	"devDependencies": {
 		"@twin.org/entity-storage-connector-memory": "next",
