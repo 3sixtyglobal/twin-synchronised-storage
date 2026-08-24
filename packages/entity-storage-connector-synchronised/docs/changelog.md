@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.9.2-next.1](https://github.com/iotaledger/twin-synchronised-storage/compare/entity-storage-connector-synchronised-v0.9.2-next.0...entity-storage-connector-synchronised-v0.9.2-next.1) (2026-08-07)
+
+
+### Features
+
+* add context id features ([#24](https://github.com/iotaledger/twin-synchronised-storage/issues/24)) ([5266b18](https://github.com/iotaledger/twin-synchronised-storage/commit/5266b18088317c7dc274a209a79102a6fc88a8e4))
+* json ld contexts ([#36](https://github.com/iotaledger/twin-synchronised-storage/issues/36)) ([3a87a9f](https://github.com/iotaledger/twin-synchronised-storage/commit/3a87a9fb16d21baf672e44b4e8914cf1937b1d6a))
+* linting and dependency update ([3f65a59](https://github.com/iotaledger/twin-synchronised-storage/commit/3f65a592be7733f3b9b3a4486647c8d90543c5a0))
+* typescript 6 update ([b0e6d52](https://github.com/iotaledger/twin-synchronised-storage/commit/b0e6d52f622dc1ff2273f5e09e8370382742ae50))
+* update dependencies ([2bce2e2](https://github.com/iotaledger/twin-synchronised-storage/commit/2bce2e205f9e1acdef41681720e192b77aa50468))
+* update to latest entity storage model ([14fc53f](https://github.com/iotaledger/twin-synchronised-storage/commit/14fc53fd93140fb9aff6bf937a7646d0a654fd9d))
+
+
+### Bug Fixes
+
+* package.json ([9d3c7d6](https://github.com/iotaledger/twin-synchronised-storage/commit/9d3c7d65d01b4100f7831b5f057b96fba8211815))
+* use async getStore in tests ([b883778](https://github.com/iotaledger/twin-synchronised-storage/commit/b8837787b9876d836e69e3f81ac6508fd97a5465))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/synchronised-storage-models bumped from 0.9.2-next.0 to 0.9.2-next.1
+
 ## [0.9.1](https://github.com/iotaledger/twin-synchronised-storage/compare/entity-storage-connector-synchronised-v0.9.1...entity-storage-connector-synchronised-v0.9.1) (2026-07-27)
 
 
