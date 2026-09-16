@@ -1,6 +1,6 @@
 {
 	"name": "@twin.org/synchronised-storage-rest-client",
-	"version": "0.9.3-next.0",
+	"version": "0.10.1-next.0",
 	"description": "REST client for trusted decryption key retrieval and change set synchronisation.",
 	"repository": {
 		"type": "git",
@@ -39,7 +39,7 @@
 	"devDependencies": {
 		"@twin.org/nameof-transformer": "next",
 		"@twin.org/nameof-vitest-plugin": "next",
-		"@twin.org/synchronised-storage-models": "0.9.3-next.0",
+		"@twin.org/synchronised-storage-models": "0.10.1-next.0",
 		"@twin.org/validate-locales": "next",
 		"@vitest/coverage-v8": "4.1.10",
 		"copyfiles": "2.4.1",
