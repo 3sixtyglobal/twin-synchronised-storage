@@ -11,31 +11,31 @@ export class SyncSnapshotEntry {
 	/**
 	 * The id for the snapshot.
 	 */
-	@property({ type: "string", isPrimary: true })
+	@property({ type: "string", isPrimary: true, maxLength: 255 })
 	public id!: string;
 
 	/**
 	 * The version for the snapshot.
 	 */
-	@property({ type: "string" })
+	@property({ type: "string", maxLength: 128 })
 	public version!: string;
 
 	/**
 	 * The storage key for the snapshot i.e. which entity is being synchronized.
 	 */
-	@property({ type: "string", isSecondary: true })
+	@property({ type: "string", maxLength: 255, isSecondary: true })
 	public storageKey!: string;
 
 	/**
 	 * The date the snapshot was created.
 	 */
-	@property({ type: "string" })
+	@property({ type: "string", format: "date-time" })
 	public dateCreated!: string;
 
 	/**
 	 * The date the snapshot was last modified.
 	 */
-	@property({ type: "string" })
+	@property({ type: "string", format: "date-time" })
 	public dateModified!: string;
 
 	/**
