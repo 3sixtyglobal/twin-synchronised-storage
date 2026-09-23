@@ -13,6 +13,7 @@ import {
 } from "@twin.org/entity";
 import {
 	EntityStorageConnectorFactory,
+	type IEntityStorageJoinOptions,
 	type IEntityStorageConnector
 } from "@twin.org/entity-storage-models";
 import type { IEvent, IEventBusComponent } from "@twin.org/event-bus-models";
@@ -414,6 +415,38 @@ export class SynchronisedEntityStorageConnector<
 			cursor,
 			limit
 		);
+	}
+
+	/**
+	 * Query all the entities which match the conditions, attaching to each one the entities from a
+	 * second storage connector whose join property matches. The join behaves like a left join by
+	 * default, a primary entity with no matches is still returned with an empty joined list, unless
+	 * joinRequired asks for an inner join and those entities are left out altogether.
+	 * @param joinConnector The connector holding the entities to join to.
+	 * @param joinOptions The properties to join on, the conditions, sort order, projection and
+	 * paging for the primary entities, the optional grouping and group conditions, and the optional
+	 * conditions, sort order and projection for the joined entities.
+	 * @returns All the entities for the storage matching the conditions with their joined entities,
+	 * and a cursor which can be used to request more entities.
+	 */
+	public async queryJoin<U>(
+		joinConnector: IEntityStorageConnector<U>,
+		joinOptions: IEntityStorageJoinOptions<T, U>
+	): Promise<{
+		/**
+		 * The entities, which can be partial if a limited keys list was provided, each with the
+		 * list of entities joined to it.
+		 */
+		entities: (Partial<T> & {
+			joined: Partial<U>[];
+		})[];
+		/**
+		 * An optional cursor, when defined can be used to call queryJoin to get more entities.
+		 */
+		cursor?: string;
+	}> {
+		// We deliberately skip the partition key as we want to query all partitions in synchronised storage
+		return this._entityStorageConnector.queryJoin(joinConnector, joinOptions);
 	}
 
 	/**
