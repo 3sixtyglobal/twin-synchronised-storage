@@ -14,8 +14,8 @@
 		"node": ">=24.0.0"
 	},
 	"scripts": {
-		"clean": "rimraf dist coverage",
-		"build:schema": "ts-to-schema ./ts-to-schema.json ./src/schemas",
+		"clean": "rimraf dist coverage src/compiled",
+		"build:schema": "ts-to-schema ./ts-to-schema.json ./src/schemas ./src/compiled",
 		"build:jsonld-context": "ts-to-jsonld-context ./ts-to-jsonld-context.json ./src/schemas/types.jsonld",
 		"build:compile": "tspc",
 		"build": "pnpm run build:schema && pnpm run build:jsonld-context && pnpm run build:compile",
@@ -32,6 +32,7 @@
 	},
 	"dependencies": {
 		"@twin.org/core": "next",
+		"@twin.org/data-core": "next",
 		"@twin.org/entity": "next",
 		"@twin.org/identity-models": "next",
 		"@twin.org/nameof": "next",

@@ -14,7 +14,27 @@ export const SynchronisedStorageTypes = {
 	/**
 	 * Represents a synchronised storage change set.
 	 */
-	ChangeSet: "ChangeSet"
+	ChangeSet: "ChangeSet",
+
+	/**
+	 * Represents a synchronised storage change.
+	 */
+	SyncChange: "SyncChange",
+
+	/**
+	 * Represents a synchronised storage change operation.
+	 */
+	SyncChangeOperation: "SyncChangeOperation",
+
+	/**
+	 * Represents a synchronised entity.
+	 */
+	SynchronisedEntity: "SynchronisedEntity",
+
+	/**
+	 * Represents the core properties of a synchronised entity.
+	 */
+	SynchronisedEntityCore: "SynchronisedEntityCore"
 } as const;
 
 /**
