@@ -14,7 +14,7 @@ export const SynchronisedStorageTypes = {
 	/**
 	 * Represents a synchronised storage change set.
 	 */
-	ChangeSet: "ChangeSet",
+	SyncChangeSet: "SyncChangeSet",
 
 	/**
 	 * Represents a synchronised storage change.

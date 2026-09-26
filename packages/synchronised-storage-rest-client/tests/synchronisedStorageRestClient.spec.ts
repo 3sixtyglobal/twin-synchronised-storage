@@ -33,7 +33,7 @@ const TEST_SYNC_CHANGE: ISyncChange = {
 
 const TEST_SYNC_CHANGE_SET: ISyncChangeSet = {
 	"@context": SynchronisedStorageContexts.Context,
-	type: SynchronisedStorageTypes.ChangeSet,
+	type: SynchronisedStorageTypes.SyncChangeSet,
 	id: "urn:changeset:test-changeset-1",
 	storageKey: "urn:storage:test-key",
 	dateCreated: "2026-01-01T00:00:00Z",
@@ -120,7 +120,7 @@ describe("SynchronisedStorageRestClient", () => {
 			const [, options] = fetchMock.mock.calls[0] as [string, RequestInit];
 			const body = JSON.parse(options.body as string) as ISyncChangeSet;
 			expect(body["@context"]).toBe(SynchronisedStorageContexts.Context);
-			expect(body.type).toBe(SynchronisedStorageTypes.ChangeSet);
+			expect(body.type).toBe(SynchronisedStorageTypes.SyncChangeSet);
 			expect(body.id).toBe(TEST_SYNC_CHANGE_SET.id);
 			expect(body.storageKey).toBe(TEST_SYNC_CHANGE_SET.storageKey);
 			expect(body.nodeIdentity).toBe(TEST_SYNC_CHANGE_SET.nodeIdentity);

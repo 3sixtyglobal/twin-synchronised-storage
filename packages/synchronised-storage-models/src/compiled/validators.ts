@@ -260,8 +260,8 @@ errors++;
 }
 }
 if(data.type !== undefined){
-if("ChangeSet" !== data.type){
-const err9 = createError(instancePath+"/type","#/properties/type/const","const",{allowedValue: "ChangeSet"},0);
+if("SyncChangeSet" !== data.type){
+const err9 = createError(instancePath+"/type","#/properties/type/const","const",{allowedValue: "SyncChangeSet"},0);
 vErrors = pushError(vErrors, err9);
 errors++;
 }

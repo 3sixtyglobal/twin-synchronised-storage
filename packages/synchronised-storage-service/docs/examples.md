@@ -61,7 +61,7 @@ const trustedService = new SynchronisedStorageService({
 
 const changeSet: ISyncChangeSet = {
   '@context': SynchronisedStorageContexts.Context,
-  type: SynchronisedStorageTypes.ChangeSet,
+  type: SynchronisedStorageTypes.SyncChangeSet,
   id: 'changeset-remote-7',
   storageKey: 'profile',
   dateCreated: '2026-03-10T12:00:00.000Z',

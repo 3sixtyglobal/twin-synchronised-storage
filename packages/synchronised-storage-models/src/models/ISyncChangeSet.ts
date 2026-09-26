@@ -16,7 +16,7 @@ export interface ISyncChangeSet {
 	/**
 	 * The LD Type for the change set.
 	 */
-	type: typeof SynchronisedStorageTypes.ChangeSet;
+	type: typeof SynchronisedStorageTypes.SyncChangeSet;
 
 	/**
 	 * The id of the change set.

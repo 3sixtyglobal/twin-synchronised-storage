@@ -26,7 +26,7 @@ export class SynchronisedStorageDataTypes {
 				compiledValidator: CompiledValidators.CompiledSyncRequest
 			},
 			{
-				type: SynchronisedStorageTypes.ChangeSet,
+				type: SynchronisedStorageTypes.SyncChangeSet,
 				schema: SyncChangeSetSchema,
 				compiledValidator: CompiledValidators.CompiledSyncChangeSet
 			},

@@ -35,7 +35,7 @@ console.log(decryptionKey.length); // 44
 
 const changeSet: ISyncChangeSet = {
   '@context': SynchronisedStorageContexts.Context,
-  type: SynchronisedStorageTypes.ChangeSet,
+  type: SynchronisedStorageTypes.SyncChangeSet,
   id: 'changeset-20260310-01',
   storageKey: 'profile',
   dateCreated: '2026-03-10T10:00:00.000Z',
