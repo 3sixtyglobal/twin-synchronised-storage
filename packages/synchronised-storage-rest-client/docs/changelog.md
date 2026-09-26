@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.10.1-next.2](https://github.com/iotaledger/twin-synchronised-storage/compare/synchronised-storage-rest-client-v0.10.1-next.1...synchronised-storage-rest-client-v0.10.1-next.2) (2026-09-26)
+
+
+### Features
+
+* compiled schemas ([ee894b0](https://github.com/iotaledger/twin-synchronised-storage/commit/ee894b09f0b09ca37197271b8ebe34bb22427238))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @twin.org/synchronised-storage-models bumped from 0.10.1-next.1 to 0.10.1-next.2
+
 ## [0.10.1-next.1](https://github.com/iotaledger/twin-synchronised-storage/compare/synchronised-storage-rest-client-v0.10.1-next.0...synchronised-storage-rest-client-v0.10.1-next.1) (2026-09-18)
 
 

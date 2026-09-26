@@ -263,7 +263,7 @@ importers:
         specifier: next
         version: 0.10.1-next.12
       '@twin.org/synchronised-storage-models':
-        specifier: 0.10.1-next.1
+        specifier: 0.10.1-next.2
         version: link:../synchronised-storage-models
     devDependencies:
       '@twin.org/entity-storage-connector-memory':
@@ -419,7 +419,7 @@ importers:
         specifier: next
         version: 0.10.1-next.12(@types/node@26.6.2)(@vitest/coverage-v8@5.0.1)(vite@8.3.0(@types/node@26.6.2)(jiti@2.6.1))
       '@twin.org/synchronised-storage-models':
-        specifier: 0.10.1-next.1
+        specifier: 0.10.1-next.2
         version: link:../synchronised-storage-models
       '@twin.org/validate-locales':
         specifier: next
@@ -488,7 +488,7 @@ importers:
         specifier: next
         version: 0.10.1-next.12
       '@twin.org/synchronised-storage-models':
-        specifier: 0.10.1-next.1
+        specifier: 0.10.1-next.2
         version: link:../synchronised-storage-models
       '@twin.org/trust-models':
         specifier: next
@@ -508,7 +508,7 @@ importers:
         version: 0.10.1-next.1
       '@twin.org/blob-storage-connector-memory':
         specifier: next
-        version: 0.10.1-next.1(typescript@6.0.3)
+        version: 0.10.1-next.2(typescript@6.0.3)
       '@twin.org/blob-storage-service':
         specifier: next
         version: 0.10.1-next.1(typescript@6.0.3)
@@ -553,10 +553,10 @@ importers:
         version: 0.10.1-next.4
       '@twin.org/verifiable-storage-connector-entity-storage':
         specifier: next
-        version: 0.10.1-next.1
+        version: 0.10.1-next.2
       '@twin.org/verifiable-storage-connector-iota':
         specifier: next
-        version: 0.10.1-next.1(typescript@6.0.3)
+        version: 0.10.1-next.2(typescript@6.0.3)
       '@types/node':
         specifier: 26.6.2
         version: 26.6.2
@@ -1438,8 +1438,8 @@ packages:
     resolution: {integrity: sha512-njHSmePt02a4h36PW3FQ1YSyN+Ne33EueCypRhD+H08ROp/L5UlEf2lq1G7a++pnYBmTRdzW7ZrODxE+wtpY2w==}
     engines: {node: '>=24.0.0'}
 
-  '@twin.org/blob-storage-connector-memory@0.10.1-next.1':
-    resolution: {integrity: sha512-Y0VmWpgVJFToJqXVEA7Qf42+3iOs/uZMjIYBox8qazeVHhVYFh/MpVtUfe6/XZrxR9ZOvxmPtdoNazH7v2PSVA==}
+  '@twin.org/blob-storage-connector-memory@0.10.1-next.2':
+    resolution: {integrity: sha512-I5PnnnoQEhT+6u/vsgLuyMXSX68J7N0StsfyPw2tKmMVFHWnA3owypWFHKTGz1Bh0n0K4Q81hC9Uww+VrUZXww==}
     engines: {node: '>=24.0.0'}
 
   '@twin.org/blob-storage-models@0.10.1-next.1':
@@ -1594,16 +1594,12 @@ packages:
     resolution: {integrity: sha512-Px3/r5yjGQeh5sjHmzuViqviHNcfab3Ecjp/tUWnrH/zQHZXXLe1wLPknV0rwpGvO1bggIuYxpmsW2vqdzX2tw==}
     engines: {node: '>=24.0.0'}
 
-  '@twin.org/verifiable-storage-connector-entity-storage@0.10.1-next.1':
-    resolution: {integrity: sha512-U5n2lXCxVEMvsuzri6XetI4gOYyaI56xI58FGwdrbuOgaXQMcbolBo75vWwh8y5ZyegBP/fP8DsdP1AHsUNKLQ==}
+  '@twin.org/verifiable-storage-connector-entity-storage@0.10.1-next.2':
+    resolution: {integrity: sha512-1MJ8RoN1nWiyDGb4335mmP2qmsYp9m0y5e3kfolVZ28K4jh6L8mUqymMKS8/NDxrQYqPAMYTBgPChyGPcidTVA==}
     engines: {node: '>=24.0.0'}
 
-  '@twin.org/verifiable-storage-connector-iota@0.10.1-next.1':
-    resolution: {integrity: sha512-BgqqjfZV/+SXSJfGDHvDtAvFtY1E5eh6YiTCTmTwoacQzCxAmdqbocLmKKyOpjHOXBRGQn0YvYPdrQ0Xv9IdUA==}
-    engines: {node: '>=24.0.0'}
-
-  '@twin.org/verifiable-storage-models@0.10.1-next.1':
-    resolution: {integrity: sha512-jWSCHfjnJwHfsqKocxCIryV40b6UkmRkh+gUSTreoFC+PS/+MJTalKmohTIT03pXTzS1KNxyYcqazdKQwCNlJQ==}
+  '@twin.org/verifiable-storage-connector-iota@0.10.1-next.2':
+    resolution: {integrity: sha512-UB/qwQCsvA4TRdgnLILYnEGL6jtneD+8GMZs8FL+eLm7zS6Os8g1FXxyLLtKQrggg6qDPxDdob5IbC42xeZ7aw==}
     engines: {node: '>=24.0.0'}
 
   '@twin.org/verifiable-storage-models@0.10.1-next.2':
@@ -4954,10 +4950,10 @@ snapshots:
       '@twin.org/logging-models': 0.10.1-next.3
       '@twin.org/nameof': 0.10.1-next.12
 
-  '@twin.org/blob-storage-connector-memory@0.10.1-next.1(typescript@6.0.3)':
+  '@twin.org/blob-storage-connector-memory@0.10.1-next.2(typescript@6.0.3)':
     dependencies:
       '@twin.org/api-models': 0.10.1-next.8
-      '@twin.org/blob-storage-models': 0.10.1-next.1(typescript@6.0.3)
+      '@twin.org/blob-storage-models': 0.10.1-next.2(typescript@6.0.3)
       '@twin.org/context': 0.10.1-next.12
       '@twin.org/core': 0.10.1-next.12
       '@twin.org/crypto': 0.10.1-next.12
@@ -5312,7 +5308,7 @@ snapshots:
       '@twin.org/nameof': 0.10.1-next.12
       '@twin.org/web': 0.10.1-next.12
 
-  '@twin.org/verifiable-storage-connector-entity-storage@0.10.1-next.1':
+  '@twin.org/verifiable-storage-connector-entity-storage@0.10.1-next.2':
     dependencies:
       '@twin.org/core': 0.10.1-next.12
       '@twin.org/crypto': 0.10.1-next.12
@@ -5321,9 +5317,9 @@ snapshots:
       '@twin.org/entity': 0.10.1-next.12
       '@twin.org/entity-storage-models': 0.10.1-next.14
       '@twin.org/nameof': 0.10.1-next.12
-      '@twin.org/verifiable-storage-models': 0.10.1-next.1
+      '@twin.org/verifiable-storage-models': 0.10.1-next.2
 
-  '@twin.org/verifiable-storage-connector-iota@0.10.1-next.1(typescript@6.0.3)':
+  '@twin.org/verifiable-storage-connector-iota@0.10.1-next.2(typescript@6.0.3)':
     dependencies:
       '@twin.org/core': 0.10.1-next.12
       '@twin.org/data-core': 0.10.1-next.2
@@ -5333,20 +5329,12 @@ snapshots:
       '@twin.org/logging-models': 0.10.1-next.3
       '@twin.org/nameof': 0.10.1-next.12
       '@twin.org/vault-models': 0.10.1-next.4
-      '@twin.org/verifiable-storage-models': 0.10.1-next.1
+      '@twin.org/verifiable-storage-models': 0.10.1-next.2
     transitivePeerDependencies:
       - '@gql.tada/svelte-support'
       - '@gql.tada/vue-support'
       - encoding
       - typescript
-
-  '@twin.org/verifiable-storage-models@0.10.1-next.1':
-    dependencies:
-      '@twin.org/api-models': 0.10.1-next.8
-      '@twin.org/core': 0.10.1-next.12
-      '@twin.org/data-json-ld': 0.10.1-next.2
-      '@twin.org/nameof': 0.10.1-next.12
-      '@twin.org/web': 0.10.1-next.12
 
   '@twin.org/verifiable-storage-models@0.10.1-next.2':
     dependencies:
