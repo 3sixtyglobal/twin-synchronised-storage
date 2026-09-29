@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.11.0](https://github.com/iotaledger/twin-synchronised-storage/compare/synchronised-storage-rest-client-v0.11.0...synchronised-storage-rest-client-v0.11.0) (2026-09-29)
+
+
+### Features
+
+* initial commit ([16949b8](https://github.com/iotaledger/twin-synchronised-storage/commit/16949b8e5bdb190f053c52af352290e3fd964f9a))
+* release to production ([#55](https://github.com/iotaledger/twin-synchronised-storage/issues/55)) ([8e5df2f](https://github.com/iotaledger/twin-synchronised-storage/commit/8e5df2fd3ef9c7a39d7bd9f366fe54b266eb0d5b))
+* release to production ([#63](https://github.com/iotaledger/twin-synchronised-storage/issues/63)) ([226c92e](https://github.com/iotaledger/twin-synchronised-storage/commit/226c92e3a8201f7a243a43eaeb44325a2abc353c))
+* release to production ([#69](https://github.com/iotaledger/twin-synchronised-storage/issues/69)) ([2073692](https://github.com/iotaledger/twin-synchronised-storage/commit/2073692286705c334db7499943830f581ae65061))
+* release to production [skip ci] ([#74](https://github.com/iotaledger/twin-synchronised-storage/issues/74)) ([5a9df59](https://github.com/iotaledger/twin-synchronised-storage/commit/5a9df594f11e92d5d3be330addcb169584bcd06b))
+* release to production [skip ci] ([#82](https://github.com/iotaledger/twin-synchronised-storage/issues/82)) ([f2320b3](https://github.com/iotaledger/twin-synchronised-storage/commit/f2320b3731ad4776ea31ad7a0b155c87bedda7d7))
+
 ## [0.10.1-next.2](https://github.com/iotaledger/twin-synchronised-storage/compare/synchronised-storage-rest-client-v0.10.1-next.1...synchronised-storage-rest-client-v0.10.1-next.2) (2026-09-26)
 
 
