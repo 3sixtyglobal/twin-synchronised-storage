@@ -14,7 +14,7 @@ The LD Context for the change set.
 
 ### type {#type}
 
-> **type**: `"ChangeSet"`
+> **type**: `"SyncChangeSet"`
 
 The LD Type for the change set.
 

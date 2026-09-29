@@ -14,7 +14,7 @@ import {
 
 const syncChangeSet: ISyncChangeSet = {
   '@context': SynchronisedStorageContexts.Context,
-  type: SynchronisedStorageTypes.ChangeSet,
+  type: SynchronisedStorageTypes.SyncChangeSet,
   id: 'changeset-001',
   storageKey: 'profile',
   dateCreated: '2026-03-10T11:00:00.000Z',

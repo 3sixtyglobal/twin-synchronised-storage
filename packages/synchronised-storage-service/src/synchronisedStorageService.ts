@@ -27,6 +27,7 @@ import {
 	type ISynchronisedStorageComponent,
 	type ISyncItemChange,
 	type ISyncRegisterStorageKey,
+	SynchronisedStorageDataTypes,
 	SynchronisedStorageTopics
 } from "@twin.org/synchronised-storage-models";
 import { type ITrustComponent, TrustHelper } from "@twin.org/trust-models";
@@ -303,6 +304,8 @@ export class SynchronisedStorageService implements ISynchronisedStorageComponent
 
 		this._serviceStarted = false;
 		this._activeStorageKeys = {};
+
+		SynchronisedStorageDataTypes.registerTypes();
 	}
 
 	/**

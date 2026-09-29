@@ -775,7 +775,7 @@ describe("synchronisedStorageService", () => {
 
 		expect(await expandObject(blobs[changeSetBlobKey])).toEqual({
 			"@context": SynchronisedStorageContexts.Namespace,
-			type: SynchronisedStorageTypes.ChangeSet,
+			type: SynchronisedStorageTypes.SyncChangeSet,
 			id: expect.stringMatching(/^[\da-f]{64}$/),
 			dateCreated: "2025-05-29T01:00:00.000Z",
 			dateModified: "2025-05-29T01:00:00.000Z",
@@ -815,7 +815,7 @@ describe("synchronisedStorageService", () => {
 
 		const changeSet: ISyncChangeSet = {
 			"@context": SynchronisedStorageContexts.Namespace,
-			type: SynchronisedStorageTypes.ChangeSet,
+			type: SynchronisedStorageTypes.SyncChangeSet,
 			id: "fafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafa",
 			dateCreated: "2025-05-29T01:00:00.000Z",
 			dateModified: "2025-05-29T01:00:00.000Z",
@@ -1104,7 +1104,7 @@ describe("synchronisedStorageService", () => {
 
 		expect(await expandObject(blobs[changeSetBlobKey])).toEqual({
 			"@context": SynchronisedStorageContexts.Namespace,
-			type: SynchronisedStorageTypes.ChangeSet,
+			type: SynchronisedStorageTypes.SyncChangeSet,
 			changes: [
 				{
 					entity: {
@@ -1136,7 +1136,7 @@ describe("synchronisedStorageService", () => {
 			// Create multiple changesets - some before consolidation, some after
 			const changeSet1: ISyncChangeSet = {
 				"@context": SynchronisedStorageContexts.Namespace,
-				type: SynchronisedStorageTypes.ChangeSet,
+				type: SynchronisedStorageTypes.SyncChangeSet,
 				id: "1111111111111111111111111111111111111111111111111111111111111111",
 				dateCreated: "2025-05-29T01:00:00.000Z",
 				dateModified: "2025-05-29T01:00:00.000Z",
@@ -1153,7 +1153,7 @@ describe("synchronisedStorageService", () => {
 
 			const changeSet2: ISyncChangeSet = {
 				"@context": SynchronisedStorageContexts.Namespace,
-				type: SynchronisedStorageTypes.ChangeSet,
+				type: SynchronisedStorageTypes.SyncChangeSet,
 				id: "2222222222222222222222222222222222222222222222222222222222222222",
 				dateCreated: "2025-05-29T02:00:00.000Z",
 				dateModified: "2025-05-29T02:00:00.000Z",
@@ -1170,7 +1170,7 @@ describe("synchronisedStorageService", () => {
 
 			const changeSet3: ISyncChangeSet = {
 				"@context": SynchronisedStorageContexts.Namespace,
-				type: SynchronisedStorageTypes.ChangeSet,
+				type: SynchronisedStorageTypes.SyncChangeSet,
 				id: "3333333333333333333333333333333333333333333333333333333333333333",
 				dateCreated: "2025-05-29T04:00:00.000Z",
 				dateModified: "2025-05-29T04:00:00.000Z",
@@ -1288,7 +1288,7 @@ describe("synchronisedStorageService", () => {
 
 			const changeSet: ISyncChangeSet = {
 				"@context": SynchronisedStorageContexts.Namespace,
-				type: SynchronisedStorageTypes.ChangeSet,
+				type: SynchronisedStorageTypes.SyncChangeSet,
 				id: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
 				dateCreated: "2025-05-29T01:00:00.000Z",
 				dateModified: "2025-05-29T01:00:00.000Z",
@@ -1389,7 +1389,7 @@ describe("synchronisedStorageService", () => {
 			// Create a new changeset for incremental sync
 			const changeSet: ISyncChangeSet = {
 				"@context": SynchronisedStorageContexts.Namespace,
-				type: SynchronisedStorageTypes.ChangeSet,
+				type: SynchronisedStorageTypes.SyncChangeSet,
 				id: "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
 				dateCreated: "2025-05-29T02:00:00.000Z",
 				dateModified: "2025-05-29T02:00:00.000Z",
@@ -1507,7 +1507,7 @@ describe("synchronisedStorageService", () => {
 
 			const changeSet: ISyncChangeSet = {
 				"@context": SynchronisedStorageContexts.Namespace,
-				type: SynchronisedStorageTypes.ChangeSet,
+				type: SynchronisedStorageTypes.SyncChangeSet,
 				id: "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
 				dateCreated: "2025-05-29T03:00:00.000Z",
 				dateModified: "2025-05-29T03:00:00.000Z",

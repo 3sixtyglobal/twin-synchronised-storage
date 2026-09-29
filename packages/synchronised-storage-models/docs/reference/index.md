@@ -1,5 +1,9 @@
 # @twin.org/synchronised-storage-models
 
+## Classes
+
+- [SynchronisedStorageDataTypes](classes/SynchronisedStorageDataTypes.md)
+
 ## Interfaces
 
 - [ISyncChange](interfaces/ISyncChange.md)
@@ -31,6 +35,12 @@
 
 ## Variables
 
+- [CompiledSyncRequest](variables/CompiledSyncRequest.md)
+- [CompiledSyncChangeSet](variables/CompiledSyncChangeSet.md)
+- [CompiledSyncChange](variables/CompiledSyncChange.md)
+- [CompiledSynchronisedEntity](variables/CompiledSynchronisedEntity.md)
+- [CompiledSynchronisedEntityCore](variables/CompiledSynchronisedEntityCore.md)
+- [CompiledSyncChangeOperation](variables/CompiledSyncChangeOperation.md)
 - [SyncChangeOperation](variables/SyncChangeOperation.md)
 - [SyncNodeIdMode](variables/SyncNodeIdMode.md)
 - [SynchronisedStorageContexts](variables/SynchronisedStorageContexts.md)

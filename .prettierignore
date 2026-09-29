@@ -1,6 +1,9 @@
 package-lock.json
+pnpm-lock.yaml
 **/docs/reference
 **/docs/open-api
 **/schemas
 changelog.md
 release/**
+**/src/compiled/
+_tmp_*
