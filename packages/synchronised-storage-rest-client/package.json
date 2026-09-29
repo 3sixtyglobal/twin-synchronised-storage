@@ -1,6 +1,6 @@
 {
 	"name": "@twin.org/synchronised-storage-rest-client",
-	"version": "0.10.1-next.2",
+	"version": "0.11.0",
 	"description": "REST client for trusted decryption key retrieval and change set synchronisation.",
 	"repository": {
 		"type": "git",
@@ -28,19 +28,19 @@
 		"dist:no-test": "pnpm run clean && concurrently -g -n build,locales,types \"pnpm run build\" \"pnpm run validate-locales\" \"pnpm run test:build\""
 	},
 	"dependencies": {
-		"@twin.org/api-core": "next",
-		"@twin.org/api-models": "next",
-		"@twin.org/context": "next",
-		"@twin.org/core": "next",
-		"@twin.org/entity": "next",
-		"@twin.org/nameof": "next",
-		"@twin.org/web": "next"
+		"@twin.org/api-core": "^0.11.0",
+		"@twin.org/api-models": "^0.11.0",
+		"@twin.org/context": "^0.11.0",
+		"@twin.org/core": "^0.11.0",
+		"@twin.org/entity": "^0.11.0",
+		"@twin.org/nameof": "^0.11.0",
+		"@twin.org/web": "^0.11.0"
 	},
 	"devDependencies": {
-		"@twin.org/nameof-transformer": "next",
-		"@twin.org/nameof-vitest-plugin": "next",
-		"@twin.org/synchronised-storage-models": "0.10.1-next.2",
-		"@twin.org/validate-locales": "next",
+		"@twin.org/nameof-transformer": "^0.11.0",
+		"@twin.org/nameof-vitest-plugin": "^0.11.0",
+		"@twin.org/synchronised-storage-models": "^0.11.0",
+		"@twin.org/validate-locales": "^0.11.0",
 		"@vitest/coverage-v8": "5.0.1",
 		"concurrently": "10.0.5",
 		"copyfiles": "2.4.1",
