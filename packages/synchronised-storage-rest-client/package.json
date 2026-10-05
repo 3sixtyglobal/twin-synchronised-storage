@@ -4,7 +4,7 @@
 	"description": "REST client for trusted decryption key retrieval and change set synchronisation.",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/iotaledger/twin-synchronised-storage.git",
+		"url": "git+https://github.com/3sixtyglobal/twin-synchronised-storage.git",
 		"directory": "packages/synchronised-storage-rest-client"
 	},
 	"author": "martyn.janes@iota.org",
@@ -77,7 +77,7 @@
 		"synchronised-storage"
 	],
 	"bugs": {
-		"url": "git+https://github.com/iotaledger/twin-synchronised-storage/issues"
+		"url": "git+https://github.com/3sixtyglobal/twin-synchronised-storage/issues"
 	},
 	"homepage": "https://twindev.org"
 }

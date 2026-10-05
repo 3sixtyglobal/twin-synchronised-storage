@@ -14,3 +14,7 @@ Taken together, these packages help teams establish consistent synchronisation b
 ## Contributing
 
 To contribute to this package see the guidelines for building and publishing in [CONTRIBUTING](./CONTRIBUTING.md)
+
+## Origin
+
+This repository is derived from the original [iotaledger/twin-synchronised-storage](https://github.com/iotaledger/twin-synchronised-storage) repository.

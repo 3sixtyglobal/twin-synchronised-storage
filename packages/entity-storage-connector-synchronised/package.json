@@ -4,7 +4,7 @@
 	"description": "Entity storage connector that publishes local changes and applies remote updates.",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/iotaledger/twin-synchronised-storage.git",
+		"url": "git+https://github.com/3sixtyglobal/twin-synchronised-storage.git",
 		"directory": "packages/entity-storage-connector-synchronised"
 	},
 	"author": "martyn.janes@iota.org",
@@ -89,7 +89,7 @@
 		"integration"
 	],
 	"bugs": {
-		"url": "git+https://github.com/iotaledger/twin-synchronised-storage/issues"
+		"url": "git+https://github.com/3sixtyglobal/twin-synchronised-storage/issues"
 	},
 	"homepage": "https://twindev.org"
 }
