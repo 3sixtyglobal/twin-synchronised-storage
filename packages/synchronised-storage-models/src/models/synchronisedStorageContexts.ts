@@ -9,17 +9,17 @@ export const SynchronisedStorageContexts = {
 	/**
 	 * The canonical RDF namespace URI for Synchronised Storage.
 	 */
-	Namespace: "https://schema.twindev.org/synchronised-storage/",
+	Namespace: "https://schema.3sixty.global/synchronised-storage/",
 
 	/**
 	 * The value to use in context for Synchronised Storage.
 	 */
-	Context: "https://schema.twindev.org/synchronised-storage/",
+	Context: "https://schema.3sixty.global/synchronised-storage/",
 
 	/**
 	 * The JSON-LD Context URL for Synchronised Storage.
 	 */
-	JsonLdContext: "https://schema.twindev.org/synchronised-storage/types.jsonld"
+	JsonLdContext: "https://schema.3sixty.global/synchronised-storage/types.jsonld"
 } as const;
 
 /**

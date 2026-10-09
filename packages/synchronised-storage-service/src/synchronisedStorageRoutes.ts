@@ -6,9 +6,9 @@ import type {
 	IRestRoute,
 	ITag,
 	IUnauthorizedResponse
-} from "@twin.org/api-models";
-import { ComponentFactory, Guards } from "@twin.org/core";
-import { nameof } from "@twin.org/nameof";
+} from "@3sixty/api-models";
+import { ComponentFactory, Guards } from "@3sixty/core";
+import { nameof } from "@3sixty/nameof";
 import {
 	SynchronisedStorageContexts,
 	SynchronisedStorageTypes,
@@ -16,8 +16,8 @@ import {
 	type ISyncDecryptionKeyRequest,
 	type ISyncDecryptionKeyResponse,
 	type ISynchronisedStorageComponent
-} from "@twin.org/synchronised-storage-models";
-import { HeaderHelper, HeaderTypes, HttpStatusCode } from "@twin.org/web";
+} from "@3sixty/synchronised-storage-models";
+import { HeaderHelper, HeaderTypes, HttpStatusCode } from "@3sixty/web";
 
 /**
  * The source used when communicating about these routes.

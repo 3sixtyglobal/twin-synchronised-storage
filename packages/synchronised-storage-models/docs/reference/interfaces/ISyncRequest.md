@@ -6,7 +6,7 @@ The object definition for a sync request.
 
 ### @context {#context}
 
-> **@context**: `"https://schema.twindev.org/synchronised-storage/"`
+> **@context**: `"https://schema.3sixty.global/synchronised-storage/"`
 
 The LD Context for the request.
 

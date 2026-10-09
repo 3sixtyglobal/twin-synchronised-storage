@@ -1,4 +1,4 @@
-# TWIN Synchronised Storage
+# 3Sixty Synchronised Storage
 
 This repository provides the building blocks needed to replicate entity changes safely across connected nodes. It brings together shared message models, a service that manages synchronisation state, a REST client for trusted node communication, and an entity storage connector that integrates synchronisation into application persistence flows.
 

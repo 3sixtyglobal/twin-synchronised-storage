@@ -1,7 +1,7 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { ContextIdHelper, ContextIdKeys, ContextIdStore } from "@twin.org/context";
-import { ComponentFactory, GeneralError, Guards, Is, StringHelper } from "@twin.org/core";
+import { ContextIdHelper, ContextIdKeys, ContextIdStore } from "@3sixty/context";
+import { ComponentFactory, GeneralError, Guards, Is, StringHelper } from "@3sixty/core";
 import {
 	ComparisonOperator,
 	type EntityCondition,
@@ -10,14 +10,14 @@ import {
 	type IEntitySchema,
 	type IEntitySchemaProperty,
 	SortDirection
-} from "@twin.org/entity";
+} from "@3sixty/entity";
 import {
 	EntityStorageConnectorFactory,
 	type IEntityStorageJoinOptions,
 	type IEntityStorageConnector
-} from "@twin.org/entity-storage-models";
-import type { IEvent, IEventBusComponent } from "@twin.org/event-bus-models";
-import { nameof } from "@twin.org/nameof";
+} from "@3sixty/entity-storage-models";
+import type { IEvent, IEventBusComponent } from "@3sixty/event-bus-models";
+import { nameof } from "@3sixty/nameof";
 import {
 	type ISyncBatchRequest,
 	type ISyncBatchResponse,
@@ -32,7 +32,7 @@ import {
 	SyncChangeOperation,
 	SynchronisedStorageTopics,
 	SyncNodeIdMode
-} from "@twin.org/synchronised-storage-models";
+} from "@3sixty/synchronised-storage-models";
 import type { ISynchronisedEntityStorageConnectorConstructorOptions } from "./models/ISynchronisedEntityStorageConnectorConstructorOptions.js";
 
 /**

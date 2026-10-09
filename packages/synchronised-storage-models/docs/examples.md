@@ -10,7 +10,7 @@ import {
   SynchronisedStorageTypes,
   SyncChangeOperation,
   type ISyncChangeSet
-} from '@twin.org/synchronised-storage-models';
+} from '@3sixty/synchronised-storage-models';
 
 const syncChangeSet: ISyncChangeSet = {
   '@context': SynchronisedStorageContexts.Context,
@@ -39,7 +39,7 @@ import {
   SyncNodeIdMode,
   SynchronisedStorageTopics,
   type ISynchronisedEntity
-} from '@twin.org/synchronised-storage-models';
+} from '@3sixty/synchronised-storage-models';
 
 interface IProfileEntity extends ISynchronisedEntity {
   displayName: string;

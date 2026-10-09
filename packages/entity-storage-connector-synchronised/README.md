@@ -5,7 +5,7 @@ This package integrates synchronised storage with an entity storage connector so
 ## Installation
 
 ```shell
-npm install @twin.org/entity-storage-connector-synchronised
+npm install @3sixty/entity-storage-connector-synchronised
 ```
 
 ## Examples

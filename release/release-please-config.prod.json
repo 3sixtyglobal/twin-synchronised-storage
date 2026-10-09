@@ -8,6 +8,7 @@
 	"release-type": "node",
 	"initial-version": "0.0.1",
 	"versioning": "default",
+	"last-release-sha": "becfbef010edcec1909963b1607571275d71c7bd",
 	"packages": {
 		"packages/synchronised-storage-models": {
 			"package-name": "synchronised-storage-models",

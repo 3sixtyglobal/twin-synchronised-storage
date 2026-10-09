@@ -18,10 +18,10 @@
  * This script assumes the identities are already created, an identity can be created with the following scripts.
  *
  * // Create a new wallet
- * npx "@twin.org/identity-cli@next" mnemonic --env wallet.env
+ * npx "@3sixty/identity-cli@next" mnemonic --env wallet.env
  *
  * // Generate some addresses
- * npx "@twin.org/identity-cli@next" address --load-env wallet.env --seed !SEED --count 1 --env wallet.env --merge-env
+ * npx "@3sixty/identity-cli@next" address --load-env wallet.env --seed !SEED --count 1 --env wallet.env --merge-env
  *
  * // Create config.env
  * NODE_URL="https://api.testnet.iota.cafe"
@@ -32,17 +32,17 @@
  *
  * // Fund the wallet address from the faucet loading the config and wallet env files
  * // If this is mainnet your will not have access to a faucet, you need real tokens
- * npx "@twin.org/identity-cli@next" faucet --load-env config.env wallet.env --address !ADDRESS_0 --network !NETWORK
+ * npx "@3sixty/identity-cli@next" faucet --load-env config.env wallet.env --address !ADDRESS_0 --network !NETWORK
  *
  * // Create an identity
- * npx "@twin.org/identity-cli@next" identity-create --load-env config.env wallet.env --seed !SEED --env identity.env
+ * npx "@3sixty/identity-cli@next" identity-create --load-env config.env wallet.env --seed !SEED --env identity.env
  */
-import { Coerce, Is, ObjectHelper } from '@twin.org/core';
-import { MemoryEntityStorageConnector } from '@twin.org/entity-storage-connector-memory';
-import { EntityStorageConnectorFactory } from '@twin.org/entity-storage-models';
-import { EntityStorageVaultConnector, initSchema } from '@twin.org/vault-connector-entity-storage';
-import { VaultConnectorFactory } from '@twin.org/vault-models';
-import { IotaVerifiableStorageConnector } from '@twin.org/verifiable-storage-connector-iota';
+import { Coerce, Is, ObjectHelper } from '@3sixty/core';
+import { MemoryEntityStorageConnector } from '@3sixty/entity-storage-connector-memory';
+import { EntityStorageConnectorFactory } from '@3sixty/entity-storage-models';
+import { EntityStorageVaultConnector, initSchema } from '@3sixty/vault-connector-entity-storage';
+import { VaultConnectorFactory } from '@3sixty/vault-models';
+import { IotaVerifiableStorageConnector } from '@3sixty/verifiable-storage-connector-iota';
 import { loadJson, saveJson } from '../../../scripts/common.mjs';
 
 const KEY_FILE = './src/data/verifiableStorageKeys.json';

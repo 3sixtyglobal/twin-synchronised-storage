@@ -1,4 +1,4 @@
-# @twin.org/synchronised-storage-rest-client
+# @3sixty/synchronised-storage-rest-client
 
 ## Classes
 

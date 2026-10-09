@@ -5,7 +5,7 @@ These snippets show how to call trusted synchronisation endpoints from a node or
 ## SynchronisedStorageRestClient
 
 ```typescript
-import { SynchronisedStorageRestClient } from '@twin.org/synchronised-storage-rest-client';
+import { SynchronisedStorageRestClient } from '@3sixty/synchronised-storage-rest-client';
 
 const client = new SynchronisedStorageRestClient({
   endpoint: 'https://api.example.net'
@@ -21,8 +21,8 @@ import {
   SynchronisedStorageContexts,
   SynchronisedStorageTypes,
   type ISyncChangeSet
-} from '@twin.org/synchronised-storage-models';
-import { SynchronisedStorageRestClient } from '@twin.org/synchronised-storage-rest-client';
+} from '@3sixty/synchronised-storage-models';
+import { SynchronisedStorageRestClient } from '@3sixty/synchronised-storage-rest-client';
 
 const client = new SynchronisedStorageRestClient({
   endpoint: 'https://api.example.net'

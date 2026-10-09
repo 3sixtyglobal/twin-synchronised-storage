@@ -5,7 +5,7 @@ These examples show common node-side synchronisation flows, from startup and sch
 ## SynchronisedStorageService
 
 ```typescript
-import { SynchronisedStorageService } from '@twin.org/synchronised-storage-service';
+import { SynchronisedStorageService } from '@3sixty/synchronised-storage-service';
 
 const service = new SynchronisedStorageService({
   loggingComponentType: 'logging',
@@ -28,7 +28,7 @@ await service.stop('logging');
 ```
 
 ```typescript
-import { SynchronisedStorageService } from '@twin.org/synchronised-storage-service';
+import { SynchronisedStorageService } from '@3sixty/synchronised-storage-service';
 
 const trustedService = new SynchronisedStorageService({
   config: {
@@ -49,8 +49,8 @@ import {
   SynchronisedStorageTypes,
   SyncChangeOperation,
   type ISyncChangeSet
-} from '@twin.org/synchronised-storage-models';
-import { SynchronisedStorageService } from '@twin.org/synchronised-storage-service';
+} from '@3sixty/synchronised-storage-models';
+import { SynchronisedStorageService } from '@3sixty/synchronised-storage-service';
 
 const trustedService = new SynchronisedStorageService({
   config: {

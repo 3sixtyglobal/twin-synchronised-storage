@@ -1,9 +1,9 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { BaseError, Converter, Is, ObjectHelper, RandomHelper } from "@twin.org/core";
-import type { IEventBusComponent } from "@twin.org/event-bus-models";
-import type { ILoggingComponent } from "@twin.org/logging-models";
-import { nameof } from "@twin.org/nameof";
+import { BaseError, Converter, Is, ObjectHelper, RandomHelper } from "@3sixty/core";
+import type { IEventBusComponent } from "@3sixty/event-bus-models";
+import type { ILoggingComponent } from "@3sixty/logging-models";
+import { nameof } from "@3sixty/nameof";
 import {
 	type ISyncChangeSet,
 	type ISyncItemRemove,
@@ -12,7 +12,7 @@ import {
 	SyncChangeOperation,
 	SynchronisedStorageTopics,
 	type SyncNodeIdMode
-} from "@twin.org/synchronised-storage-models";
+} from "@3sixty/synchronised-storage-models";
 import type { BlobStorageHelper } from "./blobStorageHelper.js";
 
 /**

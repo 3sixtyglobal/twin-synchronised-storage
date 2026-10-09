@@ -1,17 +1,17 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { BaseRestClient } from "@twin.org/api-core";
-import type { IBaseRestClientConfig, INoContentResponse } from "@twin.org/api-models";
-import { Guards } from "@twin.org/core";
-import { nameof } from "@twin.org/nameof";
+import { BaseRestClient } from "@3sixty/api-core";
+import type { IBaseRestClientConfig, INoContentResponse } from "@3sixty/api-models";
+import { Guards } from "@3sixty/core";
+import { nameof } from "@3sixty/nameof";
 import type {
 	ISyncChangeSet,
 	ISyncChangeSetRequest,
 	ISyncDecryptionKeyRequest,
 	ISyncDecryptionKeyResponse,
 	ISynchronisedStorageComponent
-} from "@twin.org/synchronised-storage-models";
-import { HeaderHelper, HeaderTypes, HttpMethod } from "@twin.org/web";
+} from "@3sixty/synchronised-storage-models";
+import { HeaderHelper, HeaderTypes, HttpMethod } from "@3sixty/web";
 
 /**
  * Client for performing synchronised storage through to REST endpoints.

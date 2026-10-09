@@ -1,4 +1,4 @@
-# @twin.org/synchronised-storage-models
+# @3sixty/synchronised-storage-models
 
 ## Classes
 

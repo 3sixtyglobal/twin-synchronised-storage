@@ -1,4 +1,4 @@
-# @twin.org/entity-storage-connector-synchronised
+# @3sixty/entity-storage-connector-synchronised
 
 ## Classes
 

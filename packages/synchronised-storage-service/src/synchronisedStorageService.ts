@@ -1,11 +1,11 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { ITaskSchedulerComponent } from "@twin.org/background-task-models";
+import type { ITaskSchedulerComponent } from "@3sixty/background-task-models";
 import {
 	BlobStorageConnectorFactory,
 	type IBlobStorageConnector
-} from "@twin.org/blob-storage-models";
-import { ContextIdHelper, ContextIdKeys, ContextIdStore } from "@twin.org/context";
+} from "@3sixty/blob-storage-models";
+import { ContextIdHelper, ContextIdKeys, ContextIdStore } from "@3sixty/context";
 import {
 	BaseError,
 	ComponentFactory,
@@ -14,14 +14,14 @@ import {
 	Guards,
 	Is,
 	UnauthorizedError
-} from "@twin.org/core";
+} from "@3sixty/core";
 import {
 	EntityStorageConnectorFactory,
 	type IEntityStorageConnector
-} from "@twin.org/entity-storage-models";
-import type { IEventBusComponent } from "@twin.org/event-bus-models";
-import type { ILoggingComponent } from "@twin.org/logging-models";
-import { nameof } from "@twin.org/nameof";
+} from "@3sixty/entity-storage-models";
+import type { IEventBusComponent } from "@3sixty/event-bus-models";
+import type { ILoggingComponent } from "@3sixty/logging-models";
+import { nameof } from "@3sixty/nameof";
 import {
 	type ISyncChangeSet,
 	type ISynchronisedStorageComponent,
@@ -29,13 +29,13 @@ import {
 	type ISyncRegisterStorageKey,
 	SynchronisedStorageDataTypes,
 	SynchronisedStorageTopics
-} from "@twin.org/synchronised-storage-models";
-import { type ITrustComponent, TrustHelper } from "@twin.org/trust-models";
-import { type IVaultConnector, VaultConnectorFactory, VaultKeyType } from "@twin.org/vault-models";
+} from "@3sixty/synchronised-storage-models";
+import { type ITrustComponent, TrustHelper } from "@3sixty/trust-models";
+import { type IVaultConnector, VaultConnectorFactory, VaultKeyType } from "@3sixty/vault-models";
 import {
 	type IVerifiableStorageConnector,
 	VerifiableStorageConnectorFactory
-} from "@twin.org/verifiable-storage-models";
+} from "@3sixty/verifiable-storage-models";
 import verifiableStorageKeys from "./data/verifiableStorageKeys.json" with { type: "json" };
 import type { SyncSnapshotEntry } from "./entities/syncSnapshotEntry.js";
 import { BlobStorageHelper } from "./helpers/blobStorageHelper.js";

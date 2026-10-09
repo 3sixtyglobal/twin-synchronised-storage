@@ -6,7 +6,7 @@ The object definition for a sync change set.
 
 ### @context {#context}
 
-> **@context**: `"https://schema.twindev.org/synchronised-storage/"`
+> **@context**: `"https://schema.3sixty.global/synchronised-storage/"`
 
 The LD Context for the change set.
 

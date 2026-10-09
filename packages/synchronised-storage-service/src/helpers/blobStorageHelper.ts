@@ -1,6 +1,6 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { IBlobStorageConnector } from "@twin.org/blob-storage-models";
+import type { IBlobStorageConnector } from "@3sixty/blob-storage-models";
 import {
 	BaseError,
 	Compression,
@@ -8,10 +8,10 @@ import {
 	GeneralError,
 	Is,
 	ObjectHelper
-} from "@twin.org/core";
-import type { ILoggingComponent } from "@twin.org/logging-models";
-import { nameof } from "@twin.org/nameof";
-import { type IVaultConnector, VaultEncryptionType } from "@twin.org/vault-models";
+} from "@3sixty/core";
+import type { ILoggingComponent } from "@3sixty/logging-models";
+import { nameof } from "@3sixty/nameof";
+import { type IVaultConnector, VaultEncryptionType } from "@3sixty/vault-models";
 
 /**
  * Class for performing blob storage operations.

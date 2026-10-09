@@ -1,8 +1,8 @@
 {
 	"prefix": "twin-synchronised-storage",
-	"contextUrl": "https://schema.twindev.org/synchronised-storage/",
+	"contextUrl": "https://schema.3sixty.global/synchronised-storage/",
 	"additionalContextUrls": {
-		"twin-common": "https://schema.twindev.org/common/",
+		"twin-common": "https://schema.3sixty.global/common/",
 		"schema": "http://schema.org/"
 	},
 	"fixedMappings": {

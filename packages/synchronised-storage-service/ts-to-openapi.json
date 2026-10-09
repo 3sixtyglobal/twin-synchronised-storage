@@ -1,7 +1,7 @@
 {
-	"title": "TWIN - Test Endpoints",
+	"title": "3Sixty - Test Endpoints",
 	"version": "1.0.0",
-	"description": "REST API for TWIN - Test Endpoints.",
+	"description": "REST API for 3Sixty - Test Endpoints.",
 	"licenseName": "Apache 2.0 License",
 	"licenseUrl": "https://opensource.org/licenses/Apache-2.0",
 	"servers": ["https://localhost"],
@@ -12,11 +12,11 @@
 		}
 	],
 	"externalReferences": {
-		"Did(.*?)": "https://schema.twindev.org/w3c-did/Did$1",
-		"ProofTypes": "https://schema.twindev.org/w3c-did/ProofTypes",
-		"Proof": "https://schema.twindev.org/w3c-did/Proof",
-		"DataIntegrityProof": "https://schema.twindev.org/w3c-did/DataIntegrityProof",
-		"ProofSignerVerifier": "https://schema.twindev.org/w3c-did/ProofSignerVerifier",
-		"JsonWebSignature2020Proof": "https://schema.twindev.org/w3c-did/JsonWebSignature2020Proof"
+		"Did(.*?)": "https://schema.3sixty.global/w3c-did/Did$1",
+		"ProofTypes": "https://schema.3sixty.global/w3c-did/ProofTypes",
+		"Proof": "https://schema.3sixty.global/w3c-did/Proof",
+		"DataIntegrityProof": "https://schema.3sixty.global/w3c-did/DataIntegrityProof",
+		"ProofSignerVerifier": "https://schema.3sixty.global/w3c-did/ProofSignerVerifier",
+		"JsonWebSignature2020Proof": "https://schema.3sixty.global/w3c-did/JsonWebSignature2020Proof"
 	}
 }

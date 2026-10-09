@@ -1,19 +1,19 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { ContextIdStore } from "@twin.org/context";
-import { ComponentFactory } from "@twin.org/core";
-import { EntitySchemaFactory, EntitySchemaHelper, entity, property } from "@twin.org/entity";
-import { MemoryEntityStorageConnector } from "@twin.org/entity-storage-connector-memory";
-import { EntityStorageConnectorFactory } from "@twin.org/entity-storage-models";
-import { LocalEventBusConnector } from "@twin.org/event-bus-connector-local";
+import { ContextIdStore } from "@3sixty/context";
+import { ComponentFactory } from "@3sixty/core";
+import { EntitySchemaFactory, EntitySchemaHelper, entity, property } from "@3sixty/entity";
+import { MemoryEntityStorageConnector } from "@3sixty/entity-storage-connector-memory";
+import { EntityStorageConnectorFactory } from "@3sixty/entity-storage-models";
+import { LocalEventBusConnector } from "@3sixty/event-bus-connector-local";
 import {
 	EventBusConnectorFactory,
 	type IEvent,
 	type IEventBusComponent,
 	type IEventBusConnector
-} from "@twin.org/event-bus-models";
-import { EventBusService } from "@twin.org/event-bus-service";
-import { nameof } from "@twin.org/nameof";
+} from "@3sixty/event-bus-models";
+import { EventBusService } from "@3sixty/event-bus-service";
+import { nameof } from "@3sixty/nameof";
 import {
 	SyncNodeIdMode,
 	SynchronisedStorageTopics,
@@ -26,7 +26,7 @@ import {
 	type ISyncItemSet,
 	type ISyncRegisterStorageKey,
 	type ISyncReset
-} from "@twin.org/synchronised-storage-models";
+} from "@3sixty/synchronised-storage-models";
 import { SynchronisedEntityStorageConnector } from "../src/synchronisedEntityStorageConnector.js";
 
 /**

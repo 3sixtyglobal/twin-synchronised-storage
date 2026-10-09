@@ -5,7 +5,7 @@ This package provides a client for calling trusted synchronised storage REST end
 ## Installation
 
 ```shell
-npm install @twin.org/synchronised-storage-rest-client
+npm install @3sixty/synchronised-storage-rest-client
 ```
 
 ## Examples

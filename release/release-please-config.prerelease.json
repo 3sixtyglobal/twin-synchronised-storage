@@ -10,6 +10,7 @@
 	"versioning": "prerelease",
 	"prerelease": true,
 	"prerelease-type": "next",
+	"last-release-sha": "dccbc532bf70b4579caf89a1d381d90f5c3fa80a",
 	"packages": {
 		"packages/synchronised-storage-models": {
 			"package-name": "synchronised-storage-models",

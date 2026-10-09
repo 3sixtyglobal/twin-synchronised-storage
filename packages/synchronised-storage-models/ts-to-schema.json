@@ -1,5 +1,5 @@
 {
-	"baseUrl": "https://schema.twindev.org/synchronised-storage/",
+	"baseUrl": "https://schema.3sixty.global/synchronised-storage/",
 	"types": [
 		"./src/models/ISyncRequest.ts",
 		"./src/models/ISyncChangeSet.ts",
@@ -9,7 +9,7 @@
 		"./src/models/syncChangeOperation.ts"
 	],
 	"externalReferences": {
-		"JsonLd(.*)": "https://schema.twindev.org/json-ld/JsonLd$1",
-		"Proof": "https://schema.twindev.org/w3c-did/Proof"
+		"JsonLd(.*)": "https://schema.3sixty.global/json-ld/JsonLd$1",
+		"Proof": "https://schema.3sixty.global/w3c-did/Proof"
 	}
 }

@@ -5,7 +5,7 @@ This package provides the synchronisation service layer responsible for tracking
 ## Installation
 
 ```shell
-npm install @twin.org/synchronised-storage-service
+npm install @3sixty/synchronised-storage-service
 ```
 
 ## Examples

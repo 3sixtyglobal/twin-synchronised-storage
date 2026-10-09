@@ -5,7 +5,7 @@ This package defines the shared contracts for synchronised storage payloads, top
 ## Installation
 
 ```shell
-npm install @twin.org/synchronised-storage-models
+npm install @3sixty/synchronised-storage-models
 ```
 
 ## Examples
